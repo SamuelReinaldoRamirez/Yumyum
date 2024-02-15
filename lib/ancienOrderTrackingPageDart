@@ -1,0 +1,595 @@
+import 'dart:async';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:chewie/chewie.dart';
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:yummap/ApiService.dart';
+import 'package:yummap/Restaurant.dart';
+import 'package:video_player/video_player.dart';
+import 'package:yummap/videoPlayerWidget.dart';
+
+class OrderTrackingPage extends StatefulWidget {
+  final List<Restaurant> restaurantList; // Accept the list of restaurants
+
+  const OrderTrackingPage({Key? key, required this.restaurantList})
+      : super(key: key);
+
+  @override
+  State<OrderTrackingPage> createState() => OrderTrackingPageState();
+}
+
+class OrderTrackingPageState extends State<OrderTrackingPage> {
+  final Completer<GoogleMapController> _controller = Completer();
+
+  // Create LatLng objects for restaurant locations
+  List<LatLng> restaurantLocations = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _createRestaurantLocations();
+  }
+
+  void _createRestaurantLocations() {
+    for (var restaurant in widget.restaurantList) {
+      restaurantLocations.add(LatLng(restaurant.latitude, restaurant.longitude));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Track order",
+          style: TextStyle(color: Colors.black, fontSize: 16),
+        ),
+      ),
+      body: GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: LatLng(48.8566, 2.339), // Initial camera position (Paris)
+          zoom: 12,
+        ),
+        markers: _createMarkers(), // Create markers for each restaurant location
+      ),
+    );
+  }
+
+  Set<Marker> _createMarkers() {
+    Set<Marker> markers = {};
+
+    for (int i = 0; i < restaurantLocations.length; i++) {
+      markers.add(
+        Marker(
+          markerId: MarkerId(widget.restaurantList[i].name), // Use restaurant name as marker ID
+          position: restaurantLocations[i],
+          onTap: () {
+            _showMarkerInfo(context, widget.restaurantList[i]);
+          },
+        ),
+      );
+    }
+
+    return markers;
+  }
+
+//   void _showMarkerInfo(BuildContext context, Restaurant restaurant) async {
+//   try {
+//     showModalBottomSheet(
+//       context: context,
+//       builder: (BuildContext context) {
+//         return DraggableScrollableSheet(
+//           initialChildSize: 0.5, // Taille initiale de la feuille modale
+//           minChildSize: 0.2, // Taille minimale de la feuille modale
+//           maxChildSize: 0.9, // Taille maximale de la feuille modale
+//           builder: (BuildContext context, ScrollController scrollController) {
+//             return SingleChildScrollView(
+//               controller: scrollController,
+//               child: Container(
+//                 padding: EdgeInsets.all(16.0),
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Text(
+//                       restaurant.name,
+//                       style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+//                     ),
+//                     SizedBox(height: 16.0),
+//                     AspectRatio(
+//                       aspectRatio: 16 / 9,
+//                       child: Container(
+//                         decoration: BoxDecoration(
+//                           color: Colors.blue,
+//                         ),
+//                         child: Center(
+//                           child: VideoPlayerWidget(
+//                             videoUrl: restaurant.getVideoLinks().isNotEmpty ? restaurant.getVideoLinks()[0] : '',
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             );
+//           },
+//         );
+//       },
+//     );
+//   } catch (e) {
+//     print('Error: $e');
+//   }
+// }
+
+
+  void _showMarkerInfo(BuildContext context, Restaurant restaurant) async {
+    try {
+      // showModalBottomSheet(
+      //   context: context,
+      //   builder: (BuildContext context) {
+      //     return SingleChildScrollView(
+      //       child: Container(
+      //         padding: EdgeInsets.all(16.0),
+      //         child: Column(
+      //           crossAxisAlignment: CrossAxisAlignment.start,
+      //           children: [
+      //             Text(
+      //               restaurant.name,
+      //               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      //             ),
+      //             SizedBox(height: 16.0),
+      //             AspectRatio(
+      //               aspectRatio: 9 / 16, 
+      //               child: Container(
+      //                 decoration: BoxDecoration(
+      //                   color: Colors.blue, 
+      //                 ),
+      //                 child: Center(
+      //                   child: 
+      //                   // AspectRatio(
+      //                   //   aspectRatio: 9 / 16, 
+      //                   //   child: 
+      //                     VideoPlayerWidget(
+      //                       videoUrl: 
+      //                       // '',
+      //                       restaurant.getVideoLinks() != [] ? restaurant.getVideoLinks()[0] : '',
+      //                     ),
+      //                   ),
+      //                 ),
+      //               ),
+      //             // ),
+      //           ],
+      //         ),
+      //       ),
+      //     );
+      //   },
+      // );
+      _showBottomSheet(context, restaurant);
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+Widget _buildChewieVideoPlayer(String videoUrl,
+      {required String thumbnailUrl}) {
+    final videoPlayerController = VideoPlayerController.network(videoUrl);
+
+    return FutureBuilder(
+      future: videoPlayerController.initialize(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          final chewieController = ChewieController(
+            videoPlayerController: videoPlayerController,
+            autoPlay: false,
+            looping: false,
+            allowFullScreen: true,
+            allowMuting: false,
+            customControls:
+                CustomControls(videoPlayerController: videoPlayerController),
+            aspectRatio: 9 / 16,
+          );
+
+          Completer<void> fullScreenCompleter = Completer<void>();
+
+          return GestureDetector(
+            onTap: () async {
+              chewieController.addListener(() {
+                if (chewieController.isFullScreen &&
+                    !fullScreenCompleter.isCompleted) {
+                  fullScreenCompleter.complete();
+                }
+              });
+
+              chewieController.enterFullScreen();
+
+              await fullScreenCompleter.future;
+
+              chewieController.play();
+
+              print("Fullscreen");
+            },
+            child: Stack(
+              children: [
+                TickerMode(
+                  enabled: true,
+                  child: Chewie(controller: chewieController),
+                ),
+                Positioned.fill(
+                  child: Image.network(
+                    thumbnailUrl,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          return Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
+  
+   void _showBottomSheet(BuildContext context, Restaurant restaurant) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SingleChildScrollView(
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            color: Colors.white,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: Text(
+                    restaurant.name,
+                    style: Theme.of(context).textTheme.headline6,
+                  ),
+                ),
+                CarouselSlider.builder(
+                  itemCount: 2,
+                  options: CarouselOptions(
+                    height: 400,
+                    viewportFraction: 0.6,
+                    enableInfiniteScroll: false,
+                    enlargeCenterPage: false,
+                    initialPage: 0,
+                    scrollDirection: Axis.horizontal,
+                    onPageChanged: (index, reason) {
+                      // Callback appelée lorsqu'une nouvelle page est sélectionnée
+                    },
+                  ),
+                  itemBuilder:
+                      (BuildContext context, int index, int realIndex) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 30.0),
+                      child: _buildChewieVideoPlayer(
+                        index == 0
+                            ? 'https://res.cloudinary.com/dxcikkfjg/video/upload/v1706885190/blcrr5lcu7pqgxszy0pj.mp4'
+                            : 'https://res.cloudinary.com/dxcikkfjg/video/upload/v1706885370/nxktun2y1h6pc07yawyd.mp4',
+                        thumbnailUrl: index == 0
+                            ? 'https://res.cloudinary.com/dxcikkfjg/video/upload/v1706885190/blcrr5lcu7pqgxszy0pj.jpg'
+                            : 'https://res.cloudinary.com/dxcikkfjg/video/upload/v1706885370/nxktun2y1h6pc07yawyd.jpg',
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+}
+
+class CustomControls extends StatefulWidget {
+  final VideoPlayerController videoPlayerController;
+
+  CustomControls({required this.videoPlayerController});
+
+  @override
+  _CustomControlsState createState() => _CustomControlsState();
+}
+
+class _CustomControlsState extends State<CustomControls> {
+  bool isPlaying = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Bouton Play/Pause
+        IconButton(
+          onPressed: () {
+            if (widget.videoPlayerController.value.isPlaying) {
+              widget.videoPlayerController.pause();
+            } else {
+              widget.videoPlayerController.play();
+            }
+            setState(() {
+              isPlaying = !isPlaying;
+            });
+          },
+          icon: Icon(
+            isPlaying ? Icons.pause : Icons.play_arrow,
+            color: Colors.white,
+          ),
+        ),
+        // Bouton de fermeture en plein écran
+        IconButton(
+          onPressed: () {
+            widget.videoPlayerController.pause();
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.close, color: Colors.white),
+        ),
+      ],
+    );
+  }
+}
+
+
+// import 'dart:async';
+// import 'package:flutter/material.dart';
+// import 'package:google_maps_flutter/google_maps_flutter.dart';
+// import 'package:yummap/ApiService.dart';
+// import 'package:yummap/Restaurant.dart';
+// import 'package:video_player/video_player.dart';
+// import 'package:yummap/videoPlayerWidget.dart';
+
+
+// class OrderTrackingPage extends StatefulWidget {
+//   const OrderTrackingPage({Key? key}) : super(key: key);
+
+//   @override
+//   State<OrderTrackingPage> createState() => OrderTrackingPageState();
+// }
+
+// class OrderTrackingPageState extends State<OrderTrackingPage> {
+//   final Completer<GoogleMapController> _controller = Completer();
+
+//   static const LatLng parisLocation = LatLng(48.8566, 2.339);
+
+//   static const LatLng jjan = LatLng(48.860111, 2.344315);
+//   static const LatLng becot_smash_burger = LatLng(48.864603, 2.373225);
+//   static const LatLng bao_express = LatLng(48.8565703, 2.3722064);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text(
+//           "Track order",
+//           style: TextStyle(color: Colors.black, fontSize: 16),
+//         ),
+//       ),
+//       body: GoogleMap(
+//         initialCameraPosition: CameraPosition(
+//           target: parisLocation,
+//           zoom: 12,
+//         ),
+//         markers: {
+//           Marker(
+//             markerId: MarkerId("jjan"),
+//             position: jjan,
+//             onTap: () {
+//               // Handle marker tap
+//               print('Marker tapped');
+//               _showMarkerInfo(context, "jjan");
+//             },
+//           ),
+//           Marker(
+//             markerId: MarkerId("becot_smash_burger"),
+//             position: becot_smash_burger,
+//             onTap: () {
+//               // Handle marker tap
+//               print('Marker tapped');
+//               _showMarkerInfo(context, "becot_smash_burger");
+//             },
+//           ),
+//           Marker(
+//             markerId: MarkerId("bao_express"),
+//             position: bao_express,
+//             onTap: () {
+//               // Handle marker tap
+//               print('Marker tapped');
+//               _showMarkerInfo(context, "bao_express");
+//             },
+//           ),
+//         },
+//       ),
+//     );
+//   }
+
+// void _showMarkerInfo(BuildContext context, String markerId) async {
+//   try {
+//     Restaurant restaurant = await fetchRestaurant(markerId);
+//     showModalBottomSheet(
+//       context: context,
+//       builder: (BuildContext context) {
+//         return SingleChildScrollView(
+//           child: Container(
+//             padding: EdgeInsets.all(16.0),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text(
+//                   restaurant.name,
+//                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+//                 ),
+//                 SizedBox(height: 16.0),
+//                 AspectRatio(
+//                   aspectRatio: 9 / 16, // Utilisez un rapport d'aspect standard pour la vidéo
+//                   child: Container(
+//                     decoration: BoxDecoration(
+//                       color: Colors.black, // Couleur de fond pour la vidéo
+//                     ),
+//                     child: Center(
+//                       child: AspectRatio(
+//                         aspectRatio: 9 / 16, // Utilisez le même rapport d'aspect que ci-dessus
+//                         child: VideoPlayerWidget(
+//                           // videoUrl: 'https://res.cloudinary.com/dxcikkfjg/video/upload/v1706199793/Bao_Express/fkwjjk3vupf6ukyijejd.mov',  // Remplacez par votre URL vidéo
+//                           videoUrl: 'https://res.cloudinary.com/dxcikkfjg/video/upload/v1706885190/blcrr5lcu7pqgxszy0pj.mp4',
+//                         ),
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   } catch (e) {
+//     print('Error: $e');
+//     // Gérer les erreurs
+//   }
+// }
+
+
+// VideoPlayerController _initializeVideoPlayer(String videoUrl) {
+//   VideoPlayerController controller = VideoPlayerController.network(
+//     videoUrl,
+//   );
+//   controller.initialize().then((_) {
+//     // Assurer que l'état de l'application est mis à jour lorsque le lecteur est prêt à être utilisé.
+//     setState(() {});
+//   });
+//   return controller;
+// }
+
+//   Future<Restaurant> fetchRestaurant(String markerId) async {
+//     const String apiUrl = 'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/restaurants/1';
+//     final ApiService apiService = ApiService(apiUrl);
+
+//     try {
+//       var data = await apiService.fetchData();
+//       print(data); // Afficher les données récupérées de l'API
+//       return Restaurant.fromJson(data); // Convertir les données JSON en objet Restaurant
+//     } catch (e) {
+//       print('Error: $e');
+//       throw Exception('Error fetching data');
+//     }
+//   }
+
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// final String videoUrll = "https://res.cloudinary.com/dxcikkfjg/video/upload/v1706199793/Bao_Express/fkwjjk3vupf6ukyijejd.mov";
+
+
+// // class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
+//   late VideoPlayerController _videoPlayerController;
+//   late ChewieController _chewieController;
+
+//   @override
+//   void initState() {
+//     super.initState();
+    
+//     // Initialiser le contrôleur de lecture vidéo
+//     _videoPlayerController = VideoPlayerController.network(widget.videoUrll);
+    
+//     // Initialiser le contrôleur Chewie
+//     _chewieController = ChewieController(
+//       videoPlayerController: _videoPlayerController,
+//       aspectRatio: 16 / 9,  // Ajuster ceci selon le rapport hauteur/largeur de votre vidéo
+//       autoPlay: true,
+//       looping: true,
+//     );
+//   }
+
+//   @override
+//   void dispose() {
+//     // Libérer les ressources lorsque le widget est détruit
+//     _videoPlayerController.dispose();
+//     _chewieController.dispose();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Chewie(
+//       controller: _chewieController,
+//     );
+//   }
+// // }
+
+
+
+
+
+
+
+
+
+
+
+
+//   void _showMarkerInfo(BuildContext context, String markerId) async {
+//   try {
+//     Restaurant restaurant = await fetchRestaurant(markerId);
+//     showModalBottomSheet(
+//       context: context,
+//       builder: (BuildContext context) {
+//         return SingleChildScrollView(
+//           child: Container(
+//             padding: EdgeInsets.all(16.0),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text(
+//                   restaurant.name,
+//                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+//                 ),
+//                 SizedBox(height: 16.0),
+//                 AspectRatio(
+//                   aspectRatio: 9 / 16, // Définir le rapport d'aspect du lecteur vidéo
+//                   child: VideoPlayerWidget(
+//                     videoUrl: 'https://res.cloudinary.com/dxcikkfjg/video/upload/v1706199793/Bao_Express/fkwjjk3vupf6ukyijejd.mov',  // Remplacez par votre URL vidéo
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   } catch (e) {
+//     print('Error: $e');
+//     // Gérer les erreurs
+//   }
+// }
+
+
