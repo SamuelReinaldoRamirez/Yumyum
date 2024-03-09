@@ -141,6 +141,13 @@ class BottomSheetHelper {
                   },
                   child: Text("Y aller"),
                 ),
+                restaurant.getTagStr().isNotEmpty ? Text(
+                  restaurant.getTagStr().isNotEmpty ? restaurant.getTagStr()[0] : '',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ) : SizedBox(height: 0),
               ],
             ),
           ),
@@ -196,6 +203,12 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
+      // onWillPop: () async {
+      //   // Votre logique ici, retourne true si vous voulez fermer l'application
+      //   // ou false si vous souhaitez empêcher la fermeture
+      //   // Par exemple, vous pouvez afficher une boîte de dialogue de confirmation
+      //   return true;
+      // },
       aspectRatio: 9 / 16,
       child: Stack(
         children: [

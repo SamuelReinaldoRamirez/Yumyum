@@ -8,6 +8,7 @@ class Restaurant {
   final List<String> videoLinks;
   final double longitude;
   final double latitude;
+  final List<String> tagStr;
 
   Restaurant({
     required this.id,
@@ -16,6 +17,7 @@ class Restaurant {
     required this.videoLinks,
     required this.longitude,
     required this.latitude,
+    required this.tagStr,
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,13 @@ class Restaurant {
     }else{
       videoLinks = [];
     }
+
+    List<String> tagStr = [];
+    if (json.containsKey('str_tags') && json['str_tags'] != null && json['str_tags'] != []) {
+      tagStr = List<String>.from(json['str_tags']);
+    }else{
+      tagStr = [];
+    }
  
 
     double longitude = json['GPS_address']['data']['lng'] != null ? json['GPS_address']['data']['lng'].toDouble() : 0.0;
@@ -44,12 +53,18 @@ class Restaurant {
       videoLinks: videoLinks,
       longitude: longitude,
       latitude: latitude,
+      tagStr: tagStr,
     );
   }
 
     List<String> getVideoLinks() {
     return videoLinks;
   }
+
+  List<String> getTagStr() {
+    return tagStr;
+  }
+  
 
 }
 
