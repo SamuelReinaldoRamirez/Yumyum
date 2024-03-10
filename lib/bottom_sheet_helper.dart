@@ -106,6 +106,7 @@ class BottomSheetHelper {
     showModalBottomSheet(
       context: context,
       builder: (context) {
+        DetailsTags detailsTags = DetailsTags(restaurant: restaurant);
         return SingleChildScrollView(
           child: Container(
             padding: EdgeInsets.all(16),
@@ -135,19 +136,26 @@ class BottomSheetHelper {
                 SizedBox(height: 16),
                 VideoCarousel(videoLinks: restaurant.videoLinks),
                 SizedBox(height: 16),
-                ElevatedButton(
+                 Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children:[
+                    ElevatedButton(
                   onPressed: () {
                     navigateToRestaurant(restaurant);
                   },
                   child: Text("Y aller"),
                 ),
-                restaurant.getTagStr().isNotEmpty ? Text(
-                  restaurant.getTagStr().isNotEmpty ? restaurant.getTagStr()[0] : '',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87,
-                  ),
-                ) : SizedBox(height: 0),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => detailsTags),
+                    );
+                  },
+                  child: Text("tags"),
+                ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -185,6 +193,30 @@ class BottomSheetHelper {
 
     print("Fullscreen");
     print(videoUrl);
+  }
+}
+
+class DetailsTags extends StatelessWidget {
+  const DetailsTags({super.key, required this.restaurant});
+
+  final Restaurant restaurant;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('details tags de tel resto'),
+      ),
+      body: Center(
+        child: restaurant.getTagStr().isNotEmpty ? Text(
+                  restaurant.getTagStr().isNotEmpty ? restaurant.getTagStr()[0] : '',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ) : SizedBox(height: 0),
+      ),
+    );
   }
 }
 
