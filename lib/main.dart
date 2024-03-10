@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:yummap/order_tracking_page.dart';
-import 'package:yummap/call_endpoint_service.dart'; // Import the service file
-import 'package:yummap/Restaurant.dart'; // Import the Restaurant model
+import 'package:yummap/call_endpoint_service.dart';
+import 'package:yummap/Restaurant.dart';
+import 'package:yummap/search_bar.dart' as CustomSearchBar;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Call the endpoint service to get the restaurants
   List<Restaurant> restaurantList =
       await CallEndpointService.getRestaurantsFromXanos();
-  runApp(MyApp(
-      restaurantList: restaurantList)); // Pass the restaurant list to MyApp
+  runApp(MyApp(restaurantList: restaurantList));
 }
 
 class MyApp extends StatelessWidget {
-  final List<Restaurant> restaurantList; // Define the restaurant list
+  final List<Restaurant> restaurantList;
 
   const MyApp({Key? key, required this.restaurantList}) : super(key: key);
 
@@ -29,8 +28,25 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      // Pass the restaurant list to the OrderTrackingPage
-      home: OrderTrackingPage(restaurantList: restaurantList),
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              CustomSearchBar.SearchBar(
+                onSearchChanged: (value) {
+                  print('Recherche: $value');
+                },
+              ),
+              SizedBox(
+                // Utiliser un SizedBox pour définir des contraintes de taille pour OrderTrackingPage
+                height: MediaQuery.of(context).size.height *
+                    0.8, // Ajustez la taille selon vos besoins
+                child: OrderTrackingPage(restaurantList: restaurantList),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
