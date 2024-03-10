@@ -197,7 +197,7 @@ class BottomSheetHelper {
 }
 
 class DetailsTags extends StatelessWidget {
-  const DetailsTags({super.key, required this.restaurant});
+const DetailsTags({Key? key, required this.restaurant}) : super(key: key);
 
   final Restaurant restaurant;
 
@@ -205,7 +205,7 @@ class DetailsTags extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('details tags de tel resto'),
+        title: Text('details tags de ${restaurant.name}'),
       ),
       body: Center(
         child: restaurant.getTagStr().isNotEmpty ? Text(
