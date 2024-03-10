@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:yummap/call_endpoint_service.dart';
+import 'package:yummap/tag.dart';
 
 class SearchBar extends StatelessWidget implements PreferredSizeWidget {
   final Function(String) onSearchChanged;
@@ -53,6 +55,20 @@ class FilterOptionsModal extends StatefulWidget {
 
 class _FilterOptionsModalState extends State<FilterOptionsModal> {
   List<String> selectedFilters = [];
+  List<Tag> tagList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTagList();
+  }
+
+  Future<void> _fetchTagList() async {
+    List<Tag> tags = await CallEndpointService.getTagsFromXanos();
+    setState(() {
+      tagList = tags;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,20 +83,26 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
             style: Theme.of(context).textTheme.headline6,
           ),
           SizedBox(height: 16.0),
-          CheckboxListTile(
-            title: Text('Type de cuisine: Italien'),
-            value: selectedFilters.contains('Type de cuisine: Italien'),
-            onChanged: (bool? value) {
-              setState(() {
-                if (value != null && value) {
-                  selectedFilters.add('Type de cuisine: Italien');
-                } else {
-                  selectedFilters.remove('Type de cuisine: Italien');
-                }
-              });
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: tagList.length,
+            itemBuilder: (context, index) {
+              final tag = tagList[index];
+              return CheckboxListTile(
+                title: Text(tag.tag),
+                value: selectedFilters.contains(tag.tag),
+                onChanged: (bool? value) {
+                  setState(() {
+                    if (value != null && value) {
+                      selectedFilters.add(tag.tag);
+                    } else {
+                      selectedFilters.remove(tag.tag);
+                    }
+                  });
+                },
+              );
             },
           ),
-          // Ajouter d'autres CheckboxListTile pour chaque filtre...
           SizedBox(height: 16.0),
           ElevatedButton(
             onPressed: () {

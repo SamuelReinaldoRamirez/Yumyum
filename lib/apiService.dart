@@ -6,6 +6,7 @@ class ApiService {
 
   ApiService(this.apiUrl);
 
+//appelé nulle part? 
   Future<dynamic> fetchData() async {
     try {
       var response = await http.get(Uri.parse(apiUrl));

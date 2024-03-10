@@ -8,7 +8,7 @@ class Restaurant {
   final List<String> videoLinks;
   final double longitude;
   final double latitude;
-  final List<String> tagStr;
+  final List<int> tagStr;
 
   Restaurant({
     required this.id,
@@ -22,9 +22,9 @@ class Restaurant {
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
     final logger = Logger();
-    logger.e(json['name']);
+    //logger.e(json['name']);
     if(json['name'] == 'Bao Express'){
-      logger.e("TROUVE");
+      logger.e("BAO EXPRESS");
     }
 
 
@@ -35,9 +35,10 @@ class Restaurant {
       videoLinks = [];
     }
 
-    List<String> tagStr = [];
-    if (json.containsKey('str_tags') && json['str_tags'] != null && json['str_tags'] != []) {
-      tagStr = List<String>.from(json['str_tags']);
+    List<int> tagStr = [];
+    logger.d(json['tags_id']);
+    if (json.containsKey('tags_id') && json['tags_id'] != null && json['tags_id'] != []) {
+      tagStr = List<int>.from(json['tags_id']);
     }else{
       tagStr = [];
     }
@@ -61,7 +62,7 @@ class Restaurant {
     return videoLinks;
   }
 
-  List<String> getTagStr() {
+  List<int> getTagStr() {
     return tagStr;
   }
   

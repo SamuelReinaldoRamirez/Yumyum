@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
 import 'package:yummap/Restaurant.dart';
+import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/custom_controls.dart';
+import 'package:yummap/tag.dart';
 
 Completer<void> fullScreenCompleter = Completer<void>();
 
@@ -196,28 +199,128 @@ class BottomSheetHelper {
   }
 }
 
-class DetailsTags extends StatelessWidget {
-const DetailsTags({Key? key, required this.restaurant}) : super(key: key);
-
+class DetailsTags extends StatefulWidget {
+  DetailsTags({Key? key, required this.restaurant}) : super(key: key);
   final Restaurant restaurant;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('details tags de ${restaurant.name}'),
-      ),
-      body: Center(
-        child: restaurant.getTagStr().isNotEmpty ? Text(
-                  restaurant.getTagStr().isNotEmpty ? restaurant.getTagStr()[0] : '',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87,
-                  ),
-                ) : SizedBox(height: 0),
-      ),
-    );
+  _DetailsTagsState createState() => _DetailsTagsState(restaurant);
+}
+
+
+class _DetailsTagsState extends State<DetailsTags> {
+  Restaurant restaurant;
+  
+  List<Tag> tagList = [];
+  
+  _DetailsTagsState(this.restaurant);
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTagList();
   }
+
+  Future<void> _fetchTagList() async {
+    List<Tag> tags = await CallEndpointService.getTagsFromXanos();
+    setState(() {
+      tagList = tags;
+    });
+  }
+
+  @override
+Widget build(BuildContext context) {
+  // Regrouper les tags par type
+  Map<String, List<Tag>> tagsByType = {};
+  tagList.forEach((tag) {
+    tagsByType.putIfAbsent(tag.type, () => []);
+    tagsByType[tag.type]!.add(tag);
+  });
+
+  // Filtrer les tags en fonction de la liste de tags de notre restaurant
+  List<Tag> filteredTags = [];
+  restaurant.getTagStr().forEach((tagId) {
+    tagList.forEach((tag) {
+      if (tag.id == tagId) {
+        filteredTags.add(tag);
+      }
+    });
+  });
+
+  // Regrouper les tags filtrés par type
+  Map<String, List<Tag>> filteredTagsByType = {};
+  filteredTags.forEach((tag) {
+    filteredTagsByType.putIfAbsent(tag.type, () => []);
+    filteredTagsByType[tag.type]!.add(tag);
+  });
+
+  // Logging the filteredTagsByType
+  print('Filtered Tags By Type: $filteredTagsByType');
+
+  return Scaffold(
+    appBar: AppBar(
+      title: Text('Détails des tags de ${restaurant.name}'),
+    ),
+    body: ListView.builder(
+      itemCount: filteredTagsByType.length,
+      itemBuilder: (context, index) {
+        String type = filteredTagsByType.keys.elementAt(index);
+        List<Tag> tags = filteredTagsByType[type]!;
+        
+        // Construction du widget pour chaque type de tag et ses tags associés
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              type,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: tags.map((tag) => Text(tag.tag)).toList(),
+            ),
+            SizedBox(height: 10), // Espacement entre chaque groupe de tags
+          ],
+        );
+      },
+    ),
+  );
+}
+
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   // Récupérer les identifiants de tags
+  //   List<int> tagIdList = restaurant.getTagStr();
+    
+  //   // Récupérer les noms des tags correspondant aux identifiants de tags
+  //   List<String> tagNameList = tagIdList.map((tagId) {
+  //     Tag? tag = tagList.firstWhere((tag) => tag.id == tagId, orElse: () => Tag(id:0,tag:'chargement', type:'chargement'));
+  //     return tag != null ? tag.tag : 'Tag inconnu';
+  //   }).toList();
+
+  //   // Logging the tagNameList
+  //   print('Tag Names: $tagNameList');
+
+  //   return Scaffold(
+  //     appBar: AppBar(
+  //       title: Text('Détails des tags de ${restaurant.name}'),
+  //     ),
+  //     body: Center(
+  //       child: tagNameList.isNotEmpty ? Text(
+  //         tagNameList.join(', '),
+  //         style: TextStyle(
+  //           fontSize: 16,
+  //           color: Colors.black87,
+  //         ),
+  //       ) : SizedBox(height: 0),
+  //     ),
+  //   );
+  // }
+  
 }
 
 class ChewieVideoPlayer extends StatefulWidget {
