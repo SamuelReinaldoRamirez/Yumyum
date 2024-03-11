@@ -84,6 +84,32 @@ class MapHelper {
     return markers;
   }
 
+  static Future<void> createRestaurantMarkers(
+    BuildContext context,
+    Future<List<Restaurant>> futureRestaurantList,
+    Function(BuildContext context, Restaurant r) showMarkerInfo,
+  ) async {
+    List<LatLng> restaurantLocations = [];
+    Set<Marker> markers = {};
+
+    List<Restaurant> restaurantList = await futureRestaurantList;
+
+    for (var restaurant in restaurantList) {
+      LatLng location = LatLng(restaurant.latitude, restaurant.longitude);
+      Marker marker = Marker(
+        markerId: MarkerId(restaurant.name),
+        position: location,
+        onTap: () {
+          showMarkerInfo(context, restaurant);
+        },
+      );
+      markers.add(marker);
+      restaurantLocations.add(location);
+    }
+
+    MarkerManager.markers = markers;
+  }
+
   static Future<void> setMapStyle(
       BuildContext context, GoogleMapController mapController) async {
     String style = await DefaultAssetBundle.of(context)

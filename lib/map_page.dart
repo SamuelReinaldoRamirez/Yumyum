@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
@@ -81,9 +82,18 @@ class _MapPageState extends State<MapPage> {
     MapService.setMapStyle(context, mapController);
   }
 
-  void clearMarkers() {
-    MarkerManager.clearMarkers();
-    setState(() {});
+  Future<void> clearMarkers() async {
+    //************* IL FAUT REMPLACER [1] Par l'id du tag de l'utilisateur */
+    List<Restaurant> newRestaurants =
+        await CallEndpointService.getRestaurantsByTags([1]);
+    List<LatLng> newLocations = [];
+    MapService.createRestaurantLocations(newRestaurants, newLocations);
+    Set<Marker> newMarkers = MapHelper.createMarkers(
+        context, newRestaurants, newLocations, _showMarkerInfo);
+
+    setState(() {
+      markers = newMarkers; // Remplacez les anciens marqueurs par les nouveaux
+    });
   }
 
   @override
