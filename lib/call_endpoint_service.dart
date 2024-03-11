@@ -4,10 +4,7 @@ import 'package:yummap/Restaurant.dart';
 import 'package:logger/logger.dart';
 import 'package:yummap/tag.dart';
 
-
 class CallEndpointService {
-  
-
   static const String baseUrl =
       'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/restaurants';
 
@@ -27,7 +24,6 @@ class CallEndpointService {
         final List<dynamic> jsonData = json.decode(response.body);
         // logger.e(response.body);
 
-
         List<Restaurant> restaurants = jsonData.map((data) {
           // logger.e(data);
 
@@ -43,16 +39,14 @@ class CallEndpointService {
     }
   }
 
-  static const String allTagsUrl = 'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/tags';
+  static const String allTagsUrl =
+      'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/tags';
 
   static Future<List<Tag>> getTagsFromXanos() async {
-    final logger = Logger();
-
     try {
       final response = await http.get(Uri.parse(allTagsUrl));
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
-
 
         List<Tag> tags = jsonData.map((data) {
           // logger.e(data);
@@ -69,6 +63,31 @@ class CallEndpointService {
     }
   }
 
+// Méthode pour récupérer une liste de restaurants à partir du nouveau point de terminaison en fonction des tags_id
+  static Future<List<Restaurant>> getRestaurantsByTags(List<int> tagsId) async {
+    // Convertir la liste d'entiers en une chaîne de requête
+    String tagsIdQueryString = tagsId.join(',');
+
+    String url = '$baseUrl/tags/$tagsIdQueryString';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+
+        List<Restaurant> restaurants = jsonData.map((data) {
+          return Restaurant.fromJson(data);
+        }).toList();
+
+        return restaurants;
+      } else {
+        throw Exception('Failed to load restaurants by tags');
+      }
+    } catch (e) {
+      throw Exception('Failed to load restaurants by tags: $e');
+    }
+  }
+
   // static const String tagByIdUrl = 'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/tags/{tags_id}';
 
   // static Future<Tag> getTagByIdFromXanos() async {
@@ -78,7 +97,6 @@ class CallEndpointService {
   //     final response = await http.get(Uri.parse(tagByIdUrl));
   //     if (response.statusCode == 200) {
   //       final List<dynamic> jsonData = json.decode(response.body);
-
 
   //       Tag tag = jsonData.map((data) {
   //         // logger.e(data);

@@ -12,40 +12,46 @@ class MapHelper {
     callback();
   }
 
-  static void createRestaurantLocations(List<Restaurant> restaurantList, List<LatLng> restaurantLocations) {
+  static void createRestaurantLocations(
+      List<Restaurant> restaurantList, List<LatLng> restaurantLocations) {
     for (var restaurant in restaurantList) {
-      restaurantLocations.add(LatLng(restaurant.latitude, restaurant.longitude));
+      restaurantLocations
+          .add(LatLng(restaurant.latitude, restaurant.longitude));
     }
   }
+
   static Widget buildMap(
-  BuildContext context,
-  Future<Set<Marker>> markersFuture,
-  Function(GoogleMapController) onMapCreated,
-  Function setMapStyle,
-) {
-  return FutureBuilder<Set<Marker>>(
-    future: markersFuture,
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.done) {
-        return GoogleMap(
-          initialCameraPosition: CameraPosition(
-            target: LatLng(48.8566, 2.339),
-            zoom: 12,
-          ),
-          markers: snapshot.data ?? Set<Marker>(),
-          myLocationEnabled: true,
-          onMapCreated: onMapCreated,
-          zoomControlsEnabled: false,
-        );
-      } else {
-        return Center(child: CircularProgressIndicator());
-      }
-    },
-  );
-}
+    BuildContext context,
+    Future<Set<Marker>> markersFuture,
+    Function(GoogleMapController) onMapCreated,
+    Function setMapStyle,
+  ) {
+    return FutureBuilder<Set<Marker>>(
+      future: markersFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: LatLng(48.8566, 2.339),
+              zoom: 12,
+            ),
+            markers: snapshot.data ?? Set<Marker>(),
+            myLocationEnabled: true,
+            onMapCreated: onMapCreated,
+            zoomControlsEnabled: false,
+          );
+        } else {
+          return Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
 
-
-  static Set<Marker> createMarkers(BuildContext context, List<Restaurant> restaurantList, List<LatLng> restaurantLocations, Function(BuildContext context, Restaurant r) showMarkerInfo) {
+  static Set<Marker> createMarkers(
+      BuildContext context,
+      List<Restaurant> restaurantList,
+      List<LatLng> restaurantLocations,
+      Function(BuildContext context, Restaurant r) showMarkerInfo) {
     Set<Marker> markers = {};
 
     for (int i = 0; i < restaurantLocations.length; i++) {
@@ -63,9 +69,10 @@ class MapHelper {
     return markers;
   }
 
-  static Future<void> setMapStyle(BuildContext context, GoogleMapController? mapController) async {
-    String style = await DefaultAssetBundle.of(context).loadString('assets/custom_map.json');
+  static Future<void> setMapStyle(
+      BuildContext context, GoogleMapController? mapController) async {
+    String style = await DefaultAssetBundle.of(context)
+        .loadString('assets/custom_map.json');
     mapController?.setMapStyle(style);
   }
 }
-

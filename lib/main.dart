@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
               SizedBox(
                 // Utiliser un SizedBox pour définir des contraintes de taille pour OrderTrackingPage
                 height: MediaQuery.of(context).size.height *
-                    0.8, // Ajustez la taille selon vos besoins
+                    0.8875, // Ajustez la taille selon vos besoins
                 child: OrderTrackingPage(restaurantList: restaurantList),
               ),
             ],

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chewie/chewie.dart';
@@ -139,24 +138,24 @@ class BottomSheetHelper {
                 SizedBox(height: 16),
                 VideoCarousel(videoLinks: restaurant.videoLinks),
                 SizedBox(height: 16),
-                 Row(
+                Row(
                   mainAxisSize: MainAxisSize.min,
-                  children:[
+                  children: [
                     ElevatedButton(
-                  onPressed: () {
-                    navigateToRestaurant(restaurant);
-                  },
-                  child: Text("Y aller"),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => detailsTags),
-                    );
-                  },
-                  child: Text("tags"),
-                ),
+                      onPressed: () {
+                        navigateToRestaurant(restaurant);
+                      },
+                      child: Text("Y aller"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => detailsTags),
+                        );
+                      },
+                      child: Text("tags"),
+                    ),
                   ],
                 ),
               ],
@@ -207,12 +206,11 @@ class DetailsTags extends StatefulWidget {
   _DetailsTagsState createState() => _DetailsTagsState(restaurant);
 }
 
-
 class _DetailsTagsState extends State<DetailsTags> {
   Restaurant restaurant;
-  
+
   List<Tag> tagList = [];
-  
+
   _DetailsTagsState(this.restaurant);
 
   @override
@@ -229,73 +227,72 @@ class _DetailsTagsState extends State<DetailsTags> {
   }
 
   @override
-Widget build(BuildContext context) {
-  // Regrouper les tags par type
-  Map<String, List<Tag>> tagsByType = {};
-  tagList.forEach((tag) {
-    tagsByType.putIfAbsent(tag.type, () => []);
-    tagsByType[tag.type]!.add(tag);
-  });
-
-  // Filtrer les tags en fonction de la liste de tags de notre restaurant
-  List<Tag> filteredTags = [];
-  restaurant.getTagStr().forEach((tagId) {
+  Widget build(BuildContext context) {
+    // Regrouper les tags par type
+    Map<String, List<Tag>> tagsByType = {};
     tagList.forEach((tag) {
-      if (tag.id == tagId) {
-        filteredTags.add(tag);
-      }
+      tagsByType.putIfAbsent(tag.type, () => []);
+      tagsByType[tag.type]!.add(tag);
     });
-  });
 
-  // Regrouper les tags filtrés par type
-  Map<String, List<Tag>> filteredTagsByType = {};
-  filteredTags.forEach((tag) {
-    filteredTagsByType.putIfAbsent(tag.type, () => []);
-    filteredTagsByType[tag.type]!.add(tag);
-  });
+    // Filtrer les tags en fonction de la liste de tags de notre restaurant
+    List<Tag> filteredTags = [];
+    restaurant.getTagStr().forEach((tagId) {
+      tagList.forEach((tag) {
+        if (tag.id == tagId) {
+          filteredTags.add(tag);
+        }
+      });
+    });
 
-  // Logging the filteredTagsByType
-  print('Filtered Tags By Type: $filteredTagsByType');
+    // Regrouper les tags filtrés par type
+    Map<String, List<Tag>> filteredTagsByType = {};
+    filteredTags.forEach((tag) {
+      filteredTagsByType.putIfAbsent(tag.type, () => []);
+      filteredTagsByType[tag.type]!.add(tag);
+    });
 
-  return Scaffold(
-    appBar: AppBar(
-      title: Text('Détails des tags de ${restaurant.name}'),
-    ),
-    body: ListView.builder(
-      itemCount: filteredTagsByType.length,
-      itemBuilder: (context, index) {
-        String type = filteredTagsByType.keys.elementAt(index);
-        List<Tag> tags = filteredTagsByType[type]!;
-        
-        // Construction du widget pour chaque type de tag et ses tags associés
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              type,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+    // Logging the filteredTagsByType
+    print('Filtered Tags By Type: $filteredTagsByType');
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Détails des tags de ${restaurant.name}'),
+      ),
+      body: ListView.builder(
+        itemCount: filteredTagsByType.length,
+        itemBuilder: (context, index) {
+          String type = filteredTagsByType.keys.elementAt(index);
+          List<Tag> tags = filteredTagsByType[type]!;
+
+          // Construction du widget pour chaque type de tag et ses tags associés
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                type,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: tags.map((tag) => Text(tag.tag)).toList(),
-            ),
-            SizedBox(height: 10), // Espacement entre chaque groupe de tags
-          ],
-        );
-      },
-    ),
-  );
-}
-
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: tags.map((tag) => Text(tag.tag)).toList(),
+              ),
+              SizedBox(height: 10), // Espacement entre chaque groupe de tags
+            ],
+          );
+        },
+      ),
+    );
+  }
 
   // @override
   // Widget build(BuildContext context) {
   //   // Récupérer les identifiants de tags
   //   List<int> tagIdList = restaurant.getTagStr();
-    
+
   //   // Récupérer les noms des tags correspondant aux identifiants de tags
   //   List<String> tagNameList = tagIdList.map((tagId) {
   //     Tag? tag = tagList.firstWhere((tag) => tag.id == tagId, orElse: () => Tag(id:0,tag:'chargement', type:'chargement'));
@@ -320,7 +317,6 @@ Widget build(BuildContext context) {
   //     ),
   //   );
   // }
-  
 }
 
 class ChewieVideoPlayer extends StatefulWidget {
