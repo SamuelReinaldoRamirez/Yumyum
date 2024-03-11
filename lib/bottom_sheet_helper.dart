@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
-import 'package:yummap/Restaurant.dart';
+import 'package:yummap/restaurant.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/custom_controls.dart';
 import 'package:yummap/tag.dart';
@@ -287,36 +287,6 @@ class _DetailsTagsState extends State<DetailsTags> {
       ),
     );
   }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   // Récupérer les identifiants de tags
-  //   List<int> tagIdList = restaurant.getTagStr();
-
-  //   // Récupérer les noms des tags correspondant aux identifiants de tags
-  //   List<String> tagNameList = tagIdList.map((tagId) {
-  //     Tag? tag = tagList.firstWhere((tag) => tag.id == tagId, orElse: () => Tag(id:0,tag:'chargement', type:'chargement'));
-  //     return tag != null ? tag.tag : 'Tag inconnu';
-  //   }).toList();
-
-  //   // Logging the tagNameList
-  //   print('Tag Names: $tagNameList');
-
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: Text('Détails des tags de ${restaurant.name}'),
-  //     ),
-  //     body: Center(
-  //       child: tagNameList.isNotEmpty ? Text(
-  //         tagNameList.join(', '),
-  //         style: TextStyle(
-  //           fontSize: 16,
-  //           color: Colors.black87,
-  //         ),
-  //       ) : SizedBox(height: 0),
-  //     ),
-  //   );
-  // }
 }
 
 class ChewieVideoPlayer extends StatefulWidget {
@@ -334,12 +304,6 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      // onWillPop: () async {
-      //   // Votre logique ici, retourne true si vous voulez fermer l'application
-      //   // ou false si vous souhaitez empêcher la fermeture
-      //   // Par exemple, vous pouvez afficher une boîte de dialogue de confirmation
-      //   return true;
-      // },
       aspectRatio: 9 / 16,
       child: Stack(
         children: [

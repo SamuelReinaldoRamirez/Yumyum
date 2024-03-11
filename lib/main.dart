@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:yummap/order_tracking_page.dart';
 import 'package:yummap/call_endpoint_service.dart';
-import 'package:yummap/Restaurant.dart';
+import 'package:yummap/restaurant.dart';
+// ignore: library_prefixes
 import 'package:yummap/search_bar.dart' as CustomSearchBar;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   List<Restaurant> restaurantList =
-      await CallEndpointService.getRestaurantsFromXanos();
+      (await CallEndpointService.getRestaurantsFromXanos()).cast<Restaurant>();
   runApp(MyApp(restaurantList: restaurantList));
 }
 
@@ -33,14 +34,12 @@ class MyApp extends StatelessWidget {
           child: Column(
             children: [
               CustomSearchBar.SearchBar(
-                onSearchChanged: (value) {
-                  print('Recherche: $value');
-                },
+                onSearchChanged: (value) {},
               ),
               SizedBox(
                 // Utiliser un SizedBox pour définir des contraintes de taille pour OrderTrackingPage
                 height: MediaQuery.of(context).size.height *
-                    0.8875, // Ajustez la taille selon vos besoins
+                    0.8874, // Ajustez la taille selon vos besoins
                 child: OrderTrackingPage(restaurantList: restaurantList),
               ),
             ],

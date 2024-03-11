@@ -1,23 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:yummap/Restaurant.dart';
+import 'package:yummap/restaurant.dart';
 
-class MapHelper {
-  static void getCurrentLocation(Function callback) async {
-    LocationPermission permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      return;
-    }
-    callback();
+class MarkerManager {
+  static Set<Marker> markers = {};
+
+  static void addMarker(Marker marker) {
+    markers.add(marker);
   }
 
+  static void clearMarkers() {
+    print("-------------------");
+    print("-------------------");
+    print("-------------------");
+    print("-------------------");
+    print("-------------------");
+    print("-------------------");
+    print("-------------------");
+    print("-------------------");
+    print("-------------------");
+    //print(markers.first);
+    markers.clear();
+    //print(markers.first);
+  }
+
+  static void pop() {}
+}
+
+class MapHelper {
   static void createRestaurantLocations(
       List<Restaurant> restaurantList, List<LatLng> restaurantLocations) {
     for (var restaurant in restaurantList) {
       restaurantLocations
           .add(LatLng(restaurant.latitude, restaurant.longitude));
     }
+  }
+
+  static Future<void> getCurrentLocation(Function callback) async {
+    // Code pour obtenir la localisation actuelle
   }
 
   static Widget buildMap(
@@ -31,11 +51,11 @@ class MapHelper {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return GoogleMap(
-            initialCameraPosition: CameraPosition(
+            initialCameraPosition: const CameraPosition(
               target: LatLng(48.8566, 2.339),
               zoom: 12,
             ),
-            markers: snapshot.data ?? Set<Marker>(),
+            markers: MarkerManager.markers,
             myLocationEnabled: true,
             onMapCreated: onMapCreated,
             zoomControlsEnabled: false,
@@ -55,24 +75,24 @@ class MapHelper {
     Set<Marker> markers = {};
 
     for (int i = 0; i < restaurantLocations.length; i++) {
-      markers.add(
-        Marker(
-          markerId: MarkerId(restaurantList[i].name),
-          position: restaurantLocations[i],
-          onTap: () {
-            showMarkerInfo(context, restaurantList[i]);
-          },
-        ),
+      Marker marker = Marker(
+        markerId: MarkerId(restaurantList[i].name),
+        position: restaurantLocations[i],
+        onTap: () {
+          showMarkerInfo(context, restaurantList[i]);
+        },
       );
+      //markers.add(marker);
+      MarkerManager.addMarker(marker);
     }
 
     return markers;
   }
 
   static Future<void> setMapStyle(
-      BuildContext context, GoogleMapController? mapController) async {
+      BuildContext context, GoogleMapController mapController) async {
     String style = await DefaultAssetBundle.of(context)
-        .loadString('assets/custom_map.json');
-    mapController?.setMapStyle(style);
+        .loadString('assets/map_style.json');
+    mapController.setMapStyle(style);
   }
 }
