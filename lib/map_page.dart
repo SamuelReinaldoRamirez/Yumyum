@@ -17,7 +17,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   late GoogleMapController mapController;
-  //Set<Marker> markers = {};
+  Set<Marker> markers = {}; // Champ pour stocker les marqueurs
   List<LatLng> restaurantLocations = [];
 
   @override
@@ -26,6 +26,7 @@ class _MapPageState extends State<MapPage> {
     MapService.createRestaurantLocations(
         widget.restaurantList, restaurantLocations);
     _getCurrentLocation();
+    _createMarkers(); // Appel initial pour créer les marqueurs
   }
 
   void _getCurrentLocation() async {
@@ -34,14 +35,26 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+  // Modifier _createMarkers pour mettre à jour la liste des marqueurs
+  Future<void> _createMarkers() async {
+    markers = await MapHelper.createMarkers(
+        context, widget.restaurantList, restaurantLocations, _showMarkerInfo);
+    setState(
+        () {}); // Mettre à jour l'état pour reconstruire la carte avec les nouveaux marqueurs
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: MapHelper.buildMap(
-        context,
-        _createMarkers(), // Correction ici
-        _onMapCreated,
-        _setMapStyle,
+      body: GoogleMap(
+        initialCameraPosition: const CameraPosition(
+          target: LatLng(48.8566, 2.339),
+          zoom: 12,
+        ),
+        markers: markers,
+        myLocationEnabled: true,
+        onMapCreated: _onMapCreated,
+        zoomControlsEnabled: false,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: clearMarkers,
@@ -50,14 +63,9 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  Future<Set<Marker>> _createMarkers() async {
-    return MapHelper.createMarkers(
-        context, widget.restaurantList, restaurantLocations, _showMarkerInfo);
-  }
-
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
-    _setMapStyle(context, mapController); // Correction ici
+    _setMapStyle(context, mapController);
   }
 
   void _showMarkerInfo(BuildContext context, Restaurant restaurant) {
@@ -70,14 +78,12 @@ class _MapPageState extends State<MapPage> {
   }
 
   void _setMapStyle(BuildContext context, GoogleMapController mapController) {
-    MapService.setMapStyle(context, mapController); // Correction ici
+    MapService.setMapStyle(context, mapController);
   }
 
   void clearMarkers() {
-    setState(() {
-      //apService.clearMarkers(markers); // Utilisation de MapService
-      MarkerManager.clearMarkers(); // Clear markers managed by MarkerManager
-    });
+    MarkerManager.clearMarkers();
+    setState(() {});
   }
 
   @override

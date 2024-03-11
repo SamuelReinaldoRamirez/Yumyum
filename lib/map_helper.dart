@@ -10,21 +10,16 @@ class MarkerManager {
   }
 
   static void clearMarkers() {
-    print("-------------------");
-    print("-------------------");
-    print("-------------------");
-    print("-------------------");
-    print("-------------------");
-    print("-------------------");
-    print("-------------------");
-    print("-------------------");
-    print("-------------------");
-    //print(markers.first);
     markers.clear();
-    //print(markers.first);
   }
 
-  static void pop() {}
+  static void removeMarker(Marker marker) {
+    markers.remove(marker);
+  }
+
+  static MarkerId getMarkerId() {
+    return markers.isNotEmpty ? markers.first.markerId : MarkerId('');
+  }
 }
 
 class MapHelper {
@@ -82,10 +77,10 @@ class MapHelper {
           showMarkerInfo(context, restaurantList[i]);
         },
       );
-      //markers.add(marker);
-      MarkerManager.addMarker(marker);
+      markers.add(marker);
     }
 
+    MarkerManager.markers = markers;
     return markers;
   }
 
