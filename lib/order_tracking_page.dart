@@ -12,6 +12,6 @@ class OrderTrackingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Passer uniquement les trois premiers éléments de restaurantList à MapPage
-    return MapPage(restaurantList: restaurantList.take(3).toList());
+    return MapPage(restaurantList: restaurantList);
   }
 }
