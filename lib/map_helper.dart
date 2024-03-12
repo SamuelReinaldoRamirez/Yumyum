@@ -30,7 +30,14 @@ class MarkerManager {
   }
 
   static void updateMap() {
+    // ignore: invalid_use_of_protected_member
     mapPageState?.setState(() {});
+  }
+
+  static void createFull(
+      BuildContext context, List<Restaurant> newRestaurants) {
+    MapHelper.createFull(context, newRestaurants);
+    updateMap();
   }
 }
 
@@ -51,12 +58,13 @@ class MapHelper {
     }
   }
 
-  static void createFull(List<Restaurant> newRestaurants) {
-    // List<LatLng> newLocations = [];
-    // createRestaurantLocations(newRestaurants, newLocations);
-    // Set<Marker> newMarkers = MapHelper.createMarkers(
-    //     context, newRestaurants, newLocations, _showMarkerInfo);
-    // MarkerManager.markers = newMarkers;
+  static void createFull(
+      BuildContext context, List<Restaurant> newRestaurants) {
+    List<LatLng> newLocations = [];
+    createRestaurantLocations(newRestaurants, newLocations);
+    Set<Marker> newMarkers = MapHelper.createMarkers(
+        context, newRestaurants, newLocations, _showMarkerInfo);
+    MarkerManager.markers = newMarkers;
   }
 
   static void _showMarkerInfo(BuildContext context, Restaurant restaurant) {

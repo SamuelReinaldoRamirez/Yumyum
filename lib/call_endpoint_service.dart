@@ -54,15 +54,21 @@ class CallEndpointService {
     }
   }
 
-// Méthode pour récupérer une liste de restaurants à partir du nouveau point de terminaison en fonction des tags_id
   static Future<List<Restaurant>> getRestaurantsByTags(List<int> tagsId) async {
     // Convertir la liste d'entiers en une chaîne de requête
-    String tagsIdQueryString = tagsId.join(',');
+    String tagsIdQueryString = jsonEncode({'tags_id': tagsId});
 
-    String url = '$baseUrl/tags/$tagsIdQueryString';
+    String url = '$baseUrl/tags/';
 
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.post(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: tagsIdQueryString,
+      );
+
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
 

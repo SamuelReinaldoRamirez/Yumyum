@@ -3,13 +3,15 @@ import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/tag.dart';
 
+import 'restaurant.dart';
+
 class FilterOptionsModal extends StatefulWidget {
   @override
   _FilterOptionsModalState createState() => _FilterOptionsModalState();
 }
 
 class _FilterOptionsModalState extends State<FilterOptionsModal> {
-  List<String> selectedFilters = [];
+  List<int> selectedTagIds = [];
   List<Tag> tagList = [];
 
   @override
@@ -45,13 +47,13 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
               final tag = tagList[index];
               return CheckboxListTile(
                 title: Text(tag.tag),
-                value: selectedFilters.contains(tag.tag),
+                value: selectedTagIds.contains(tag.id),
                 onChanged: (bool? value) {
                   setState(() {
                     if (value != null && value) {
-                      selectedFilters.add(tag.tag);
+                      selectedTagIds.add(tag.id);
                     } else {
-                      selectedFilters.remove(tag.tag);
+                      selectedTagIds.remove(tag.id);
                     }
                   });
                 },
@@ -60,9 +62,17 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
           ),
           SizedBox(height: 16.0),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               // Appliquer les filtres et fermer le modal
-              MarkerManager.pop();
+              print("===================");
+              print("===================");
+              print("===================");
+              print(selectedTagIds);
+              print("===================");
+              List<Restaurant> newRestaurants =
+                  await CallEndpointService.getRestaurantsByTags(
+                      selectedTagIds); // Passer les identifiants de tags sélectionnés
+              MarkerManager.createFull(context, newRestaurants);
               Navigator.of(context).pop();
               // Appeler la fonction de rappel pour nettoyer les marqueurs
             },
