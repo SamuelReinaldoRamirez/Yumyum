@@ -64,11 +64,6 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
           ElevatedButton(
             onPressed: () async {
               // Appliquer les filtres et fermer le modal
-              print("===================");
-              print("===================");
-              print("===================");
-              print(selectedTagIds);
-              print("===================");
               List<Restaurant> newRestaurants =
                   await CallEndpointService.getRestaurantsByTags(
                       selectedTagIds); // Passer les identifiants de tags sélectionnés

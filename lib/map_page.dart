@@ -55,10 +55,6 @@ class MapPageState extends State<MapPage> {
         onMapCreated: _onMapCreated,
         zoomControlsEnabled: false,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: clearMarkers,
-        child: Icon(Icons.clear),
-      ),
     );
   }
 
@@ -79,20 +75,6 @@ class MapPageState extends State<MapPage> {
 
   void _setMapStyle(BuildContext context, GoogleMapController mapController) {
     MapHelper.setMapStyle(context, mapController);
-  }
-
-  Future<void> clearMarkers() async {
-    //************* IL FAUT REMPLACER [1] Par l'id du tag de l'utilisateur */
-    // List<Restaurant> newRestaurants =
-    //     await CallEndpointService.getRestaurantsByTags([1]);
-    // List<LatLng> newLocations = [];
-    // MapHelper.createRestaurantLocations(newRestaurants, newLocations);
-    // Set<Marker> newMarkers = MapHelper.createMarkers(
-    //     context, newRestaurants, newLocations, _showMarkerInfo);
-    MarkerManager.pop();
-    setState(() {
-      //MarkerManager.markers = newMarkers; // Remplacez les anciens marqueurs par les nouveaux
-    });
   }
 
   @override
