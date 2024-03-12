@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yummap/map_helper.dart';
 import 'filter_options_modal.dart';
 
 class SearchBar extends StatelessWidget implements PreferredSizeWidget {
@@ -34,12 +35,13 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: Icon(Icons.filter_list),
           onPressed: () {
-            showModalBottomSheet<void>(
-              context: context,
-              builder: (BuildContext context) {
-                return FilterOptionsModal();
-              },
-            );
+            // showModalBottomSheet<void>(
+            //   context: context,
+            //   builder: (BuildContext context) {
+            //     return FilterOptionsModal();
+            //   },
+            // );
+            MarkerManager.pop();
           },
         ),
       ],

@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:yummap/bottom_sheet_helper.dart';
 import 'package:yummap/restaurant.dart';
+import 'package:yummap/map_page.dart';
 
 class MarkerManager {
   static Set<Marker> markers = {};
+  static MapPageState? mapPageState;
 
   static void addMarker(Marker marker) {
     markers.add(marker);
+    updateMap();
   }
 
   static void clearMarkers() {
     markers.clear();
+    updateMap();
   }
 
   static void removeMarker(Marker marker) {
     markers.remove(marker);
+    updateMap();
+  }
+
+  static void pop() {
+    markers.remove(markers.first);
+    updateMap();
+  }
+
+  static void updateMap() {
+    mapPageState?.setState(() {});
   }
 }
 
@@ -34,6 +49,18 @@ class MapHelper {
       restaurantLocations
           .add(LatLng(restaurant.latitude, restaurant.longitude));
     }
+  }
+
+  static void createFull(List<Restaurant> newRestaurants) {
+    // List<LatLng> newLocations = [];
+    // createRestaurantLocations(newRestaurants, newLocations);
+    // Set<Marker> newMarkers = MapHelper.createMarkers(
+    //     context, newRestaurants, newLocations, _showMarkerInfo);
+    // MarkerManager.markers = newMarkers;
+  }
+
+  static void _showMarkerInfo(BuildContext context, Restaurant restaurant) {
+    BottomSheetHelper.showBottomSheet(context, restaurant);
   }
 
   static Future<void> setMapStyle(

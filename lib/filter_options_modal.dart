@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yummap/call_endpoint_service.dart';
+import 'package:yummap/map_helper.dart';
 import 'package:yummap/tag.dart';
 
 class FilterOptionsModal extends StatefulWidget {
@@ -61,6 +62,7 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
           ElevatedButton(
             onPressed: () {
               // Appliquer les filtres et fermer le modal
+              MarkerManager.pop();
               Navigator.of(context).pop();
               // Appeler la fonction de rappel pour nettoyer les marqueurs
             },

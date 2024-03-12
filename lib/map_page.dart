@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
@@ -12,10 +11,10 @@ class MapPage extends StatefulWidget {
   const MapPage({Key? key, required this.restaurantList}) : super(key: key);
 
   @override
-  _MapPageState createState() => _MapPageState();
+  MapPageState createState() => MapPageState();
 }
 
-class _MapPageState extends State<MapPage> {
+class MapPageState extends State<MapPage> {
   late GoogleMapController mapController;
   Set<Marker> markers = {}; // Champ pour stocker les marqueurs
   List<LatLng> restaurantLocations = [];
@@ -65,12 +64,13 @@ class _MapPageState extends State<MapPage> {
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
+    MarkerManager.mapPageState =
+        this as MapPageState?; // Affectation de la référence
     _setMapStyle(context, mapController);
   }
 
   void _showMarkerInfo(BuildContext context, Restaurant restaurant) {
-    BottomSheetHelper.showBottomSheet(
-        context, restaurant, _navigateToRestaurant);
+    BottomSheetHelper.showBottomSheet(context, restaurant);
   }
 
   void _navigateToRestaurant(Restaurant restaurant) async {
@@ -83,16 +83,15 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> clearMarkers() async {
     //************* IL FAUT REMPLACER [1] Par l'id du tag de l'utilisateur */
-    List<Restaurant> newRestaurants =
-        await CallEndpointService.getRestaurantsByTags([1]);
-    List<LatLng> newLocations = [];
-    MapHelper.createRestaurantLocations(newRestaurants, newLocations);
-    Set<Marker> newMarkers = MapHelper.createMarkers(
-        context, newRestaurants, newLocations, _showMarkerInfo);
-
+    // List<Restaurant> newRestaurants =
+    //     await CallEndpointService.getRestaurantsByTags([1]);
+    // List<LatLng> newLocations = [];
+    // MapHelper.createRestaurantLocations(newRestaurants, newLocations);
+    // Set<Marker> newMarkers = MapHelper.createMarkers(
+    //     context, newRestaurants, newLocations, _showMarkerInfo);
+    MarkerManager.pop();
     setState(() {
-      MarkerManager.markers =
-          newMarkers; // Remplacez les anciens marqueurs par les nouveaux
+      //MarkerManager.markers = newMarkers; // Remplacez les anciens marqueurs par les nouveaux
     });
   }
 

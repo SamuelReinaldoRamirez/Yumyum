@@ -103,8 +103,7 @@ class _VideoCarouselState extends State<VideoCarousel>
 }
 
 class BottomSheetHelper {
-  static void showBottomSheet(BuildContext context, Restaurant restaurant,
-      Function navigateToRestaurant) {
+  static void showBottomSheet(BuildContext context, Restaurant restaurant) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
