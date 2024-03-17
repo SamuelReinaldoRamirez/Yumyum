@@ -4,8 +4,14 @@ import 'package:video_player/video_player.dart';
 
 class CustomControls extends StatefulWidget {
   final VideoPlayerController videoPlayerController;
+  final bool showPlayPause;
+  final bool showFullScreenButton;
 
-  CustomControls({required this.videoPlayerController});
+  CustomControls({
+    required this.videoPlayerController,
+    required this.showPlayPause,
+    required this.showFullScreenButton,
+  });
 
   @override
   _CustomControlsState createState() => _CustomControlsState();

@@ -8,6 +8,7 @@ import 'package:yummap/map_page.dart';
 class MarkerManager {
   static Set<Marker> markers = {};
   static MapPageState? mapPageState;
+  static late BuildContext context;
 
   static void addMarker(Marker marker) {
     markers.add(marker);
@@ -36,7 +37,7 @@ class MarkerManager {
 
   static void createFull(
       BuildContext context, List<Restaurant> newRestaurants) {
-    MapHelper.createFull(context, newRestaurants);
+    MapHelper.createFull(mapPageState!.context, newRestaurants);
     updateMap();
   }
 }

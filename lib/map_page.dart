@@ -16,7 +16,6 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   late GoogleMapController mapController;
-  Set<Marker> markers = {}; // Champ pour stocker les marqueurs
   List<LatLng> restaurantLocations = [];
 
   @override
@@ -36,7 +35,7 @@ class MapPageState extends State<MapPage> {
 
   // Modifier _createMarkers pour mettre à jour la liste des marqueurs
   Future<void> _createMarkers() async {
-    MarkerManager.markers = await MapHelper.createMarkers(
+    MarkerManager.markers = MapHelper.createMarkers(
         context, widget.restaurantList, restaurantLocations, _showMarkerInfo);
     setState(
         () {}); // Mettre à jour l'état pour reconstruire la carte avec les nouveaux marqueurs
@@ -62,15 +61,12 @@ class MapPageState extends State<MapPage> {
     mapController = controller;
     MarkerManager.mapPageState =
         this as MapPageState?; // Affectation de la référence
+    MarkerManager.context = context;
     _setMapStyle(context, mapController);
   }
 
   void _showMarkerInfo(BuildContext context, Restaurant restaurant) {
     BottomSheetHelper.showBottomSheet(context, restaurant);
-  }
-
-  void _navigateToRestaurant(Restaurant restaurant) async {
-    // Votre code pour naviguer vers la page du restaurant
   }
 
   void _setMapStyle(BuildContext context, GoogleMapController mapController) {
@@ -79,6 +75,12 @@ class MapPageState extends State<MapPage> {
 
   @override
   void dispose() {
+    print("++++++++++++++++++++++");
+    print("++++++++++++++++++++++");
+    print("++++++++++++++++++++++");
+    print("++++++++++++++++++++++");
+    print("++++++++++++++++++++++");
+    print("SOS-MAP");
     super.dispose();
   }
 }
