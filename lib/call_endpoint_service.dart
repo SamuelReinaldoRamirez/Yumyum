@@ -84,4 +84,28 @@ class CallEndpointService {
       throw Exception('Failed to load restaurants by tags: $e');
     }
   }
+
+  static Future<List<Restaurant>> searchRestaurantByName(
+      String restaurantName) async {
+    final String endpoint =
+        'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/restaurants/search/$restaurantName';
+
+    try {
+      final response = await http.get(Uri.parse(endpoint));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+
+        List<Restaurant> restaurants = jsonData.map((data) {
+          return Restaurant.fromJson(data);
+        }).toList();
+
+        return restaurants;
+      } else {
+        throw Exception('Failed to search restaurants by name');
+      }
+    } catch (e) {
+      throw Exception('Failed to search restaurants by name: $e');
+    }
+  }
 }

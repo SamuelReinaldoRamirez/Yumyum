@@ -7,6 +7,7 @@ import 'package:yummap/map_page.dart';
 
 class MarkerManager {
   static Set<Marker> markers = {};
+  static Set<Marker> allmarkers = {};
   static MapPageState? mapPageState;
   static late BuildContext context;
 
@@ -39,6 +40,10 @@ class MarkerManager {
       BuildContext context, List<Restaurant> newRestaurants) {
     MapHelper.createFull(mapPageState!.context, newRestaurants);
     updateMap();
+  }
+
+  static void resetMarkers() {
+    markers = Set<Marker>.from(allmarkers);
   }
 }
 

@@ -37,6 +37,7 @@ class MapPageState extends State<MapPage> {
   Future<void> _createMarkers() async {
     MarkerManager.markers = MapHelper.createMarkers(
         context, widget.restaurantList, restaurantLocations, _showMarkerInfo);
+    MarkerManager.allmarkers = Set<Marker>.from(MarkerManager.markers);
     setState(
         () {}); // Mettre à jour l'état pour reconstruire la carte avec les nouveaux marqueurs
   }
