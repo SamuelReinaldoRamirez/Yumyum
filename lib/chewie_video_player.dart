@@ -27,6 +27,7 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
       looping: false,
       allowFullScreen: true,
       allowMuting: false,
+      aspectRatio: 9 / 16,
       customControls: CustomControls(
         // Utiliser CustomControls ici
         videoPlayerController:
@@ -59,7 +60,8 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
         },
         child: Stack(
           children: [
-            Chewie(controller: _chewieController),
+            Visibility(
+                visible: false, child: Chewie(controller: _chewieController)),
             Positioned.fill(
               child: Image.network(
                 widget.thumbnailUrl,
@@ -89,6 +91,7 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
   }
 
   void _enterFullScreen(BuildContext context) async {
+    _chewieController.play(); // Lire la vidéo automatiquement en plein écran
     await Navigator.push(
       context,
       MaterialPageRoute(
