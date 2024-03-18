@@ -7,9 +7,11 @@ class ChewieVideoPlayer extends StatefulWidget {
   final String videoLink;
   final String thumbnailUrl;
 
-  ChewieVideoPlayer({required this.videoLink, required this.thumbnailUrl});
+  const ChewieVideoPlayer(
+      {super.key, required this.videoLink, required this.thumbnailUrl});
 
   @override
+  // ignore: library_private_types_in_public_api
   _ChewieVideoPlayerState createState() => _ChewieVideoPlayerState();
 }
 
@@ -20,7 +22,8 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
   @override
   void initState() {
     super.initState();
-    _videoPlayerController = VideoPlayerController.network(widget.videoLink);
+    _videoPlayerController =
+        VideoPlayerController.networkUrl(Uri.parse(widget.videoLink));
     _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController,
       autoPlay: false,
@@ -76,8 +79,8 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
                   shape: BoxShape.circle,
                   color: Colors.black12.withOpacity(0.3),
                 ),
-                padding: EdgeInsets.all(8),
-                child: Icon(
+                padding: const EdgeInsets.all(8),
+                child: const Icon(
                   Icons.play_arrow,
                   color: Colors.white,
                   size: 32,

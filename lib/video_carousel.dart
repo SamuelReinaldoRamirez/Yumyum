@@ -5,7 +5,7 @@ import 'package:yummap/chewie_video_player.dart';
 class VideoCarousel extends StatefulWidget {
   final List<String> videoLinks;
 
-  VideoCarousel({required this.videoLinks});
+  const VideoCarousel({super.key, required this.videoLinks});
 
   @override
   _VideoCarouselState createState() => _VideoCarouselState();
@@ -52,7 +52,7 @@ class _VideoCarouselState extends State<VideoCarousel>
       ),
       itemBuilder: (BuildContext context, int index, int realIndex) {
         return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: _videoPlayers[index],
         );
       },

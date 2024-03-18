@@ -76,12 +76,6 @@ class MapPageState extends State<MapPage> {
 
   @override
   void dispose() {
-    print("++++++++++++++++++++++");
-    print("++++++++++++++++++++++");
-    print("++++++++++++++++++++++");
-    print("++++++++++++++++++++++");
-    print("++++++++++++++++++++++");
-    print("SOS-MAP");
     super.dispose();
   }
 }

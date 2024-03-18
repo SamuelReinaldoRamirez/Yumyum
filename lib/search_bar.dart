@@ -16,7 +16,7 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
   }) : super(key: key);
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +29,9 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
         decoration: InputDecoration(
           hintText: 'Rechercher un restaurant',
           border: InputBorder.none,
-          prefixIcon: Icon(Icons.search),
+          prefixIcon: const Icon(Icons.search),
           suffixIcon: IconButton(
-            icon: Icon(Icons.clear),
+            icon: const Icon(Icons.clear),
             onPressed: () async {
               _clearSearch();
               List<Restaurant> newRestaurants =
@@ -44,12 +44,12 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         IconButton(
-          icon: Icon(Icons.filter_list),
+          icon: const Icon(Icons.filter_list),
           onPressed: () {
             showModalBottomSheet<void>(
               context: context,
               builder: (BuildContext context) {
-                return FilterOptionsModal();
+                return const FilterOptionsModal();
               },
             );
           },
@@ -90,7 +90,7 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
       }
     }).catchError((error) {
       // Gérer les erreurs éventuelles
-      print('Une erreur s\'est produite : $error');
+      //print('Une erreur s\'est produite : $error');
     });
   }
 

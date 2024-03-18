@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/map_helper.dart';
@@ -6,6 +8,8 @@ import 'package:yummap/tag.dart';
 import 'restaurant.dart';
 
 class FilterOptionsModal extends StatefulWidget {
+  const FilterOptionsModal({super.key});
+
   @override
   _FilterOptionsModalState createState() => _FilterOptionsModalState();
 }
@@ -30,16 +34,16 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             'Filtres',
-            style: Theme.of(context).textTheme.headline6,
+            style: Theme.of(context).textTheme.titleLarge,
           ),
-          SizedBox(height: 16.0),
+          const SizedBox(height: 16.0),
           ListView.builder(
             shrinkWrap: true,
             itemCount: tagList.length,
@@ -60,7 +64,7 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
               );
             },
           ),
-          SizedBox(height: 16.0),
+          const SizedBox(height: 16.0),
           ElevatedButton(
             onPressed: () async {
               // Appliquer les filtres et fermer le modal
@@ -71,7 +75,7 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
               Navigator.of(context).pop();
               // Appeler la fonction de rappel pour nettoyer les marqueurs
             },
-            child: Text('Appliquer'),
+            child: const Text('Appliquer'),
           ),
         ],
       ),

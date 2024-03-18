@@ -7,13 +7,15 @@ class CustomControls extends StatefulWidget {
   final bool showPlayPause;
   final bool showFullScreenButton;
 
-  CustomControls({
+  const CustomControls({
+    super.key,
     required this.videoPlayerController,
     required this.showPlayPause,
     required this.showFullScreenButton,
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _CustomControlsState createState() => _CustomControlsState();
 }
 
@@ -28,7 +30,7 @@ class _CustomControlsState extends State<CustomControls> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Container(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -42,8 +44,8 @@ class _CustomControlsState extends State<CustomControls> {
                       shape: BoxShape.circle,
                       color: Colors.black.withOpacity(0.5),
                     ),
-                    padding: EdgeInsets.all(12),
-                    child: Icon(
+                    padding: const EdgeInsets.all(12),
+                    child: const Icon(
                       Icons.close,
                       color: Colors.white,
                       size: 32,

@@ -1,13 +1,16 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/tag.dart';
 
 class DetailsTags extends StatefulWidget {
-  DetailsTags({Key? key, required this.restaurant}) : super(key: key);
+  const DetailsTags({Key? key, required this.restaurant}) : super(key: key);
   final Restaurant restaurant;
 
   @override
+  // ignore: no_logic_in_create_state
   _DetailsTagsState createState() => _DetailsTagsState(restaurant);
 }
 
@@ -50,7 +53,7 @@ class _DetailsTagsState extends State<DetailsTags> {
             children: [
               Text(
                 type,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -59,7 +62,7 @@ class _DetailsTagsState extends State<DetailsTags> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: tags.map((tag) => Text(tag.tag)).toList(),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
             ],
           );
         },
@@ -69,18 +72,18 @@ class _DetailsTagsState extends State<DetailsTags> {
 
   Map<String, List<Tag>> _groupTagsByType() {
     Map<String, List<Tag>> tagsByType = {};
-    tagList.forEach((tag) {
+    for (var tag in tagList) {
       tagsByType.putIfAbsent(tag.type, () => []);
       tagsByType[tag.type]!.add(tag);
-    });
+    }
 
     List<Tag> filteredTags = _filterTags(restaurant.getTagStr().cast<String>());
 
     Map<String, List<Tag>> filteredTagsByType = {};
-    filteredTags.forEach((tag) {
+    for (var tag in filteredTags) {
       filteredTagsByType.putIfAbsent(tag.type, () => []);
       filteredTagsByType[tag.type]!.add(tag);
-    });
+    }
 
     return filteredTagsByType;
   }

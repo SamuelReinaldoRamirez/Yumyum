@@ -11,8 +11,8 @@ class BottomSheetHelper {
       builder: (context) {
         return SingleChildScrollView(
           child: Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
               color: Colors.transparent,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
@@ -21,23 +21,23 @@ class BottomSheetHelper {
               children: [
                 Text(
                   restaurant.name,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   restaurant.address,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     color: Colors.black87,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 VideoCarousel(videoLinks: restaurant.videoLinks),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -45,13 +45,13 @@ class BottomSheetHelper {
                       onPressed: () {
                         _navigateToRestaurant(restaurant);
                       },
-                      child: Text("Y aller"),
+                      child: const Text("Y aller"),
                     ),
                     ElevatedButton(
                       onPressed: () {
                         _navigateToTags(context, restaurant);
                       },
-                      child: Text("Tags"),
+                      child: const Text("Tags"),
                     ),
                   ],
                 ),
@@ -68,10 +68,11 @@ class BottomSheetHelper {
   static void _navigateToRestaurant(Restaurant restaurant) async {
     final url =
         'https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}';
-    if (await canLaunch(url)) {
-      await launch(url);
+    Uri uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     } else {
-      print('Could not launch $url');
+      //print('Could not launch $url');
     }
   }
 
