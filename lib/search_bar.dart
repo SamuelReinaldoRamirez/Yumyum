@@ -34,10 +34,7 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
             icon: const Icon(Icons.clear),
             onPressed: () async {
               _clearSearch();
-              List<Restaurant> newRestaurants =
-                  await CallEndpointService.getRestaurantsByTags(
-                      []); // Passer les identifiants de tags sélectionnés
-              MarkerManager.createFull(context, newRestaurants);
+              MarkerManager.resetMarkers();
             },
           ),
         ),

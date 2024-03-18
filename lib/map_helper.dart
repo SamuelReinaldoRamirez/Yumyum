@@ -44,6 +44,7 @@ class MarkerManager {
 
   static void resetMarkers() {
     markers = Set<Marker>.from(allmarkers);
+    updateMap();
   }
 }
 
