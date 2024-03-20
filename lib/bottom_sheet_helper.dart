@@ -47,12 +47,12 @@ class BottomSheetHelper {
                       },
                       child: const Text("Y aller"),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        _navigateToTags(context, restaurant);
-                      },
-                      child: const Text("Tags"),
-                    ),
+                    // ElevatedButton(
+                    //   onPressed: () {
+                    //     _navigateToTags(context, restaurant);
+                    //   },
+                    //   child: const Text("Tags"),
+                    // ),
                   ],
                 ),
               ],
