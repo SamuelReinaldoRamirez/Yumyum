@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/map_helper.dart';
@@ -49,53 +51,51 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
       child: Text(
         'Filtres',
-        style: Theme.of(context).textTheme.headline6,
+        style: Theme.of(context).textTheme.titleLarge,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildTitle(context),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: tagList.length,
-                    itemBuilder: (context, index) {
-                      final tag = tagList[index];
-                      return CheckboxListTile(
-                        title: Text(tag.tag),
-                        value: selectedTagIds.contains(tag.id),
-                        onChanged: (bool? value) {
-                          setState(() {
-                            if (value != null && value) {
-                              selectedTagIds.add(tag.id);
-                            } else {
-                              selectedTagIds.remove(tag.id);
-                            }
-                          });
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildTitle(context),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: tagList.length,
+                  itemBuilder: (context, index) {
+                    final tag = tagList[index];
+                    return CheckboxListTile(
+                      title: Text(tag.tag),
+                      value: selectedTagIds.contains(tag.id),
+                      onChanged: (bool? value) {
+                        setState(() {
+                          if (value != null && value) {
+                            selectedTagIds.add(tag.id);
+                          } else {
+                            selectedTagIds.remove(tag.id);
+                          }
+                        });
+                      },
+                    );
+                  },
+                ),
+              ],
             ),
           ),
-          _buildApplyButton(context),
-        ],
-      ),
+        ),
+        _buildApplyButton(context),
+      ],
     );
   }
 }
