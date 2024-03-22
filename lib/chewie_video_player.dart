@@ -53,6 +53,12 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
     super.dispose();
   }
 
+  void _pauseVideo() {
+    if (_videoPlayerController.value.isPlaying) {
+      _videoPlayerController.pause();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
@@ -98,14 +104,18 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Scaffold(
-          body: Center(
-            child: Chewie(
-              controller: _chewieController,
+        builder: (context) {
+          return Scaffold(
+            backgroundColor: Colors.black, // Fond noir
+            body: Center(
+              child: Chewie(
+                controller: _chewieController,
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
+    _pauseVideo();
   }
 }

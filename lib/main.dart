@@ -31,18 +31,23 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
         body: SingleChildScrollView(
-          child: Column(
-            children: [
-              CustomSearchBar.SearchBar(
-                onSearchChanged: (value) {},
-              ),
-              SizedBox(
-                // Utiliser un SizedBox pour définir des contraintes de taille pour OrderTrackingPage
-                height: MediaQuery.of(context).size.height *
-                    0.872, // Ajustez la taille selon vos besoins
-                child: MapPage(restaurantList: restaurantList),
-              ),
-            ],
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.12,
+                  child: CustomSearchBar.SearchBar(
+                    onSearchChanged: (value) {},
+                  ),
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height *
+                      0.88, // 90% de la hauteur de l'écran
+                  child: MapPage(restaurantList: restaurantList),
+                ),
+              ],
+            ),
           ),
         ),
       ),

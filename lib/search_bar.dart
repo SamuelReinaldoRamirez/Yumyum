@@ -72,7 +72,7 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
           CameraUpdate.newCameraPosition(
             CameraPosition(
               target: LatLng(latitude, longitude),
-              zoom: 13.0, // Zoom sur la position
+              zoom: 17.0, // Zoom sur la position
             ),
           ),
         );

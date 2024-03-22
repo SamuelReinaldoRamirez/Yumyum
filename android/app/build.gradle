@@ -22,6 +22,8 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+ext.kotlin_version = '1.8.0' // Définition de la version de Kotlin
+
 android {
     namespace "com.example.yummap"
     compileSdkVersion flutter.compileSdkVersion
@@ -65,4 +67,6 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version" // Ajout de la dépendance Kotlin
+}

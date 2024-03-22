@@ -42,7 +42,7 @@ class _CustomControlsState extends State<CustomControls> {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.grey.withOpacity(0.5),
                     ),
                     padding: const EdgeInsets.all(12),
                     child: const Icon(
@@ -60,8 +60,8 @@ class _CustomControlsState extends State<CustomControls> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.black.withOpacity(0.2),
-                      Colors.black.withOpacity(0.1)
+                      Colors.white.withOpacity(0.2),
+                      Colors.white.withOpacity(0.1)
                     ],
                   ),
                   border: 2,
@@ -70,8 +70,8 @@ class _CustomControlsState extends State<CustomControls> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.black.withOpacity(0.5),
-                      Colors.black.withOpacity(0.2)
+                      Colors.white.withOpacity(0.5),
+                      Colors.white.withOpacity(0.2)
                     ],
                   ),
                   child: IconButton(

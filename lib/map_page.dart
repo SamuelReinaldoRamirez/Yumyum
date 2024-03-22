@@ -45,15 +45,25 @@ class MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GoogleMap(
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(48.8566, 2.339),
-          zoom: 12,
+      body: GestureDetector(
+        onTap: () {
+          // Fermer le clavier lors du tap sur la carte
+          FocusScope.of(context).unfocus();
+        },
+        child: GoogleMap(
+          initialCameraPosition: const CameraPosition(
+            target: LatLng(48.8566, 2.339),
+            zoom: 12,
+          ),
+          markers: MarkerManager.markers,
+          myLocationEnabled: true,
+          onMapCreated: _onMapCreated,
+          zoomControlsEnabled: false,
+          onTap: (_) {
+            // Fermer le clavier lors du tap sur la carte
+            FocusScope.of(context).unfocus();
+          },
         ),
-        markers: MarkerManager.markers,
-        myLocationEnabled: true,
-        onMapCreated: _onMapCreated,
-        zoomControlsEnabled: false,
       ),
     );
   }

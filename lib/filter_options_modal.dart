@@ -1,5 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/map_helper.dart';
@@ -32,17 +30,37 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
   }
 
   Widget _buildApplyButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () async {
-        // Appliquer les filtres et fermer le modal
-        List<Restaurant> newRestaurants =
-            await CallEndpointService.getRestaurantsByTags(
-                selectedTagIds); // Passer les identifiants de tags sélectionnés
-        MarkerManager.createFull(context, newRestaurants);
-        Navigator.of(context).pop();
-        // Appeler la fonction de rappel pour nettoyer les marqueurs
-      },
-      child: const Text('Appliquer'),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: ElevatedButton(
+        onPressed: () async {
+          List<Restaurant> newRestaurants =
+              await CallEndpointService.getRestaurantsByTags(selectedTagIds);
+          if (newRestaurants.isEmpty) {
+            Navigator.of(context).pop(); // Ferme le BottomSheet
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text("Aucun résultat trouvé avec ces filtres"),
+                duration: const Duration(seconds: 3),
+                action: SnackBarAction(
+                  label: 'OK',
+                  onPressed: () {
+                    // Action à effectuer lorsque l'utilisateur appuie sur le bouton OK
+                  },
+                ),
+              ),
+            );
+          } else {
+            MarkerManager.createFull(context, newRestaurants);
+            Navigator.of(context).pop(); // Ferme le BottomSheet
+          }
+        },
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all<Color>(
+              Colors.grey.shade50), // Couleur de fond bleue
+        ),
+        child: const Text('Appliquer'),
+      ),
     );
   }
 
@@ -60,7 +78,6 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildTitle(context),
         Expanded(
