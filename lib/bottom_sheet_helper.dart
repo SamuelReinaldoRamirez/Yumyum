@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:yummap/details_tags.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/video_carousel.dart';
 
@@ -18,14 +19,50 @@ class BottomSheetHelper {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  restaurant.name,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
+                Row(             
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Container(), // Première colonne vide
+                    ),
+                    Expanded(
+                      flex: 4,
+                      child: Container(
+                        margin: EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          restaurant.name,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54,
+                        ),
                 ),
+                      ), // Deuxième colonne avec champ texte
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        margin: EdgeInsets.symmetric(horizontal: 8.0),
+                        
+                        child: IconButton(
+                        icon: Icon(Icons.info_outline), 
+                        color: Colors.blue,
+                        onPressed: () {
+                            _navigateToTags(context, restaurant);                          },
+                        ),
+                      ), // Troisième colonne avec bouton
+                    ),
+                  ],
+                ),
+                // Text(
+                //   restaurant.name,
+                //   style: const TextStyle(
+                //     fontSize: 24,
+                //     fontWeight: FontWeight.bold,
+                //     color: Colors.black54,
+                //   ),
+                // ),
                 const SizedBox(height: 8),
                 Text(
                   restaurant.address,
@@ -75,11 +112,11 @@ class BottomSheetHelper {
     }
   }
 
-  // static void _navigateToTags(BuildContext context, Restaurant restaurant) {
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //         builder: (context) => DetailsTags(restaurant: restaurant)),
-  //   );
-  // }
+  static void _navigateToTags(BuildContext context, Restaurant restaurant) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => DetailsTags(restaurant: restaurant)),
+    );
+  }
 }
