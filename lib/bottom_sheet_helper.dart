@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yummap/details_tags.dart';
+import 'package:yummap/restau_details.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/video_carousel.dart';
 
@@ -116,7 +117,8 @@ class BottomSheetHelper {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => DetailsTags(restaurant: restaurant)),
+        builder: (context) => RestaurantDetailsWidget()),
+        // builder: (context) => DetailsTags(restaurant: restaurant)),
     );
   }
 }
