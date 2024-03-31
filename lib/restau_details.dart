@@ -219,6 +219,12 @@ double convertFraction(fraction){
   return stars;
 }
 
+Future<void> _launchUrl() async {
+  if (!await launchUrl(_siteInternet)) {
+    throw Exception('Could not launch $_siteInternet');
+  }
+}
+
  @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -406,27 +412,16 @@ double convertFraction(fraction){
               ),
               ]
             ),
-                //site internet / menu
-                SizedBox(height: 10),
-                _siteInternet != null
-                    ? InkWell(
-                        onTap: () async {
-                          // Vérifier si le lien est valide
-                          if (await canLaunch(_siteInternet.toString())) {
-                            // Ouvrir le lien
-                            await launch(_siteInternet.toString());
-                          } else {
-                            // Gérer les erreurs si le lien n'est pas valide
-                            throw 'Impossible d\'ouvrir le lien $_siteInternet';
-                          }
-                        },
-                        child: Text(
-                          '${_siteInternet}',
-                          style: TextStyle(fontSize: 18, color: Colors.blue),
-                        ),
-                      )
-                    : SizedBox.shrink(),
-
+            SizedBox(height: 10),
+                _siteInternet != null && Uri.parse(_siteInternet.toString()).isAbsolute
+                ? InkWell(
+                    onTap: _launchUrl,
+                    child: Text(
+                      '${_siteInternet}',
+                      style: TextStyle(fontSize: 18, color: Colors.blue),
+                    ),
+                  )
+                : SizedBox.shrink(),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children :[

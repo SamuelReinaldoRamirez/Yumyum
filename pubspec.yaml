@@ -24,7 +24,7 @@ dependencies:
   carousel_slider: ^4.0.0
   logger: ^2.0.2+1
   glassmorphism: ^3.0.0
-  url_launcher: ^6.0.9
+  url_launcher: ^6.2.5
   geolocator: ^8.0.1
   cupertino_icons: ^1.0.2
   flutter_rating_bar: ^4.0.0
