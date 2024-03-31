@@ -25,21 +25,21 @@ class RestaurantDetailsWidget extends StatefulWidget {
     return oldClipper.fraction != fraction;
   }
 }
-class FractionalClipper2 extends CustomClipper<Rect> {
-  final double fraction;
+// class FractionalClipper2 extends CustomClipper<Rect> {
+//   final double fraction;
 
-  FractionalClipper2(this.fraction);
+//   FractionalClipper2(this.fraction);
 
-  @override
-  Rect getClip(Size size) {
-    return Rect.fromLTRB(size.width * fraction, 0, size.width, size.height);
-  }
+//   @override
+//   Rect getClip(Size size) {
+//     return Rect.fromLTRB(size.width * fraction, 0, size.width, size.height);
+//   }
 
-  @override
-  bool shouldReclip(FractionalClipper oldClipper) {
-    return oldClipper.fraction != fraction;
-  }
-}
+//   @override
+//   bool shouldReclip(FractionalClipper oldClipper) {
+//     return oldClipper.fraction != fraction;
+//   }
+// }
 
 class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   String _photoReference = '';
@@ -50,8 +50,36 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   List<dynamic> _openingHours = [];
   bool _isTimmyCompliant = false;
   bool _isPlantEaterCompliant = false;
+  int _userRatingsTotal = 0;
+  double _noteDeTeste = 1.1;
 
-
+double convertFraction(fraction){
+    fraction = (fraction * 10).round();
+    if(fraction<1)
+      return 0.15;
+    else if(fraction<2)
+      return 0.32;
+    else if(fraction<3)
+      return 0.35;
+    else if(fraction<4)
+      return 0.40;
+    else if(fraction<5)
+      return 0.45;
+    else if(fraction==5)
+      return 0.5;
+    else if(fraction>=9)
+      return 0.80;
+    else if(fraction>=8)
+      return 0.65;
+    else if(fraction>=7)
+      return 0.60;
+    else if(fraction>=6)
+      return 0.55;
+    else if(fraction<6)
+      return 0.52;
+    return 0.5;
+  }
+  
   @override
   void initState() {
     super.initState();
@@ -79,6 +107,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
         _openingHours = data['result']['opening_hours']['weekday_text'];
         _isTimmyCompliant = data['result']['wheelchair_accessible_entrance'];
         _isPlantEaterCompliant = data['result']['serves_vegetarian_food'];
+        _userRatingsTotal = data['result']['user_ratings_total'];
         
         print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
         print(_isTimmyCompliant);
@@ -108,6 +137,42 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     );
   }
 
+//   List<Widget> buildStarRating2(double rating) {
+//   List<Widget> stars = [];
+//   int fullStars = rating.floor();
+//   double fraction = rating - fullStars;
+
+//   // Ajouter les étoiles pleines
+//   for (int i = 0; i < 10; i++) {
+//     print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
+//     print(i+1);
+//     print(convertFraction((i+1)/10));
+//     stars.add(
+//       Center(
+//         child: Stack(
+//           alignment: Alignment.center,
+//           children: <Widget>[
+//             ClipRect(
+//               clipper: FractionalClipper(convertFraction((i+1)/10)),
+//               // child: Icon(Icons.star, color: Colors.amber),
+//               child: Icon(Icons.star, size: 25, color: Colors.amber),
+//             ),
+//             // ClipRect(
+//             //   clipper: FractionalClipper2(convertFraction(fraction)),
+//             //   // child: Icon(Icons.star, color: Colors.amber),
+//             //   child: Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.3)),
+//             // )
+//             Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.3))
+//           ],
+//         ),
+//       )
+//       // Icon(Icons.star_half, color: Colors.amber)
+//       );
+//   }
+//   return stars;
+// }
+
+  
   List<Widget> buildStarRating(double rating) {
   List<Widget> stars = [];
   int fullStars = rating.floor();
@@ -120,21 +185,25 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
 
   // Ajouter l'étoile partiellement remplie si nécessaire
   if (fraction > 0) {
+    print("FRACTIONNNNNNNNNNNNNNNNNN");
+    print(fraction);
+    print(convertFraction(fraction));
     stars.add(
       Center(
         child: Stack(
           alignment: Alignment.center,
           children: <Widget>[
             ClipRect(
-              clipper: FractionalClipper(fraction),
+              clipper: FractionalClipper(convertFraction(fraction)),
               // child: Icon(Icons.star, color: Colors.amber),
               child: Icon(Icons.star, size: 25, color: Colors.amber),
             ),
-            ClipRect(
-              clipper: FractionalClipper2(fraction),
-              // child: Icon(Icons.star, color: Colors.amber),
-              child: Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.3)),
-            )
+            // ClipRect(
+            //   clipper: FractionalClipper2(convertFraction(fraction)),
+            //   // child: Icon(Icons.star, color: Colors.amber),
+            //   child: Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.3)),
+            // )
+            Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.3))
           ],
         ),
       )
@@ -199,15 +268,19 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                   },
                   child: Text(
                   // 'Note moyenne: $_noteMoyenne',
-                  'Note : $_noteMoyenne',
+                  '$_noteMoyenne',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue,),
-                )
-                ),
+                ), 
+                               ),
                 Row(children: buildStarRating(
                   double.parse(_noteMoyenne)
-                  //1.7
                   )
-                )
+                ), 
+                Text(
+                  // 'Note moyenne: $_noteMoyenne',
+                  '($_userRatingsTotal)',
+                  style: TextStyle(fontSize: 15, color: Colors.black,),
+                ),
                 // initialRating: double.parse("3.6".substring(0,"3.6".indexOf("."))), // Note initiale
 
                 // Center(
@@ -317,11 +390,11 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                  Text(
-                    // 'prix moyen: $_prixMoyen',
-                    'prix : ',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),
-                  ),
+                  // Text(
+                  //   // 'prix moyen: $_prixMoyen',
+                  //   'prix : ',
+                  //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),
+                  // ),
                   for (int i = 0; i < int.parse(_prixMoyen); i++)
                   Icon(
                     Icons.euro_symbol, // Icône "euro" pour le symbole de l'euro
@@ -333,8 +406,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
               ),
               ]
             ),
-
-
                 //site internet / menu
                 SizedBox(height: 10),
                 _siteInternet != null
