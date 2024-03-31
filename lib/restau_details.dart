@@ -3,10 +3,42 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:yummap/reviews_details.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class RestaurantDetailsWidget extends StatefulWidget {
   @override
   _RestaurantDetailsWidgetState createState() => _RestaurantDetailsWidgetState();
+}
+
+ class FractionalClipper extends CustomClipper<Rect> {
+  final double fraction;
+
+  FractionalClipper(this.fraction);
+
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTRB(0, 0, size.width * fraction, size.height);
+  }
+
+  @override
+  bool shouldReclip(FractionalClipper oldClipper) {
+    return oldClipper.fraction != fraction;
+  }
+}
+class FractionalClipper2 extends CustomClipper<Rect> {
+  final double fraction;
+
+  FractionalClipper2(this.fraction);
+
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTRB(size.width * fraction, 0, size.width, size.height);
+  }
+
+  @override
+  bool shouldReclip(FractionalClipper oldClipper) {
+    return oldClipper.fraction != fraction;
+  }
 }
 
 class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
@@ -76,6 +108,48 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     );
   }
 
+  List<Widget> buildStarRating(double rating) {
+  List<Widget> stars = [];
+  int fullStars = rating.floor();
+  double fraction = rating - fullStars;
+
+  // Ajouter les étoiles pleines
+  for (int i = 0; i < fullStars; i++) {
+    stars.add(Icon(Icons.star, color: Colors.amber));
+  }
+
+  // Ajouter l'étoile partiellement remplie si nécessaire
+  if (fraction > 0) {
+    stars.add(
+      Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            ClipRect(
+              clipper: FractionalClipper(fraction),
+              // child: Icon(Icons.star, color: Colors.amber),
+              child: Icon(Icons.star, size: 25, color: Colors.amber),
+            ),
+            ClipRect(
+              clipper: FractionalClipper2(fraction),
+              // child: Icon(Icons.star, color: Colors.amber),
+              child: Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.3)),
+            )
+          ],
+        ),
+      )
+      // Icon(Icons.star_half, color: Colors.amber)
+      );
+  }
+
+  // Ajouter les étoiles vides pour compléter la note sur 5
+  for (int i = stars.length; i < 5; i++) {
+    stars.add(Icon(Icons.star, color: Colors.amber.withOpacity(0.3)));
+  }
+
+  return stars;
+}
+
  @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,15 +199,119 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                   },
                   child: Text(
                   // 'Note moyenne: $_noteMoyenne',
-                  'Note : ',
+                  'Note : $_noteMoyenne',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue,),
                 )
                 ),
-                for (int i = 0; i < double.parse(_noteMoyenne).truncate(); i++)
-                Icon(
-                  Icons.star,
-                  color: Colors.yellow,
-                ),
+                Row(children: buildStarRating(
+                  double.parse(_noteMoyenne)
+                  //1.7
+                  )
+                )
+                // initialRating: double.parse("3.6".substring(0,"3.6".indexOf("."))), // Note initiale
+
+                // Center(
+                //   child: RatingBar.builder(
+                //     initialRating: double.parse("3.6"), // Note initiale
+                //     itemCount: 5,
+                //     itemBuilder: (context, _) => Icon(
+                //       Icons.star,
+                //       color: Colors.amber,
+                //     ),
+                //     itemSize: 25,
+                //     // allowHalfRating: true, // Autoriser les demi-étoiles
+                //     // unratedColor: Colors.amber.withOpacity(0.3), // Couleur vide des étoiles avec une opacité de 30%
+                //     onRatingUpdate: (rating) {
+                //       print(rating); // Mise à jour de la note lors du glissement de la barre de notation
+                //     },
+                //   ),
+                // ),
+
+
+
+
+                // Center(
+                //   child: RatingBar.builder(
+                //     initialRating: double.parse("3.6"), // Note initiale
+                //     itemCount: 5,
+                //     itemBuilder: (context, index) {
+                //       IconData iconData;
+                //       Color color;
+                //       double rating = double.parse("3.6");        
+                //       if (index < rating.floor()) {
+                //         // Étoile entièrement remplie
+                //         iconData = Icons.star;
+                //         color = Colors.amber;  
+                //       } else if (index == rating.floor()) {
+                //         // Dernière étoile avec une fraction de remplissage
+                //         double fraction = rating - rating.floor();
+                //         if (fraction >= 0.75) {
+                //           iconData = Icons.star;
+                //           color = Colors.amber;
+                //         } else if (fraction >= 0.25) {
+                //           iconData = Icons.star_half;
+                //           color = Colors.amber;
+                //         } else {
+                //           iconData = Icons.star;
+                //           color = Colors.amber;
+                //         }
+                //       } else {
+                //         // Étoile vide
+                //         iconData = Icons.star_border;
+                //         color = Colors.amber;
+                //       }
+
+                //       return Icon(
+                //         iconData,
+                //         color: color,
+                //         size: 25,
+                //       );
+                //     },
+                //     itemSize: 25,
+                //     allowHalfRating: true, // Autoriser les demi-étoiles
+                //     unratedColor: Colors.amber.withOpacity(0.7), // Couleur vide des étoiles avec une opacité de 30%
+                //     onRatingUpdate: (rating) {
+                //       print(rating); // Mise à jour de la note lors du glissement de la barre de notation
+                //     },
+                //   ),
+                // ),
+
+
+                // Center(
+                //     child: Stack(
+                //       alignment: Alignment.center,
+                //       children: <Widget>[
+                //         ClipRect(
+                //           clipper: FractionalClipper(0.4),
+                //           // child: Icon(Icons.star, color: Colors.amber),
+                //           child: Icon(Icons.star, size: 25, color: Colors.amber),
+                //         ),
+                //         ClipRect(
+                //           clipper: FractionalClipper2(0.4),
+                //           // child: Icon(Icons.star, color: Colors.amber),
+                //           child: Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.5)),
+                //         )
+                //       ],
+                //     ),
+                //   )
+
+
+                // ClipRect(
+                //     clipper: FractionalClipper(0.4),
+                //     // child: Icon(Icons.star, color: Colors.amber),
+                //     child: Icon(Icons.star, color: Colors.amber),
+                //   ),
+                // ClipRect(
+                //     clipper: FractionalClipper2(0.4),
+                //     // child: Icon(Icons.star, color: Colors.amber),
+                //     child: Icon(Icons.star, color: Colors.amber.withOpacity(0.5)),
+                //   )
+
+                // for (int i = 0; i < double.parse(_noteMoyenne).truncate(); i++)
+                // Icon(
+                //   Icons.star,
+                //   color: Colors.yellow,
+                // ),
               ]
                 ),
                 Row(
@@ -183,15 +361,16 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                   children :[
 
                     _isTimmyCompliant?
-                    // Icon(
-                    //   Icons.accessible, // Icône de fauteuil roulant
-                    //   color: Colors.blue,
-                    // )
-                    SizedBox(
-                      width: 70, // Largeur de l'image
-                      height: 70, // Hauteur de l'image
-                      child: Image.network('https://i.pinimg.com/736x/c2/5e/43/c25e43d66f6f5b098b51265a91c3a2cf.jpg'), // Remplacez 'URL_de_votre_image' par l'URL de votre image
+                    Icon(
+                      Icons.accessible, // Icône de fauteuil roulant
+                      color: Colors.black,
                     )
+                    //TIMMYYY
+                    // SizedBox(
+                    //   width: 70, // Largeur de l'image
+                    //   height: 70, // Hauteur de l'image
+                    //   child: Image.network('https://i.pinimg.com/736x/c2/5e/43/c25e43d66f6f5b098b51265a91c3a2cf.jpg'), // Remplacez 'URL_de_votre_image' par l'URL de votre image
+                    // )
                     :SizedBox(height: 0),               
 
                     _isPlantEaterCompliant?
