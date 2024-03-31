@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:yummap/reviews_details.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class RestaurantDetailsWidget extends StatefulWidget {
   @override
@@ -25,21 +24,6 @@ class RestaurantDetailsWidget extends StatefulWidget {
     return oldClipper.fraction != fraction;
   }
 }
-// class FractionalClipper2 extends CustomClipper<Rect> {
-//   final double fraction;
-
-//   FractionalClipper2(this.fraction);
-
-//   @override
-//   Rect getClip(Size size) {
-//     return Rect.fromLTRB(size.width * fraction, 0, size.width, size.height);
-//   }
-
-//   @override
-//   bool shouldReclip(FractionalClipper oldClipper) {
-//     return oldClipper.fraction != fraction;
-//   }
-// }
 
 class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   String _photoReference = '';
@@ -51,7 +35,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   bool _isTimmyCompliant = false;
   bool _isPlantEaterCompliant = false;
   int _userRatingsTotal = 0;
-  double _noteDeTeste = 1.1;
 
 double convertFraction(fraction){
     fraction = (fraction * 10).round();
@@ -108,13 +91,8 @@ double convertFraction(fraction){
         _isTimmyCompliant = data['result']['wheelchair_accessible_entrance'];
         _isPlantEaterCompliant = data['result']['serves_vegetarian_food'];
         _userRatingsTotal = data['result']['user_ratings_total'];
-        
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-        print(_isTimmyCompliant);
         if (photosData.isNotEmpty) {
           _photoReference = photosData[0]['photo_reference'];
-          print('____________________');
-          print(_photoReference);
         }
       } else {
         print('Erreur lors de la requête: ${response.statusCode}');
@@ -137,42 +115,6 @@ double convertFraction(fraction){
     );
   }
 
-//   List<Widget> buildStarRating2(double rating) {
-//   List<Widget> stars = [];
-//   int fullStars = rating.floor();
-//   double fraction = rating - fullStars;
-
-//   // Ajouter les étoiles pleines
-//   for (int i = 0; i < 10; i++) {
-//     print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
-//     print(i+1);
-//     print(convertFraction((i+1)/10));
-//     stars.add(
-//       Center(
-//         child: Stack(
-//           alignment: Alignment.center,
-//           children: <Widget>[
-//             ClipRect(
-//               clipper: FractionalClipper(convertFraction((i+1)/10)),
-//               // child: Icon(Icons.star, color: Colors.amber),
-//               child: Icon(Icons.star, size: 25, color: Colors.amber),
-//             ),
-//             // ClipRect(
-//             //   clipper: FractionalClipper2(convertFraction(fraction)),
-//             //   // child: Icon(Icons.star, color: Colors.amber),
-//             //   child: Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.3)),
-//             // )
-//             Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.3))
-//           ],
-//         ),
-//       )
-//       // Icon(Icons.star_half, color: Colors.amber)
-//       );
-//   }
-//   return stars;
-// }
-
-  
   List<Widget> buildStarRating(double rating) {
   List<Widget> stars = [];
   int fullStars = rating.floor();
@@ -185,9 +127,6 @@ double convertFraction(fraction){
 
   // Ajouter l'étoile partiellement remplie si nécessaire
   if (fraction > 0) {
-    print("FRACTIONNNNNNNNNNNNNNNNNN");
-    print(fraction);
-    print(convertFraction(fraction));
     stars.add(
       Center(
         child: Stack(
@@ -195,19 +134,12 @@ double convertFraction(fraction){
           children: <Widget>[
             ClipRect(
               clipper: FractionalClipper(convertFraction(fraction)),
-              // child: Icon(Icons.star, color: Colors.amber),
               child: Icon(Icons.star, size: 25, color: Colors.amber),
             ),
-            // ClipRect(
-            //   clipper: FractionalClipper2(convertFraction(fraction)),
-            //   // child: Icon(Icons.star, color: Colors.amber),
-            //   child: Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.3)),
-            // )
             Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.3))
           ],
         ),
       )
-      // Icon(Icons.star_half, color: Colors.amber)
       );
   }
 
@@ -251,7 +183,6 @@ Future<void> _launchUrl() async {
                   child: ClipOval(
                     child: Image.network(
                       'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$_photoReference&key=AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U',
-                      // 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$_photoReference&key=YOUR_API_KEY',
                       fit: BoxFit.cover,
                     ),
                 )
@@ -273,7 +204,6 @@ Future<void> _launchUrl() async {
                     _navigateToReviewDetails(context);
                   },
                   child: Text(
-                  // 'Note moyenne: $_noteMoyenne',
                   '$_noteMoyenne',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue,),
                 ), 
@@ -283,124 +213,14 @@ Future<void> _launchUrl() async {
                   )
                 ), 
                 Text(
-                  // 'Note moyenne: $_noteMoyenne',
                   '($_userRatingsTotal)',
                   style: TextStyle(fontSize: 15, color: Colors.black,),
                 ),
-                // initialRating: double.parse("3.6".substring(0,"3.6".indexOf("."))), // Note initiale
-
-                // Center(
-                //   child: RatingBar.builder(
-                //     initialRating: double.parse("3.6"), // Note initiale
-                //     itemCount: 5,
-                //     itemBuilder: (context, _) => Icon(
-                //       Icons.star,
-                //       color: Colors.amber,
-                //     ),
-                //     itemSize: 25,
-                //     // allowHalfRating: true, // Autoriser les demi-étoiles
-                //     // unratedColor: Colors.amber.withOpacity(0.3), // Couleur vide des étoiles avec une opacité de 30%
-                //     onRatingUpdate: (rating) {
-                //       print(rating); // Mise à jour de la note lors du glissement de la barre de notation
-                //     },
-                //   ),
-                // ),
-
-
-
-
-                // Center(
-                //   child: RatingBar.builder(
-                //     initialRating: double.parse("3.6"), // Note initiale
-                //     itemCount: 5,
-                //     itemBuilder: (context, index) {
-                //       IconData iconData;
-                //       Color color;
-                //       double rating = double.parse("3.6");        
-                //       if (index < rating.floor()) {
-                //         // Étoile entièrement remplie
-                //         iconData = Icons.star;
-                //         color = Colors.amber;  
-                //       } else if (index == rating.floor()) {
-                //         // Dernière étoile avec une fraction de remplissage
-                //         double fraction = rating - rating.floor();
-                //         if (fraction >= 0.75) {
-                //           iconData = Icons.star;
-                //           color = Colors.amber;
-                //         } else if (fraction >= 0.25) {
-                //           iconData = Icons.star_half;
-                //           color = Colors.amber;
-                //         } else {
-                //           iconData = Icons.star;
-                //           color = Colors.amber;
-                //         }
-                //       } else {
-                //         // Étoile vide
-                //         iconData = Icons.star_border;
-                //         color = Colors.amber;
-                //       }
-
-                //       return Icon(
-                //         iconData,
-                //         color: color,
-                //         size: 25,
-                //       );
-                //     },
-                //     itemSize: 25,
-                //     allowHalfRating: true, // Autoriser les demi-étoiles
-                //     unratedColor: Colors.amber.withOpacity(0.7), // Couleur vide des étoiles avec une opacité de 30%
-                //     onRatingUpdate: (rating) {
-                //       print(rating); // Mise à jour de la note lors du glissement de la barre de notation
-                //     },
-                //   ),
-                // ),
-
-
-                // Center(
-                //     child: Stack(
-                //       alignment: Alignment.center,
-                //       children: <Widget>[
-                //         ClipRect(
-                //           clipper: FractionalClipper(0.4),
-                //           // child: Icon(Icons.star, color: Colors.amber),
-                //           child: Icon(Icons.star, size: 25, color: Colors.amber),
-                //         ),
-                //         ClipRect(
-                //           clipper: FractionalClipper2(0.4),
-                //           // child: Icon(Icons.star, color: Colors.amber),
-                //           child: Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.5)),
-                //         )
-                //       ],
-                //     ),
-                //   )
-
-
-                // ClipRect(
-                //     clipper: FractionalClipper(0.4),
-                //     // child: Icon(Icons.star, color: Colors.amber),
-                //     child: Icon(Icons.star, color: Colors.amber),
-                //   ),
-                // ClipRect(
-                //     clipper: FractionalClipper2(0.4),
-                //     // child: Icon(Icons.star, color: Colors.amber),
-                //     child: Icon(Icons.star, color: Colors.amber.withOpacity(0.5)),
-                //   )
-
-                // for (int i = 0; i < double.parse(_noteMoyenne).truncate(); i++)
-                // Icon(
-                //   Icons.star,
-                //   color: Colors.yellow,
-                // ),
               ]
                 ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                  // Text(
-                  //   // 'prix moyen: $_prixMoyen',
-                  //   'prix : ',
-                  //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),
-                  // ),
                   for (int i = 0; i < int.parse(_prixMoyen); i++)
                   Icon(
                     Icons.euro_symbol, // Icône "euro" pour le symbole de l'euro
@@ -431,12 +251,6 @@ Future<void> _launchUrl() async {
                       Icons.accessible, // Icône de fauteuil roulant
                       color: Colors.black,
                     )
-                    //TIMMYYY
-                    // SizedBox(
-                    //   width: 70, // Largeur de l'image
-                    //   height: 70, // Hauteur de l'image
-                    //   child: Image.network('https://i.pinimg.com/736x/c2/5e/43/c25e43d66f6f5b098b51265a91c3a2cf.jpg'), // Remplacez 'URL_de_votre_image' par l'URL de votre image
-                    // )
                     :SizedBox(height: 0),               
 
                     _isPlantEaterCompliant?
@@ -447,7 +261,6 @@ Future<void> _launchUrl() async {
                     :SizedBox(height: 0),
                   ]
                 ),
-
                     //horaires :
                     SizedBox(height: 20),
                      Text(
@@ -470,29 +283,6 @@ Future<void> _launchUrl() async {
           ),
     );
   }
-
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: Text('Bao Express'),
-  //     ),
-  //     body: _isLoading
-  //       ? Center(child: CircularProgressIndicator())
-  //       : _photoReference.isNotEmpty
-  //         ? Container(
-  //             width: 200,
-  //             height: 200,
-  //             child: Image.network(
-  //               'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$_photoReference&key=AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U',
-  //               // 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$_photoReference&key=YOUR_API_KEY',
-  //               fit: BoxFit.cover,
-  //             ),
-  //           )
-  //         : Center(child: Text('Aucune photo disponible')),
-  //   );
-  // }
 }
 
 void main() {
