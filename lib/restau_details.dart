@@ -86,8 +86,8 @@ double convertFraction(fraction){
     try {
       print("SERRRIEUXXX APIKEYYY EN DUUUR???????????");
       print("https://maps.googleapis.com/maps/api/place/textsearch/json?query=$name&location=$latitude,$longitude&radius=500&type=restaurant&key=AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U");
+      print("https://maps.googleapis.com/maps/api/place/textsearch/json?query=$name&location=$latitude,$longitude&radius=500&type=restaurant&key=AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U");
       http.Response response = await http.get(Uri.parse("https://maps.googleapis.com/maps/api/place/textsearch/json?query=$name&location=$latitude,$longitude&radius=500&type=restaurant&key=AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U"));
-
       if (response.statusCode == 200) {
         Map<String, dynamic> data = json.decode(response.body);
         print(response.body);
@@ -122,6 +122,7 @@ double convertFraction(fraction){
     print("ATTENTION !!!!!!!!!!!!!!!! IL FAUT REMPLACER L4APIKEY POUR LA MASQUER!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     String apiKey = 'AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U'; // Remplacez par votre clé d'API Google
     String url = 'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey';
+    print(url);
 
     setState(() {
       _isLoading = true;
@@ -129,20 +130,46 @@ double convertFraction(fraction){
 
     try {
       http.Response response = await http.get(Uri.parse(url));
+      // print(response.body);
 
       if (response.statusCode == 200) {
         Map<String, dynamic> data = json.decode(response.body);
         List<dynamic> photosData = data['result']['photos'];
-        _noteMoyenne = data['result']['rating'].toString() ?? 'Non disponible';
-        _prixMoyen = data['result']['price_level'].toString() ?? 'Non disponible';
-        _siteInternet = (Uri.parse(data['result']['website']) ?? null)!;
+        print(photosData);
+        // print(data['result']['rating']);
+        _noteMoyenne = data['result']['rating'] != null ? data['result']['rating'].toString() : '0';
+        print(_noteMoyenne);
+        _prixMoyen = data['result']['price_level'] != null ? data['result']['price_level'].toString() : '0';
+        print(_prixMoyen);
+        _siteInternet = (Uri.parse(data['result']['website'] != null ? data['result']['website'] : ""));
+        print(_siteInternet);
         _openingHours = data['result']['opening_hours']['weekday_text'];
-        _isTimmyCompliant = data['result']['wheelchair_accessible_entrance'];
-        _isPlantEaterCompliant = data['result']['serves_vegetarian_food'];
+        print(_openingHours);
+
+        // Type type = data['result']['wheelchair_accessible_entrance'].getType();
+        // print('Le type de l\'objet est : $type');
+
+
+        print(data['result']['wheelchair_accessible_entrance']);
+        //_isTimmyCompliant = stringToBool(data['result']['wheelchair_accessible_entrance'].toString());
+        _isTimmyCompliant = data['result']['wheelchair_accessible_entrance'] != null ? data['result']['wheelchair_accessible_entrance'] : false;
+
+        print(_isTimmyCompliant);
+        // _isPlantEaterCompliant = stringToBool(data['result']['serves_vegetarian_food'].toString());
+        _isPlantEaterCompliant = data['result']['serves_vegetarian_food'] != null ? data['result']['serves_vegetarian_food'] : false;
+        print(_isPlantEaterCompliant);
         _userRatingsTotal = data['result']['user_ratings_total'];
+        // print(photosData);
+
+        print(_noteMoyenne);
+        print(_prixMoyen);
+        print(_siteInternet);
+        print(_openingHours);
+        print(_userRatingsTotal);
         if (photosData.isNotEmpty) {
           _photoReference = photosData[0]['photo_reference'];
         }
+        print(_photoReference);
       } else {
         print('Erreur lors de la requête: ${response.statusCode}');
       }
@@ -154,6 +181,24 @@ double convertFraction(fraction){
       _isLoading = false;
     });
   }
+
+//   bool stringToBool(String value) {
+//     print("stringtoBOOL");
+//     print(value);
+//   // Convert "true" (case insensitive) to true
+//   if (value.toLowerCase() == 'true') {
+//     return true;
+//   }
+//   // Convert "false" (case insensitive) to false
+//   else if (value.toLowerCase() == 'false') {
+//     return false;
+//   }
+//   // If the string is neither "true" nor "false", you might handle it differently,
+//   // like considering it as false by default or throwing an exception.
+//   else {
+//     throw FormatException('Invalid boolean string: $value');
+//   }
+// }
 
   static void _navigateToReviewDetails(BuildContext context) {
     Navigator.push(
@@ -267,7 +312,7 @@ Future<void> _launchUrl() async {
                 ),
               ]
                 ),
-                Row(
+                (_prixMoyen != "0" ) ? Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                   for (int i = 0; i < int.parse(_prixMoyen); i++)
@@ -276,7 +321,7 @@ Future<void> _launchUrl() async {
                     color: Colors.blue,
                   ),
                   ]
-                ),
+                ) : SizedBox(height: 0),
                 ]
               ),
               ]
