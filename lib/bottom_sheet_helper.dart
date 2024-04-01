@@ -117,7 +117,8 @@ class BottomSheetHelper {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => RestaurantDetailsWidget()),
+        // builder: (context) => RestaurantDetailsWidget()),
+        builder: (context) => RestaurantDetailsWidget(restaurant: restaurant)),
         // builder: (context) => DetailsTags(restaurant: restaurant)),
     );
   }

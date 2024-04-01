@@ -9,6 +9,7 @@ class Restaurant {
   final double longitude;
   final double latitude;
   final List<int> tagStr;
+  String placeId;
 
   Restaurant({
     required this.id,
@@ -18,6 +19,7 @@ class Restaurant {
     required this.longitude,
     required this.latitude,
     required this.tagStr,
+    required this.placeId,
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
@@ -61,6 +63,7 @@ class Restaurant {
       longitude: longitude,
       latitude: latitude,
       tagStr: tagStr,
+      placeId: json['placeId'] ?? '',
     );
   }
 
@@ -70,5 +73,13 @@ class Restaurant {
 
   List<int> getTagStr() {
     return tagStr;
+  }
+
+  void setPlaceId(String placeId) {
+    this.placeId = placeId;
+  }
+
+  String getPlaceId() {
+    return placeId;
   }
 }

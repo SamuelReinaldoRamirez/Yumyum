@@ -1,12 +1,17 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:yummap/restaurant.dart';
 import 'package:yummap/reviews_details.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class RestaurantDetailsWidget extends StatefulWidget {
+
+  const RestaurantDetailsWidget({Key? key, required this.restaurant}) : super(key: key);
+  final Restaurant restaurant;
+
   @override
-  _RestaurantDetailsWidgetState createState() => _RestaurantDetailsWidgetState();
+  _RestaurantDetailsWidgetState createState() => _RestaurantDetailsWidgetState(restaurant);
 }
 
  class FractionalClipper extends CustomClipper<Rect> {
@@ -26,6 +31,7 @@ class RestaurantDetailsWidget extends StatefulWidget {
 }
 
 class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
+  Restaurant restaurant;
   String _photoReference = '';
   bool _isLoading = false;
   String _noteMoyenne = "";
@@ -35,6 +41,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   bool _isTimmyCompliant = false;
   bool _isPlantEaterCompliant = false;
   int _userRatingsTotal = 0;
+
+  _RestaurantDetailsWidgetState(this.restaurant);
 
 double convertFraction(fraction){
     fraction = (fraction * 10).round();
@@ -69,8 +77,49 @@ double convertFraction(fraction){
     _fetchRestaurantDetails();
   }
 
+  Future<String> fetchPlaceId(Restaurant restaurante) async {
+    print("FETCH PLACEID !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    String placeId= "";
+    String name = restaurante.name.trim();
+    String latitude = restaurante.latitude.toString();
+    String longitude = restaurante.longitude.toString();
+    try {
+      print("SERRRIEUXXX APIKEYYY EN DUUUR???????????");
+      print("https://maps.googleapis.com/maps/api/place/textsearch/json?query=$name&location=$latitude,$longitude&radius=500&type=restaurant&key=AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U");
+      http.Response response = await http.get(Uri.parse("https://maps.googleapis.com/maps/api/place/textsearch/json?query=$name&location=$latitude,$longitude&radius=500&type=restaurant&key=AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U"));
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> data = json.decode(response.body);
+        print(response.body);
+        placeId = data['results'][0]['reference'];
+        restaurant.setPlaceId(placeId);
+      } else {
+        print('Erreur lors de la requête: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Erreur lors de la requête: $error');
+    }
+    return placeId;
+  }
+
   Future<void> _fetchRestaurantDetails() async {
-    String placeId = 'ChIJ2SnopiVt5kcRCpl04SjBTuY'; // Remplacez par votre place ID
+    print('YYYYYYYYYYYYYYYYYYYYYYYYY');
+    print(this.restaurant);
+    print(this.restaurant.name);
+    if(this.restaurant.getPlaceId() != Null){
+      print("caca");
+    }else{
+      print("pipi");
+    }
+    if(this.restaurant.getPlaceId().isNotEmpty){
+      print("cucu");
+    }else{
+      print("pupu");
+    }
+    print("+"+restaurant.getPlaceId()+"+");
+    String placeId = (restaurant.placeId == "") ? await fetchPlaceId(restaurant) : restaurant.placeId ; // Remplacez par votre place ID
+    // String placeId = 'ChIJ2SnopiVt5kcRCpl04SjBTuY'; // Remplacez par votre place ID
+    print("ATTENTION !!!!!!!!!!!!!!!! IL FAUT REMPLACER L4APIKEY POUR LA MASQUER!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     String apiKey = 'AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U'; // Remplacez par votre clé d'API Google
     String url = 'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey';
 
@@ -161,7 +210,7 @@ Future<void> _launchUrl() async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bao Express'),
+        title: Text(restaurant.name),
       ),
       body: _isLoading
         ? Center(child: CircularProgressIndicator())
@@ -285,9 +334,9 @@ Future<void> _launchUrl() async {
   }
 }
 
-void main() {
-  runApp(MaterialApp(
-    title: 'Restaurant Details',
-    home: RestaurantDetailsWidget(),
-  ));
-}
+// void main() {
+//   runApp(MaterialApp(
+//     title: 'Restaurant Details',
+//     home: RestaurantDetailsWidget(),
+//   ));
+// }
