@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:yummap/restaurant.dart';
+import 'package:yummap/resto_tags.dart';
 import 'package:yummap/reviews_details.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -200,11 +201,11 @@ double convertFraction(fraction){
 //   }
 // }
 
-  static void _navigateToReviewDetails(BuildContext context) {
+  static void _navigateToReviewDetails(BuildContext context, Restaurant restaurant) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ReviewDetailsWidget()),
+        builder: (context) => ReviewDetailsWidget(restaurant: restaurant)),
         // builder: (context) => DetailsTags(restaurant: restaurant)),
     );
   }
@@ -295,7 +296,7 @@ Future<void> _launchUrl() async {
               children: [
                 GestureDetector(
                   onTap: () {
-                    _navigateToReviewDetails(context);
+                    _navigateToReviewDetails(context, restaurant);
                   },
                   child: Text(
                   '$_noteMoyenne',
@@ -357,6 +358,11 @@ Future<void> _launchUrl() async {
                 ),
                     //horaires :
                     SizedBox(height: 20),
+                     Text(
+                  'INS2RER LES TAGS',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                 RestoTags(restaurant: restaurant),
                      Text(
                   'horaires d\'ouverture',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

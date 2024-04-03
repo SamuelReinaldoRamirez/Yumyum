@@ -1,18 +1,23 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:yummap/restaurant.dart';
 
 class ReviewDetailsWidget extends StatefulWidget {
-  const ReviewDetailsWidget({super.key});
+  const ReviewDetailsWidget({Key? key, required this.restaurant}) : super(key: key);
+  final Restaurant restaurant;
 
   @override
   _ReviewDetailsWidgetState createState() =>
-      _ReviewDetailsWidgetState();
+      _ReviewDetailsWidgetState(restaurant);
 }
 
 class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
+  Restaurant restaurant;
   List<Review> _reviews = [];
   bool _isLoading = false;
+
+  _ReviewDetailsWidgetState(this.restaurant);
 
   @override
   void initState() {
@@ -22,9 +27,12 @@ class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
 
   Future<void> _fetchRestaurantDetails() async {
     // Remplacez YOUR_API_KEY par votre clé d'API Google
+    print('apiKEY EN DUR ?????');
     String apiKey = 'AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U';
     // Remplacez YOUR_PLACE_ID par l'identifiant unique du lieu "Bao Express"
-    String placeId = 'ChIJ2SnopiVt5kcRCpl04SjBTuY';
+    // String placeId = 'ChIJ2SnopiVt5kcRCpl04SjBTuY';
+        String placeId = restaurant.placeId;
+
 
     // URL de l'endpoint "Place Details"
     String url =
