@@ -5,21 +5,21 @@ import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/tag.dart';
 
-class DetailsTags extends StatefulWidget {
-  const DetailsTags({Key? key, required this.restaurant}) : super(key: key);
+class RestoTags extends StatefulWidget {
+  const RestoTags({Key? key, required this.restaurant}) : super(key: key);
   final Restaurant restaurant;
 
   @override
   // ignore: no_logic_in_create_state
-  _DetailsTagsState createState() => _DetailsTagsState(restaurant);
+  _RestoTagsState createState() => _RestoTagsState(restaurant);
 }
 
-class _DetailsTagsState extends State<DetailsTags> {
+class _RestoTagsState extends State<RestoTags> {
   Restaurant restaurant;
 
   List<Tag> tagList = [];
 
-  _DetailsTagsState(this.restaurant);
+  _RestoTagsState(this.restaurant);
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class _DetailsTagsState extends State<DetailsTags> {
           String type = filteredTagsByType.keys.elementAt(index);
           List<Tag> tags = filteredTagsByType[type]!;
 
-          return Column(
+          return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
