@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:yummap/details_tags.dart';
 import 'package:yummap/restau_details.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/video_carousel.dart';
@@ -20,7 +19,7 @@ class BottomSheetHelper {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(             
+                Row(
                   children: [
                     Expanded(
                       flex: 1,
@@ -34,23 +33,23 @@ class BottomSheetHelper {
                           restaurant.name,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54,
+                          ),
                         ),
-                ),
                       ), // Deuxième colonne avec champ texte
                     ),
                     Expanded(
                       flex: 1,
                       child: Container(
                         margin: EdgeInsets.symmetric(horizontal: 8.0),
-                        
                         child: IconButton(
-                        icon: Icon(Icons.info_outline), 
-                        color: Colors.blue,
-                        onPressed: () {
-                            _navigateToTags(context, restaurant);                          },
+                          icon: Icon(Icons.info_outline),
+                          color: Colors.blue,
+                          onPressed: () {
+                            _navigateToTags(context, restaurant);
+                          },
                         ),
                       ), // Troisième colonne avec bouton
                     ),
@@ -117,9 +116,10 @@ class BottomSheetHelper {
     Navigator.push(
       context,
       MaterialPageRoute(
-        // builder: (context) => RestaurantDetailsWidget()),
-        builder: (context) => RestaurantDetailsWidget(restaurant: restaurant)),
-        // builder: (context) => DetailsTags(restaurant: restaurant)),
+          // builder: (context) => RestaurantDetailsWidget()),
+          builder: (context) =>
+              RestaurantDetailsWidget(restaurant: restaurant)),
+      // builder: (context) => DetailsTags(restaurant: restaurant)),
     );
   }
 }
