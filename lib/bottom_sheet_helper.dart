@@ -28,7 +28,7 @@ class BottomSheetHelper {
                     Expanded(
                       flex: 4,
                       child: Container(
-                        margin: EdgeInsets.symmetric(horizontal: 8.0),
+                        margin: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
                           restaurant.name,
                           textAlign: TextAlign.center,
@@ -43,9 +43,9 @@ class BottomSheetHelper {
                     Expanded(
                       flex: 1,
                       child: Container(
-                        margin: EdgeInsets.symmetric(horizontal: 8.0),
+                        margin: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: IconButton(
-                          icon: Icon(Icons.info_outline),
+                          icon: const Icon(Icons.info_outline),
                           color: Colors.blue,
                           onPressed: () {
                             _navigateToTags(context, restaurant);

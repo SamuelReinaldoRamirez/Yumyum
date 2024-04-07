@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
 
 class HorairesRestaurant extends StatefulWidget {
+  final List<List<String>> schedule;
+
+  const HorairesRestaurant({Key? key, required this.schedule})
+      : super(key: key);
+
   @override
   _HorairesRestaurantState createState() => _HorairesRestaurantState();
 }
 
 class _HorairesRestaurantState extends State<HorairesRestaurant> {
   late int _selectedDayIndex; // Index du jour sélectionné
-  // Horaires fictives pour chaque jour de la semaine
-  List<List<String>> horaires = [
-    ['00:10 - 14:00', '18:00 - 23:59'],
-    ['09:00 - 12:00', '14:00 - 17:00', '18:00 - 21:00'],
-    ['08:00 - 21:00'],
-    ['18:00 - 21:00'],
-    ['17:00 - 22:00'],
-    ['11:00 - 14:00', '15:00 - 18:00', '19:00 - 22:00'],
-    [],
-  ];
 
   @override
   void initState() {
@@ -32,7 +27,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(
@@ -62,17 +57,19 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                     child: Column(
                       children: [
                         Container(
-                          padding: EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0),
                           decoration: BoxDecoration(
-                            color:
-                                isSelected ? Color(0xFF95A472) : Colors.white,
+                            color: isSelected
+                                ? const Color(0xFF95A472)
+                                : Colors.white,
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           child: Text(
                             dayName,
                             style: TextStyle(
-                              color:
-                                  isSelected ? Colors.white : Color(0xFF646165),
+                              color: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF646165),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -84,7 +81,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
               ),
             ),
           ),
-          SizedBox(height: 1.0),
+          const SizedBox(height: 1.0),
           LayoutBuilder(
             builder: (context, constraints) {
               return SizedBox(
@@ -93,7 +90,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: Color(0xFF646165),
+                        color: const Color(0xFF646165),
                         borderRadius: BorderRadius.circular(
                             5.0), // Ajout des bords arrondis
                       ),
@@ -116,7 +113,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
 
   // Construction du carré d'heures d'ouverture
   Widget _buildOpeningHoursBox(double containerWidth) {
-    List<String> times = horaires[_selectedDayIndex];
+    List<String> times = widget.schedule[_selectedDayIndex];
     times.sort((a, b) {
       // Trier par heure de début
       var startTimeA = a.split(' - ')[0];
@@ -142,7 +139,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
           child: Container(
             width: widthPercentage * containerWidth / 100,
             height: 50.0,
-            color: Color(0xFF95A472),
+            color: const Color(0xFF95A472),
           ),
         ),
       );
@@ -153,7 +150,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
           bottom: 30,
           child: Text(
             parts[0],
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: 13, color: Colors.white, fontWeight: FontWeight.w600),
           ),
         ),
@@ -165,7 +162,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
           bottom: 3,
           child: Text(
             parts[1],
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: 13,
                 color: Color(0xFFFFFF00),
                 fontWeight: FontWeight.w700),

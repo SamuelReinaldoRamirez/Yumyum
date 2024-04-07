@@ -1,21 +1,21 @@
-import 'dart:convert';
-import 'package:flutter/services.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:yummap/restaurant.dart';
-import 'package:yummap/reviews_details.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:yummap/horaires_restaurant.dart'; // Importez le fichier contenant le widget horaire
+import 'restaurant.dart';
+import 'reviews_details.dart';
+import 'horaires_restaurant.dart';
 
 class RestaurantDetailsWidget extends StatefulWidget {
   const RestaurantDetailsWidget({Key? key, required this.restaurant})
       : super(key: key);
+
   final Restaurant restaurant;
 
   @override
   _RestaurantDetailsWidgetState createState() =>
-      _RestaurantDetailsWidgetState(restaurant);
+      _RestaurantDetailsWidgetState();
 }
 
 class FractionalClipper extends CustomClipper<Rect> {
@@ -35,21 +35,20 @@ class FractionalClipper extends CustomClipper<Rect> {
 }
 
 class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
-  Restaurant restaurant;
   String _photoReference = '';
   bool _isLoading = false;
-  String _noteMoyenne = "";
+  String _noteMoyenne = '';
   int _userRatingsTotal = 0;
   String? _siteInternet;
   String? _instagram;
   String? _menu;
-  _RestaurantDetailsWidgetState(this.restaurant);
+  List<List<String>>? _schedule;
 
-  double convertFraction(fraction) {
-    fraction = (fraction * 10).round();
-    if (fraction < 1)
+  double convertFraction(double fraction) {
+    fraction = (fraction * 10).roundToDouble();
+    if (fraction < 1) {
       return 0.15;
-    else if (fraction < 2)
+    } else if (fraction < 2)
       return 0.32;
     else if (fraction < 3)
       return 0.35;
@@ -77,80 +76,61 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     _fetchRestaurantDetails();
   }
 
-  Future<String> fetchPlaceId(Restaurant restaurante) async {
-    String placeId = "";
-    String name = restaurante.name.trim();
-    String latitude = restaurante.latitude.toString();
-    String longitude = restaurante.longitude.toString();
-    try {
-      http.Response response = await http.get(Uri.parse(
-          "https://maps.googleapis.com/maps/api/place/textsearch/json?query=$name&location=$latitude,$longitude&radius=500&type=restaurant&key=AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U"));
-      if (response.statusCode == 200) {
-        Map<String, dynamic> data = json.decode(response.body);
-        placeId = data['results'][0]['reference'];
-        restaurant.setPlaceId(placeId);
-      } else {
-        print('Erreur lors de la requête: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Erreur lors de la requête: $error');
-    }
-    return placeId;
-  }
-
   Future<void> _fetchRestaurantDetails() async {
-    if (this.restaurant.getPlaceId().isEmpty) {
-      String placeId = await fetchPlaceId(restaurant);
-      restaurant.setPlaceId(placeId);
-    }
-
-    String apiKey = 'AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U';
-    String url =
-        'https://maps.googleapis.com/maps/api/place/details/json?place_id=${restaurant.getPlaceId()}&key=$apiKey';
-
     setState(() {
       _isLoading = true;
     });
 
-    try {
-      http.Response response = await http.get(Uri.parse(url));
+    // Assuming that the data is fetched from the Restaurant object directly
 
-      if (response.statusCode == 200) {
-        Map<String, dynamic> data = json.decode(response.body);
-        List<dynamic> photosData = data['result']['photos'];
+    _noteMoyenne = widget.restaurant.ratings.toString();
+    _userRatingsTotal = widget.restaurant.numberOfReviews;
+    _photoReference = widget.restaurant.pictureProfile;
+    _siteInternet = widget.restaurant.websiteUrl;
+    // _instagram = widget.restaurant.instagram;
+    _menu = widget.restaurant.websiteUrl;
+    _schedule = widget.restaurant.schedule;
+    print("*****************");
+    print('----');
 
-        _noteMoyenne = data['result']['rating'] != null
-            ? data['result']['rating'].toString()
-            : '0';
-        _userRatingsTotal = data['result']['user_ratings_total'];
-
-        if (photosData.isNotEmpty) {
-          _photoReference = photosData[0]['photo_reference'];
-        }
-
-        // Récupération du site web du restaurant
-        if (data['result']['website'] != null) {
-          _siteInternet = data['result']['website'];
-        }
-
-        // Récupération du compte Instagram du restaurant
-        if (data['result']['instagram'] != null) {
-          _instagram = data['result']['instagram'];
-        }
-
-        if (data['result']['menu'] != null) {
-          _menu = data['result']['menu'];
-        }
-      } else {
-        print('Erreur lors de la requête: ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Erreur lors de la requête: $error');
-    }
+    print(_schedule);
+    print("*****************");
+    print('----');
 
     setState(() {
       _isLoading = false;
     });
+  }
+
+  Future<void> _launchUrl(String? url) async {
+    if (url != null && await canLaunch(url)) {
+      // Utiliser canLaunch avec un String
+      await launch(url); // Utiliser launch avec un String
+    }
+  }
+
+  Future<void> openURL(BuildContext context, String? url) async {
+    if (url != null) {
+      await Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.close),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            title: const Text('Yummap Navigator'),
+          ),
+          body: SafeArea(
+            child: InAppWebView(
+              initialUrlRequest:
+                  URLRequest(url: WebUri(url, forceToStringRawValue: true)),
+            ),
+          ),
+        ),
+      ));
+    }
   }
 
   static void _navigateToReviewDetails(
@@ -158,46 +138,9 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => ReviewDetailsWidget(restaurant: restaurant)),
+        builder: (context) => ReviewDetailsWidget(restaurant: restaurant),
+      ),
     );
-  }
-
-  List<Widget> buildStarRating(double rating) {
-    List<Widget> stars = [];
-    int fullStars = rating.floor();
-    double fraction = rating - fullStars;
-
-    for (int i = 0; i < fullStars; i++) {
-      stars.add(Icon(Icons.star, color: Colors.amber));
-    }
-
-    if (fraction > 0) {
-      stars.add(Center(
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            ClipRect(
-              clipper: FractionalClipper(convertFraction(fraction)),
-              child: Icon(Icons.star, size: 25, color: Colors.amber),
-            ),
-            Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.3))
-          ],
-        ),
-      ));
-    }
-
-    for (int i = stars.length; i < 5; i++) {
-      stars.add(Icon(Icons.star, color: Colors.amber.withOpacity(0.3)));
-    }
-
-    return stars;
-  }
-
-  // Méthode pour ouvrir un URL dans le navigateur externe
-  Future<void> _launchUrl(String? url) async {
-    if (url != null && await canLaunch(url)) {
-      await launch(url);
-    }
   }
 
   @override
@@ -216,14 +159,14 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                     alignment: Alignment.bottomCenter,
                     children: [
                       Image.network(
-                        'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$_photoReference&key=AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U',
+                        widget.restaurant.pictureProfile,
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: 200,
                       ),
                       Positioned.fill(
                         child: Container(
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
@@ -233,13 +176,13 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                               ],
                             ),
                           ),
-                          padding: EdgeInsets.only(
+                          padding: const EdgeInsets.only(
                               bottom: 15), // Ajout de la marge en bas
                           alignment:
                               Alignment.bottomCenter, // Alignement en bas
                           child: Text(
                             widget.restaurant.name,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -250,79 +193,55 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.star, color: Colors.amber),
-                        SizedBox(width: 5),
+                        const Icon(Icons.star, color: Colors.amber),
+                        const SizedBox(width: 5),
                         Text(
                           '$_noteMoyenne ($_userRatingsTotal avis)',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.black,
                             fontSize: 18,
                           ),
                         ),
-                        SizedBox(width: 20), // Ajout d'un espace
+                        const SizedBox(width: 20), // Ajout d'un espace
                         IconButton(
-                          icon: Icon(Icons.language),
+                          icon: const Icon(Icons.language),
                           onPressed: () {
-                            // Ouvrir le site web s'il est disponible
-                            if (_siteInternet != null &&
-                                Uri.parse(_siteInternet.toString())
-                                    .isAbsolute) {
-                              _launchUrl(_siteInternet);
-                            } else {
-                              // Afficher un toast si le site web n'est pas disponible
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "Le site web n'est pas disponible",
-                                  ),
-                                ),
-                              );
-                            }
+                            openURL(context, _siteInternet);
+                            //_launchUrl(_siteInternet);
+                            print(_siteInternet);
+                            print("--------------------------");
                           },
                         ),
                         IconButton(
-                          icon: Icon(Icons.photo_camera_outlined),
+                          icon: const Icon(Icons.photo_camera_outlined),
                           onPressed: () {
-                            // Ouvrir Instagram s'il est disponible
-                            if (_instagram != null &&
-                                Uri.parse(_instagram.toString()).isAbsolute) {
-                              _launchUrl(_instagram);
-                            } else {
-                              // Afficher un toast si Instagram n'est pas disponible
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "Instagram n'est pas disponible",
-                                  ),
-                                ),
-                              );
-                            }
+                            _launchUrl(_instagram);
                           },
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Padding(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Informations :',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 10),
-                        Row(
+                        const SizedBox(height: 10),
+                        const Row(
                           children: [
                             Icon(Icons.local_dining), // Icône de la cuisine
                             SizedBox(width: 5),
@@ -332,13 +251,19 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         Row(
                           children: [
-                            Icon(Icons.accessibility),
+                            Icon(widget.restaurant.handicap
+                                ? Icons
+                                    .accessibility // Si accessible aux personnes à mobilité réduite
+                                : Icons
+                                    .not_accessible), // Si non accessible aux personnes à mobilité réduite
                             SizedBox(width: 5),
                             Text(
-                              'Accessible aux personnes à mobilité réduite',
+                              widget.restaurant.handicap
+                                  ? 'Adapté à la mobilité réduite'
+                                  : 'Non adapté à la mobilité réduite',
                               style: TextStyle(fontSize: 16),
                             ),
                           ],
@@ -346,132 +271,125 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                         SizedBox(height: 5),
                         Row(
                           children: [
-                            Icon(Icons.eco),
+                            Icon(widget.restaurant.vege
+                                ? Icons.eco // Si propose des plats végétariens
+                                : Icons
+                                    .not_interested_sharp), // Si ne propose pas de plats végétariens
                             SizedBox(width: 5),
                             Text(
-                              'Propose des plats végétariens',
+                              widget.restaurant.vege
+                                  ? 'Propose des plats végétariens'
+                                  : 'Ne propose pas de plats végétariens',
                               style: TextStyle(fontSize: 16),
                             ),
                           ],
                         ),
-                        SizedBox(height: 10),
-                        SizedBox(height: 130, child: HorairesRestaurant()),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 130,
+                          child: HorairesRestaurant(
+                            schedule: _schedule ??
+                                [], // Utilisation de l'opérateur ?? pour fournir une valeur par défaut
+                          ),
+                        ),
+                        const SizedBox(height: 20),
                         Card(
                           child: Column(
                             children: [
                               ListTile(
-                                leading: Icon(Icons.phone),
+                                leading: const Icon(Icons.phone),
                                 title: Text(
-                                    '0123456789'), // Numéro de téléphone du restaurant
+                                    widget.restaurant.phoneNumber.isNotEmpty
+                                        ? widget.restaurant.phoneNumber
+                                        : 'Indisponible'),
                                 onTap: () {
-                                  // Action à effectuer lors du clic sur le numéro de téléphone
-                                  launch('tel://0123456789');
-                                },
-                              ),
-                              Divider(), // Ligne de séparation
-                              ListTile(
-                                leading: Icon(Icons.menu_book),
-                                title: Text(
-                                  'Menu', // Titre du menu
-                                ),
-                                onTap: () {
-                                  // Ouvrir le menu s'il est disponible
-                                  if (_menu != null &&
-                                      Uri.parse(_menu.toString()).isAbsolute) {
-                                    _launchUrl(_menu);
+                                  if (widget
+                                      .restaurant.phoneNumber.isNotEmpty) {
+                                    launch(
+                                        'tel://${widget.restaurant.phoneNumber}');
                                   } else {
-                                    // Afficher un toast si le menu n'est pas disponible
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
+                                      const SnackBar(
                                         content: Text(
-                                          "Le menu n'est pas disponible",
-                                        ),
+                                            'Numéro de téléphone non disponible'),
                                       ),
                                     );
                                   }
                                 },
                               ),
-                              Divider(),
+                              const Divider(),
                               ListTile(
-                                leading: Icon(Icons.location_on),
-                                title: Text(
-                                    '123 Rue du Restaurant, Ville'), // Adresse du restaurant
+                                leading: const Icon(Icons.menu_book),
+                                title: const Text('Menu'),
                                 onTap: () {
-                                  // Copier l'adresse dans le presse-papiers
+                                  _launchUrl(_menu);
+                                },
+                              ),
+                              const Divider(),
+                              ListTile(
+                                leading: const Icon(Icons.location_on),
+                                title: Text(widget.restaurant.address),
+                                onTap: () {
                                   Clipboard.setData(ClipboardData(
-                                      text: '123 Rue du Restaurant, Ville'));
-                                  // Afficher un message indiquant que l'adresse a été copiée
+                                      text: widget.restaurant.address));
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text(
+                                      content: const Text(
                                           'Adresse copiée dans le presse-papiers'),
                                     ),
                                   );
                                 },
                               ),
-
                               SizedBox(
-                                height: 200, // Hauteur de la carte
+                                height: 200,
                                 child: GoogleMap(
                                   initialCameraPosition: CameraPosition(
-                                    target: LatLng(
-                                        // Coordonnées de votre localisation
-                                        37.42796133580664,
-                                        -122.085749655962),
-                                    zoom: 14, // Niveau de zoom initial
+                                    target: LatLng(widget.restaurant.latitude,
+                                        widget.restaurant.longitude),
+                                    zoom: 14,
                                   ),
                                   markers: {
                                     Marker(
-                                      markerId: MarkerId(
-                                          'restaurant_location'), // Identifiant du marqueur
-                                      position: LatLng(37.42796133580664,
-                                          -122.085749655962), // Coordonnées du marqueur
-                                      infoWindow: InfoWindow(
-                                        // Fenêtre d'information du marqueur
+                                      markerId:
+                                          const MarkerId('restaurant_location'),
+                                      position: LatLng(
+                                          widget.restaurant.latitude,
+                                          widget.restaurant.longitude),
+                                      infoWindow: const InfoWindow(
                                         title: 'Restaurant',
                                         snippet: '123 Rue du Restaurant, Ville',
                                       ),
                                     ),
                                   },
-                                  mapType: MapType
-                                      .normal, // Type de carte (normal, satellite, terrain, etc.)
-                                  myLocationEnabled:
-                                      true, // Activer la localisation de l'utilisateur
-                                  zoomControlsEnabled:
-                                      false, // Désactiver les contrôles de zoom
+                                  mapType: MapType.normal,
+                                  myLocationEnabled: true,
+                                  zoomControlsEnabled: false,
                                   onMapCreated:
-                                      (GoogleMapController controller) {
-                                    // Fonction appelée lorsque la carte est créée
-                                    // Vous pouvez ajouter du code supplémentaire ici si nécessaire
-                                  },
+                                      (GoogleMapController controller) {},
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        SizedBox(height: 20),
-                        // Ajout du widget horaires restaurant
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
-                  SizedBox(height: 20),
-                  // Widget "Avis clients"
+                  const SizedBox(height: 20),
                   Container(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Avis clients :',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 10),
-                        // Exemple d'avis client
-                        ListTile(
+                        const SizedBox(height: 10),
+                        const ListTile(
                           title: Text(
                             'Excellent restaurant, bonne ambiance et service rapide. Je recommande vivement !',
                           ),
@@ -486,14 +404,13 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                             ],
                           ),
                         ),
-                        SizedBox(height: 10),
-                        // Bouton pour afficher plus d'avis
+                        const SizedBox(height: 10),
                         ElevatedButton(
                           onPressed: () {
-                            // Rediriger vers la page des avis détaillés
-                            _navigateToReviewDetails(context, restaurant);
+                            _navigateToReviewDetails(
+                                context, widget.restaurant);
                           },
-                          child: Text('Voir plus d\'avis'),
+                          child: const Text('Voir plus d\'avis'),
                         ),
                       ],
                     ),

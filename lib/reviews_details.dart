@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:yummap/restaurant.dart';
 
 class ReviewDetailsWidget extends StatefulWidget {
-  const ReviewDetailsWidget({Key? key, required this.restaurant}) : super(key: key);
+  const ReviewDetailsWidget({Key? key, required this.restaurant})
+      : super(key: key);
   final Restaurant restaurant;
 
   @override
@@ -31,8 +32,7 @@ class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
     String apiKey = 'AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U';
     // Remplacez YOUR_PLACE_ID par l'identifiant unique du lieu "Bao Express"
     // String placeId = 'ChIJ2SnopiVt5kcRCpl04SjBTuY';
-        String placeId = restaurant.placeId;
-
+    String placeId = restaurant.placeId;
 
     // URL de l'endpoint "Place Details"
     String url =
@@ -75,10 +75,10 @@ class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Avis Google'),
+        title: const Text('Avis Google'),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: _reviews.length,
               itemBuilder: (context, index) {

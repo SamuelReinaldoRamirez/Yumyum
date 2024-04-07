@@ -27,7 +27,7 @@ dependencies:
   flutter_native_splash: any  # Ajout du package flutter_native_splash
   cupertino_icons: ^1.0.2
   flutter_rating_bar: ^4.0.0
-
+  flutter_inappwebview: ^6.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
