@@ -159,7 +159,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                     alignment: Alignment.bottomCenter,
                     children: [
                       Image.network(
-                        widget.restaurant.pictureProfile,
+                        _photoReference,
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: 200,

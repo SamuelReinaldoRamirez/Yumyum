@@ -45,42 +45,44 @@ class Restaurant {
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
     List<List<String>> schedule = [];
-    if (json['schedule'] != null && json['schedule'] is Map) {
-      Map<String, dynamic> scheduleMap = json['schedule'];
-      List<String> days = [
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-        'Sunday'
-      ];
-      for (String day in days) {
-        if (scheduleMap.containsKey(day)) {
-          String scheduleOfDay = scheduleMap[day] ?? '';
-          Tuple2<List<String>, bool> result =
-              _formatScheduleOfDay(scheduleOfDay);
-          if (result.item2) {
-            schedule.add(result.item1);
-          } else {
-            schedule.add(['error']);
+
+    if (json['schedule'] != null && json['schedule'] is List<dynamic>) {
+      List<dynamic> scheduleList = json['schedule'];
+      if (scheduleList.isNotEmpty) {
+        for (var item in scheduleList) {
+          if (item is String) {
+            List<String> daySchedule = [];
+
+            // Convertir les jours en format standard
+            List<String> splitItem = item.split(': ');
+            if (splitItem.length == 2) {
+              String day = splitItem[0];
+              List<String> timeRanges = splitItem[1].split(', ');
+              if (timeRanges.first != 'Closed') {
+                // Si le jour n'est pas fermé
+                for (var timeRange in timeRanges) {
+                  // Convertir les horaires de 12 heures en format 24 heures
+                  List<String> splitTimeRange = timeRange.split(' – ');
+                  if (splitTimeRange.length == 2) {
+                    String startTime12 = splitTimeRange[0].split(' ')[0];
+                    String endTime12 = splitTimeRange[1].split(' ')[0];
+                    String startTime24 = convertTo24HoursFormat(startTime12);
+                    String endTime24 = convertTo24HoursFormat(endTime12);
+                    daySchedule.add('$startTime24 - $endTime24');
+                  }
+                }
+              }
+              schedule.add(daySchedule);
+            }
           }
-        } else {
+        }
+      } else {
+        // Si la liste est vide, ajouter des listes vides pour chaque jour de la semaine
+        for (int i = 0; i < 7; i++) {
           schedule.add([]);
         }
       }
     }
-
-    schedule = [
-      ['08:10 - 14:00', '18:00 - 23:59'],
-      ['09:00 - 12:00', '14:00 - 17:00', '18:00 - 21:00'],
-      ['08:00 - 21:00'],
-      ['18:00 - 21:00'],
-      ['17:00 - 22:00'],
-      ['11:00 - 14:00', '15:00 - 18:00', '19:00 - 22:00'],
-      [],
-    ];
 
     // Parsing des autres données du restaurant
     List<String> videoLinks = [];
@@ -139,46 +141,37 @@ class Restaurant {
     );
   }
 
-  static Tuple2<List<String>, bool> _formatScheduleOfDay(String scheduleOfDay) {
-    List<String> formattedSchedule = [];
-    bool success = true;
-    if (scheduleOfDay == 'Closed') {
-      formattedSchedule = [];
-    } else {
-      List<String> timeRanges = scheduleOfDay.split(',');
-      for (String timeRange in timeRanges) {
-        List<String> times = timeRange.split('–').map((e) => e.trim()).toList();
-        if (times.length != 2) {
-          success = false;
-          break;
+  static String convertTo24HoursFormat(String time12) {
+    List<String> timeParts = time12.split(':');
+    if (timeParts.length == 2) {
+      String hourMinute = timeParts[0];
+      String periodPart =
+          timeParts[1].trim(); // Enlever les espaces en début et fin de chaîne
+
+      // Vérifier si l'indicateur AM/PM est présent dans la chaîne de période
+      if (periodPart.contains('AM') || periodPart.contains('PM')) {
+        // Récupérer l'heure et la période
+        String hour = hourMinute;
+        String period = periodPart.substring(
+            periodPart.length - 2); // Récupérer les deux derniers caractères
+
+        // Convertir l'heure en format 24 heures
+        if (period == 'PM' && hour != '12') {
+          hour = (int.parse(hour) + 12).toString();
+        } else if (period == 'AM' && hour == '12') {
+          hour = '00';
         }
-        String formattedStartTime = _convertTo24HourFormat(times[0]);
-        String formattedEndTime = _convertTo24HourFormat(times[1]);
-        formattedSchedule.add('$formattedStartTime - $formattedEndTime');
+
+        // Supprimer l'indicateur AM/PM de la partie de la période
+        String minute = periodPart.substring(0, periodPart.length - 2).trim();
+
+        // Formater l'heure en format 24 heures
+        return '$hour:$minute';
       }
     }
-    return Tuple2<List<String>, bool>(formattedSchedule, success);
-  }
 
-  static String _convertTo24HourFormat(String time) {
-    List<String> parts = time.split(' ');
-    String hourMinute = parts[0];
-    String period = parts[1];
-
-    List<String> hourMinuteParts = hourMinute
-        .split('–')
-        .map((e) => e.trim())
-        .toList(); // Utilisation du tiret standard
-    int hour = int.parse(hourMinuteParts[0].split(':')[0]);
-    int minute = int.parse(hourMinuteParts[0].split(':')[1]);
-
-    if (period == 'PM' && hour != 12) {
-      hour += 12;
-    } else if (period == 'AM' && hour == 12) {
-      hour = 0;
-    }
-
-    return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+    // Si le format du temps est incorrect ou s'il manque l'indicateur AM/PM, retourner l'entrée d'origine
+    return time12;
   }
 
   List<String> getVideoLinks() {
