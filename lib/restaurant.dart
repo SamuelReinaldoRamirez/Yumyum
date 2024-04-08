@@ -1,5 +1,3 @@
-// Importation du package tuple pour utiliser Tuple2
-
 import 'package:logger/logger.dart';
 
 class Restaurant {
@@ -14,7 +12,7 @@ class Restaurant {
   final List<int> tagStr;
   String placeId;
   final double ratings;
-  final List<Review> reviews;
+  final List<ReviewRestau> reviews;
   final String price;
   final String websiteUrl;
   final bool handicap;
@@ -51,11 +49,29 @@ class Restaurant {
     var logger = Logger();
     List<List<String>> schedule = [];
 
-    if (json['name'] == "Bao Express") {
+    // Parsing des reviews
+    List<ReviewRestau> reviews = [];
+    if (json.containsKey('reviews') && json['reviews'] != null) {
+      if (json['reviews'] is List<dynamic>) {
+        for (dynamic review in json['reviews']) {
+          if (review is Map<String, dynamic>) {
+            reviews.add(ReviewRestau.fromJson(review));
+          }
+        }
+      }
+    }
+
+    // Vérification du nom et du planning
+    if (json.containsKey('name')) {
       logger.e(json['name']);
+    }
+    if (json.containsKey('schedule')) {
       logger.e(json['schedule']);
     }
-    if (json['schedule'] != null && json['schedule'] is List<dynamic>) {
+
+    if (json.containsKey('schedule') &&
+        json['schedule'] != null &&
+        json['schedule'] is List<dynamic>) {
       List<dynamic> scheduleList = json['schedule'];
       if (scheduleList.isNotEmpty) {
         for (var item in scheduleList) {
@@ -63,109 +79,51 @@ class Restaurant {
             List<String> daySchedule = [];
             // Convertir les jours en format standard
             List<String> splitItem = item.split(': ');
-            logger.e(splitItem[1]);
-            // logger.e(item);
             if (splitItem.length == 2) {
               String day = splitItem[0];
               List<String> timeRanges = splitItem[1].split(', ');
-              logger.e(timeRanges);
-              if (timeRanges.first != 'Closed') {
-                // Si le jour n'est pas fermé
+              if (timeRanges.isNotEmpty) {
                 for (var timeRange in timeRanges) {
-                  // if(json['name'] == "Land & monkeys"){
-                  logger.wtf(json['name']);
-                  logger.wtf(json['schedule']);
-                  print(json['id']);
-                  //si la data a cette tete :  "6:00 – 7:30 PM"
-
-                  // if(json['name'] == "Wakanda factory Paris nation"){
+                  // Vérification des plages horaires
                   var indexDuTiret = 0;
                   var timerangeLength = timeRange.length;
                   try {
-                    print("---------------------/////////////////////");
-                    logger.e(json['name']);
-                    logger.e(json['schedule']);
-                    //SI IL Y A UN TIRET (if à ajouter)
-                    try {
-                      indexDuTiret = timeRange.indexOf("–");
-                    } catch (e) {
-                      logger.d(json['name']);
-                      logger.d(json['schedule']);
-                      print("Probleme de tiret");
-                    }
-                    print(timeRange);
-                    print(timeRange.substring(
-                            timerangeLength - 2, timerangeLength) +
-                        "e");
-
-                    if (timeRange.substring(
-                                timerangeLength - 2, timerangeLength) ==
-                            "PM" //et que la premiere heure ne dépasse pas 12 et n'a pas deja PM d'écrit
-                        ) {
-                      print("premierif");
-                      print(indexDuTiret);
-                      print(indexDuTiret - 3);
-                      print("A" +
-                          timeRange.substring(
-                              indexDuTiret - 3, indexDuTiret - 1) +
-                          "A");
-                      //soit il y a écrit AM en premier
-                      print(timeRange.substring(
-                              indexDuTiret - 3, indexDuTiret - 1) ==
-                          "AM");
+                    indexDuTiret = timeRange.indexOf("–");
+                    if (indexDuTiret != -1) {
+                      print(timeRange);
                       if (timeRange.substring(
-                              indexDuTiret - 3, indexDuTiret - 1) ==
-                          "AM") {
-                        print("CAS AM");
-
-                        // var newtimeRange = timeRange.substring(0, indexDuTiret-3) + "PM " + timeRange.substring(indexDuTiret, timerangeLength);
-                        // timeRange=newtimeRange;
-                        //soit on est dans PM en premier
-                      } else {
-                        if (timeRange.substring(0, indexDuTiret - 1) !=
-                            "12:00") {
-                          print("ELSE");
-                          print(timeRange.substring(0, indexDuTiret));
-                          var newtimeRange =
-                              timeRange.substring(0, indexDuTiret - 1) +
-                                  " PM" +
-                                  timeRange.substring(
-                                      indexDuTiret - 1, timerangeLength);
-                          timeRange = newtimeRange;
+                              timerangeLength - 2, timerangeLength) ==
+                          "PM") {
+                        if (timeRange.substring(
+                                indexDuTiret - 3, indexDuTiret - 1) ==
+                            "AM") {
+                          // Traitement du cas AM
+                        } else {
+                          if (timeRange.substring(0, indexDuTiret - 1) !=
+                              "12:00") {
+                            var newtimeRange =
+                                timeRange.substring(0, indexDuTiret - 1) +
+                                    " PM" +
+                                    timeRange.substring(
+                                        indexDuTiret - 1, timerangeLength);
+                            timeRange = newtimeRange;
+                          }
                         }
                       }
                     }
                   } catch (e) {
-                    // Bloc catch pour gérer l'exception
-                    logger.d(json['name']);
-                    logger.d(json['schedule']);
-                    print('Une exception a été levée : $e');
-                  }
-                  // Convertir les horaires de 12 heures en format 24 heures
-                  print(timeRange);
-                  List<String> splitTimeRange = timeRange.split(' – ');
-                  // printici
-                  print("ici");
-                  logger.e(splitTimeRange);
-                  print("XXX");
-                  if (splitTimeRange.length == 2) {
-                    // String startTime12 = splitTimeRange[0].split(' ')[0];
-                    // String endTime12 = splitTimeRange[1].split(' ')[0];
-                    print('splitimerage de 0 ');
-                    print(splitTimeRange[0]);
-                    String startTime12 = splitTimeRange[0];
-                    String endTime12 = splitTimeRange[1];
-                    print("startTime12");
-                    print(startTime12);
-                    String startTime24 = convertTo24HoursFormat(startTime12);
-                    print("starttime2222");
-                    String endTime24 = convertTo24HoursFormat(endTime12);
-                    logger.e('$startTime24 - $endTime24');
-                    daySchedule.add('$startTime24 - $endTime24');
-                    logger.e('FIN');
+                    logger.d('Une exception a été levée : $e');
                   }
 
-                  // }
+                  // Convertir les horaires de 12 heures en format 24 heures
+                  List<String> splitTimeRange = timeRange.split(' – ');
+                  if (splitTimeRange.length == 2) {
+                    String startTime12 = splitTimeRange[0];
+                    String endTime12 = splitTimeRange[1];
+                    String startTime24 = convertTo24HoursFormat(startTime12);
+                    String endTime24 = convertTo24HoursFormat(endTime12);
+                    daySchedule.add('$startTime24 - $endTime24');
+                  }
                 }
               }
               schedule.add(daySchedule);
@@ -182,7 +140,7 @@ class Restaurant {
 
     // Parsing des autres données du restaurant
     List<String> videoLinks = [];
-    if (json['video_links'] != null) {
+    if (json.containsKey('video_links') && json['video_links'] != null) {
       if (json['video_links'] is List<dynamic>) {
         for (dynamic link in json['video_links']) {
           if (link is String) {
@@ -205,7 +163,9 @@ class Restaurant {
 
     double latitude = 0.0;
     double longitude = 0.0;
-    if (json['GPS_address'] != null && json['GPS_address']['data'] != null) {
+    if (json.containsKey('GPS_address') &&
+        json['GPS_address'] != null &&
+        json['GPS_address']['data'] != null) {
       latitude = json['GPS_address']['data']['lat'] != null
           ? json['GPS_address']['data']['lat'].toDouble()
           : 0.0;
@@ -215,27 +175,29 @@ class Restaurant {
     }
 
     return Restaurant(
-        id: json['id'] ?? 0,
-        name: json['name'] ?? '',
-        address: json['address_str'] ?? '',
-        published: json['published'] ?? false,
-        latitude: latitude,
-        longitude: longitude,
-        videoLinks: videoLinks,
-        phoneNumber: json['phone_number'] ?? '',
-        tagStr: tagsId,
-        placeId: json['placeId'] ?? '',
-        ratings: json['ratings'] != null ? json['ratings'].toDouble() : 0.0,
-        reviews: [], // La liste des avis n'est pas fournie dans ce JSON, donc nous initialisons à une liste vide
-        price: json['price'] ?? '',
-        websiteUrl: json['website_url'] ?? '',
-        handicap: json['handicap'] ?? false,
-        vege: json['vege'] ?? false,
-        schedule:
-            schedule, // Utilisation de la nouvelle structure pour l'horaire
-        pictureProfile: json['picture_profile'] ?? '',
-        numberOfReviews: json['number_of_reviews'] ?? 0,
-        cuisine: json['cuisine']['cuisine_name'] ?? '');
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      address: json['address_str'] ?? '',
+      published: json['published'] ?? false,
+      latitude: latitude,
+      longitude: longitude,
+      videoLinks: videoLinks,
+      phoneNumber: json['phone_number'] ?? '',
+      tagStr: tagsId,
+      placeId: json['placeId'] ?? '',
+      ratings: json['ratings'] != null ? json['ratings'].toDouble() : 0.0,
+      reviews: reviews,
+      price: json['price'] ?? '',
+      websiteUrl: json['website_url'] ?? '',
+      handicap: json['handicap'] ?? false,
+      vege: json['vege'] ?? false,
+      schedule: schedule, // Utilisation de la nouvelle structure pour l'horaire
+      pictureProfile: json['picture_profile'] ?? '',
+      numberOfReviews: json['number_of_reviews'] ?? 0,
+      cuisine: json.containsKey('cuisine')
+          ? json['cuisine']['cuisine_name'] ?? ''
+          : '',
+    );
   }
 
   static String convertTo24HoursFormat(String time12) {
@@ -288,19 +250,19 @@ class Restaurant {
   }
 }
 
-class Review {
+class ReviewRestau {
   final String author;
   final String text;
   final String rating;
 
-  Review({
+  ReviewRestau({
     required this.author,
     required this.text,
     required this.rating,
   });
 
-  factory Review.fromJson(Map<String, dynamic> json) {
-    return Review(
+  factory ReviewRestau.fromJson(Map<String, dynamic> json) {
+    return ReviewRestau(
       author: json['author'] ?? '',
       text: json['text'] ?? '',
       rating: json['rating'] ?? '',

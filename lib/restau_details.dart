@@ -45,6 +45,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   String? _instagram;
   String? _menu;
   List<List<String>>? _schedule;
+  List<ReviewRestau> _reviews = [];
 
   double convertFraction(double fraction) {
     fraction = (fraction * 10).roundToDouble();
@@ -98,6 +99,9 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     // _instagram = widget.restaurant.instagram;
     _menu = widget.restaurant.websiteUrl;
     _schedule = widget.restaurant.schedule;
+    _reviews =
+        widget.restaurant.reviews; // Assign reviews from Restaurant object
+
     print("*****************");
     print('----');
 
@@ -149,11 +153,12 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   }
 
   static void _navigateToReviewDetails(
-      BuildContext context, Restaurant restaurant) {
+      BuildContext context, Restaurant restaurant, List<ReviewRestau> reviews) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ReviewDetailsWidget(restaurant: restaurant),
+        builder: (context) =>
+            ReviewDetailsWidget(restaurant: restaurant, reviews: reviews),
       ),
     );
   }
@@ -442,32 +447,43 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        const ListTile(
-                          title: Text(
-                            'Excellent restaurant, bonne ambiance et service rapide. Je recommande vivement !',
+                        if (_reviews == []) ...[
+                          ListTile(
+                            title: Text(_reviews[0].text),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 5),
+                                Text(
+                                  '- ${_reviews[0].author}',
+                                  style: TextStyle(fontStyle: FontStyle.italic),
+                                ),
+                              ],
+                            ),
                           ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          if (_reviews.length > 1) ...[
+                            const SizedBox(height: 10),
+                            ElevatedButton(
+                              onPressed: () {
+                                _navigateToReviewDetails(
+                                    context, widget.restaurant, _reviews);
+                              },
+                              child: const Text('Voir plus d\'avis'),
+                            ),
+                          ],
+                        ] else ...[
+                          const Row(
                             children: [
-                              SizedBox(height: 5),
-                              Text(
-                                '- Jean Dupont',
-                                style: TextStyle(fontStyle: FontStyle.italic),
-                              ),
+                              Icon(Icons.chat_outlined),
+                              SizedBox(width: 10),
+                              Text('Avis clients indisponibles'),
                             ],
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            _navigateToReviewDetails(
-                                context, widget.restaurant);
-                          },
-                          child: const Text('Voir plus d\'avis'),
-                        ),
+                          )
+                        ],
                       ],
                     ),
                   ),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
