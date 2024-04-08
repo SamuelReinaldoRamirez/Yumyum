@@ -40,6 +40,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   String _noteMoyenne = '';
   int _userRatingsTotal = 0;
   String? _siteInternet;
+  int _price = 0;
   String? _instagram;
   String? _menu;
   List<List<String>>? _schedule;
@@ -87,6 +88,11 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     _userRatingsTotal = widget.restaurant.numberOfReviews;
     _photoReference = widget.restaurant.pictureProfile;
     _siteInternet = widget.restaurant.websiteUrl;
+    try {
+      _price = int.parse(widget.restaurant.price);
+    } catch (e) {
+      print("Erreur de conversion : $e");
+    }
     // _instagram = widget.restaurant.instagram;
     _menu = widget.restaurant.websiteUrl;
     _schedule = widget.restaurant.schedule;
@@ -269,6 +275,23 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                           ),
                         ),
                         const SizedBox(height: 10),
+                        Visibility(
+                          visible: _price != null &&
+                              _price !=
+                                  0, // Rendre le widget visible si _price est valide
+                          child: Row(
+                            children: [
+                              Icon(Icons.payment), // Icône de paiement
+                              SizedBox(width: 5),
+                              Text(
+                                '€' *
+                                    _price, // Affichage du symbole € selon la valeur de price
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 5),
                         const Row(
                           children: [
                             Icon(Icons.local_dining), // Icône de la cuisine

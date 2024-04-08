@@ -1,5 +1,4 @@
-import 'package:tuple/tuple.dart'; // Importation du package tuple pour utiliser Tuple2
-import 'package:logger/logger.dart';
+// Importation du package tuple pour utiliser Tuple2
 
 class Restaurant {
   final int id;
@@ -44,111 +43,32 @@ class Restaurant {
     required this.numberOfReviews,
   });
 
-// #le traitement sur schedule est à déplacer dans horaires_restaurant. Ici on doit juste récupérer ce qu'il y a dans Xano
   factory Restaurant.fromJson(Map<String, dynamic> json) {
-    var logger = Logger();
     List<List<String>> schedule = [];
 
-    if(json['name'] == "Bao Express"){
-      logger.e(json['name']);
-      logger.e(json['schedule']);
-    }
     if (json['schedule'] != null && json['schedule'] is List<dynamic>) {
       List<dynamic> scheduleList = json['schedule'];
       if (scheduleList.isNotEmpty) {
         for (var item in scheduleList) {
           if (item is String) {
             List<String> daySchedule = [];
+
             // Convertir les jours en format standard
             List<String> splitItem = item.split(': ');
-              logger.e(splitItem[1]);
-            // logger.e(item);
             if (splitItem.length == 2) {
-              String day = splitItem[0];
               List<String> timeRanges = splitItem[1].split(', ');
-              logger.e(timeRanges);
               if (timeRanges.first != 'Closed') {
                 // Si le jour n'est pas fermé
                 for (var timeRange in timeRanges) {
-                  // if(json['name'] == "Land & monkeys"){
-                    logger.wtf(json['name']);
-                    logger.wtf(json['schedule']);
-                    print(json['id']);
-                  //si la data a cette tete :  "6:00 – 7:30 PM"
-
-
-                  // if(json['name'] == "Wakanda factory Paris nation"){
-                      var indexDuTiret = 0;
-                      var timerangeLength = timeRange.length;
-                    try{
-                      print("---------------------/////////////////////");
-                      logger.e(json['name']);
-                      logger.e(json['schedule']);
-                      //SI IL Y A UN TIRET (if à ajouter)
-                      try{
-                        indexDuTiret = timeRange.indexOf("–");
-                      }catch(e){
-                        logger.d(json['name']);
-                        logger.d(json['schedule']);
-                        print("Probleme de tiret");
-                      }
-                      print(timeRange);
-                      print(timeRange.substring(timerangeLength-2, timerangeLength)+"e");
-
-                      if(timeRange.substring(timerangeLength-2, timerangeLength)=="PM" //et que la premiere heure ne dépasse pas 12 et n'a pas deja PM d'écrit
-                      ){
-                        print("premierif");
-                        print(indexDuTiret);
-                        print(indexDuTiret-3);
-                        print("A"+timeRange.substring(indexDuTiret-3, indexDuTiret-1)+"A");
-                        //soit il y a écrit AM en premier
-                        print(timeRange.substring(indexDuTiret-3, indexDuTiret-1) == "AM");
-                        if(timeRange.substring(indexDuTiret-3, indexDuTiret-1) == "AM"){
-                          print("CAS AM");
-
-                          // var newtimeRange = timeRange.substring(0, indexDuTiret-3) + "PM " + timeRange.substring(indexDuTiret, timerangeLength);
-                          // timeRange=newtimeRange;
-                        //soit on est dans PM en premier
-                        }else{
-                          if(timeRange.substring(0, indexDuTiret-1) != "12:00"){
-                            print("ELSE");
-                            print(timeRange.substring(0, indexDuTiret));
-                            var newtimeRange = timeRange.substring(0, indexDuTiret-1) + " PM" + timeRange.substring(indexDuTiret-1, timerangeLength);
-                            timeRange=newtimeRange;
-                          }
-                        }
-                      }
-                    }catch(e) {
-                      // Bloc catch pour gérer l'exception
-                      logger.d(json['name']);
-                      logger.d(json['schedule']);
-                      print('Une exception a été levée : $e');
-                    }
-                    // Convertir les horaires de 12 heures en format 24 heures
-                    print(timeRange);
-                    List<String> splitTimeRange = timeRange.split(' – ');
-                    // printici
-                    print("ici");
-                      logger.e(splitTimeRange);
-                      print("XXX");
-                    if (splitTimeRange.length == 2) {
-                      // String startTime12 = splitTimeRange[0].split(' ')[0];
-                      // String endTime12 = splitTimeRange[1].split(' ')[0];
-                      print('splitimerage de 0 ');
-                      print(splitTimeRange[0]);
-                      String startTime12 = splitTimeRange[0];
-                      String endTime12 = splitTimeRange[1];
-                      print("startTime12");
-                      print(startTime12);
-                      String startTime24 = convertTo24HoursFormat(startTime12);
-                      print("starttime2222");
-                      String endTime24 = convertTo24HoursFormat(endTime12);
-                      logger.e('$startTime24 - $endTime24');
-                      daySchedule.add('$startTime24 - $endTime24');
-                      logger.e('FIN');
-                    }
-
-                  // }
+                  // Convertir les horaires de 12 heures en format 24 heures
+                  List<String> splitTimeRange = timeRange.split(' – ');
+                  if (splitTimeRange.length == 2) {
+                    String startTime12 = splitTimeRange[0].split(' ')[0];
+                    String endTime12 = splitTimeRange[1].split(' ')[0];
+                    String startTime24 = convertTo24HoursFormat(startTime12);
+                    String endTime24 = convertTo24HoursFormat(endTime12);
+                    daySchedule.add('$startTime24 - $endTime24');
+                  }
                 }
               }
               schedule.add(daySchedule);
@@ -221,8 +141,6 @@ class Restaurant {
   }
 
   static String convertTo24HoursFormat(String time12) {
-    var logger = Logger();
-    logger.w(time12);
     List<String> timeParts = time12.split(':');
     if (timeParts.length == 2) {
       String hourMinute = timeParts[0];
@@ -235,39 +153,16 @@ class Restaurant {
         String hour = hourMinute;
         String period = periodPart.substring(
             periodPart.length - 2); // Récupérer les deux derniers caractères
-        String minute59 = "00";
 
         // Convertir l'heure en format 24 heures
         if (period == 'PM' && hour != '12') {
           hour = (int.parse(hour) + 12).toString();
         } else if (period == 'AM' && hour == '12') {
-          // hour = '00';
-          hour = '23';
-          minute59 = '59';
+          hour = '00';
         }
 
-         // Supprimer l'indicateur AM/PM de la partie de la période
-        String minute = "38";
-        if(minute59!="59"){
-          minute = periodPart.substring(0, periodPart.length - 2).trim();
-        }else{
-          minute = minute59;
-
-        }
-
-
-        // // Convertir l'heure en format 24 heures
-        // if (period == 'PM' && hour != '12') {
-        //   hour = (int.parse(hour) + 12).toString();
-        // } else if (period == 'AM' && hour == '12') {
-        //   hour = '00';
-        //   // hour = '23';
-        //   // minute59 = '59';
-
-        // }
-
-        // // Supprimer l'indicateur AM/PM de la partie de la période
-        // String minute = periodPart.substring(0, periodPart.length - 2).trim();
+        // Supprimer l'indicateur AM/PM de la partie de la période
+        String minute = periodPart.substring(0, periodPart.length - 2).trim();
 
         // Formater l'heure en format 24 heures
         return '$hour:$minute';
