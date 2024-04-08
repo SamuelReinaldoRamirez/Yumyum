@@ -41,6 +41,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   int _userRatingsTotal = 0;
   String? _siteInternet;
   int _price = 0;
+  String? _cuisine;
   String? _instagram;
   String? _menu;
   List<List<String>>? _schedule;
@@ -88,6 +89,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     _userRatingsTotal = widget.restaurant.numberOfReviews;
     _photoReference = widget.restaurant.pictureProfile;
     _siteInternet = widget.restaurant.websiteUrl;
+    _cuisine = widget.restaurant.cuisine;
     try {
       _price = int.parse(widget.restaurant.price);
     } catch (e) {
@@ -292,12 +294,13 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                           ),
                         ),
                         const SizedBox(height: 5),
-                        const Row(
+                        Row(
                           children: [
                             Icon(Icons.local_dining), // Icône de la cuisine
                             SizedBox(width: 5),
                             Text(
-                              'Cuisine française', // Exemple de type de cuisine
+                              _cuisine ??
+                                  'Cuisine non spécifiée', // Exemple de type de cuisine
                               style: TextStyle(fontSize: 16),
                             ),
                           ],

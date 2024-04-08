@@ -20,6 +20,7 @@ class Restaurant {
   final List<List<String>> schedule;
   final String pictureProfile;
   final int numberOfReviews;
+  final String cuisine;
 
   Restaurant({
     required this.id,
@@ -41,6 +42,7 @@ class Restaurant {
     required this.schedule,
     required this.pictureProfile,
     required this.numberOfReviews,
+    required this.cuisine,
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
@@ -118,26 +120,27 @@ class Restaurant {
     }
 
     return Restaurant(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      address: json['address_str'] ?? '',
-      published: json['published'] ?? false,
-      latitude: latitude,
-      longitude: longitude,
-      videoLinks: videoLinks,
-      phoneNumber: json['phone_number'] ?? '',
-      tagStr: tagsId,
-      placeId: json['placeId'] ?? '',
-      ratings: json['ratings'] != null ? json['ratings'].toDouble() : 0.0,
-      reviews: [], // La liste des avis n'est pas fournie dans ce JSON, donc nous initialisons à une liste vide
-      price: json['price'] ?? '',
-      websiteUrl: json['website_url'] ?? '',
-      handicap: json['handicap'] ?? false,
-      vege: json['vege'] ?? false,
-      schedule: schedule, // Utilisation de la nouvelle structure pour l'horaire
-      pictureProfile: json['picture_profile'] ?? '',
-      numberOfReviews: json['number_of_reviews'] ?? 0,
-    );
+        id: json['id'] ?? 0,
+        name: json['name'] ?? '',
+        address: json['address_str'] ?? '',
+        published: json['published'] ?? false,
+        latitude: latitude,
+        longitude: longitude,
+        videoLinks: videoLinks,
+        phoneNumber: json['phone_number'] ?? '',
+        tagStr: tagsId,
+        placeId: json['placeId'] ?? '',
+        ratings: json['ratings'] != null ? json['ratings'].toDouble() : 0.0,
+        reviews: [], // La liste des avis n'est pas fournie dans ce JSON, donc nous initialisons à une liste vide
+        price: json['price'] ?? '',
+        websiteUrl: json['website_url'] ?? '',
+        handicap: json['handicap'] ?? false,
+        vege: json['vege'] ?? false,
+        schedule:
+            schedule, // Utilisation de la nouvelle structure pour l'horaire
+        pictureProfile: json['picture_profile'] ?? '',
+        numberOfReviews: json['number_of_reviews'] ?? 0,
+        cuisine: json['cuisine']['cuisine_name'] ?? '');
   }
 
   static String convertTo24HoursFormat(String time12) {
