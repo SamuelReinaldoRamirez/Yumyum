@@ -23,6 +23,9 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
 
   @override
   Widget build(BuildContext context) {
+    bool allDaysEmpty = widget.schedule.every((element) => element.isEmpty);
+    bool selectedDayEmpty = widget.schedule[_selectedDayIndex].isEmpty;
+
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +99,20 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                             5.0), // Ajout des bords arrondis
                       ),
                     ),
-                    _buildOpeningHoursBox(constraints.maxWidth),
+                    if (allDaysEmpty || selectedDayEmpty)
+                      Positioned.fill(
+                        child: Center(
+                          child: Text(
+                            allDaysEmpty ? 'Horaires indisponibles' : 'Fermé',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      _buildOpeningHoursBox(constraints.maxWidth),
                   ],
                 ),
               );
@@ -154,7 +170,10 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
           child: Text(
             parts[0],
             style: const TextStyle(
-                fontSize: 13, color: Colors.white, fontWeight: FontWeight.w600),
+              fontSize: 13,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       );
@@ -166,9 +185,10 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
           child: Text(
             parts[1],
             style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFFFFFF00),
-                fontWeight: FontWeight.w700),
+              fontSize: 13,
+              color: Color(0xFFFFFF00),
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       );

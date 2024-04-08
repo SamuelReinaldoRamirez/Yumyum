@@ -110,7 +110,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   }
 
   Future<void> openURL(BuildContext context, String? url) async {
-    if (url != null) {
+    if (url != null && url.isNotEmpty) {
       await Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => Scaffold(
           appBar: AppBar(
@@ -130,6 +130,13 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
           ),
         ),
       ));
+    } else {
+      // Afficher un toast "Indisponible" si l'URL est vide
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Indisponible'),
+        ),
+      );
     }
   }
 
@@ -141,6 +148,40 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
         builder: (context) => ReviewDetailsWidget(restaurant: restaurant),
       ),
     );
+  }
+
+  List<Widget> buildStarRating(double rating) {
+    List<Widget> stars = [];
+    int fullStars = rating.floor();
+    double fraction = rating - fullStars;
+
+    // Ajouter les étoiles pleines
+    for (int i = 0; i < fullStars; i++) {
+      stars.add(Icon(Icons.star, color: Colors.amber));
+    }
+
+    // Ajouter l'étoile partiellement remplie si nécessaire
+    if (fraction > 0) {
+      stars.add(Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            ClipRect(
+              clipper: FractionalClipper(convertFraction(fraction)),
+              child: Icon(Icons.star, size: 25, color: Colors.amber),
+            ),
+            Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.3))
+          ],
+        ),
+      ));
+    }
+
+    // Ajouter les étoiles vides pour compléter la note sur 5
+    for (int i = stars.length; i < 5; i++) {
+      stars.add(Icon(Icons.star, color: Colors.amber.withOpacity(0.3)));
+    }
+
+    return stars;
   }
 
   @override
@@ -199,7 +240,10 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.star, color: Colors.amber),
+                        //const Icon(Icons.star, color: Colors.amber),
+                        Row(
+                            children:
+                                buildStarRating(double.parse(_noteMoyenne))),
                         const SizedBox(width: 5),
                         Text(
                           '$_noteMoyenne ($_userRatingsTotal avis)',
@@ -207,22 +251,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                             color: Colors.black,
                             fontSize: 18,
                           ),
-                        ),
-                        const SizedBox(width: 20), // Ajout d'un espace
-                        IconButton(
-                          icon: const Icon(Icons.language),
-                          onPressed: () {
-                            openURL(context, _siteInternet);
-                            //_launchUrl(_siteInternet);
-                            print(_siteInternet);
-                            print("--------------------------");
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.photo_camera_outlined),
-                          onPressed: () {
-                            _launchUrl(_instagram);
-                          },
                         ),
                       ],
                     ),
@@ -269,20 +297,19 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                           ],
                         ),
                         SizedBox(height: 5),
-                        Row(
-                          children: [
-                            Icon(widget.restaurant.vege
-                                ? Icons.eco // Si propose des plats végétariens
-                                : Icons
-                                    .not_interested_sharp), // Si ne propose pas de plats végétariens
-                            SizedBox(width: 5),
-                            Text(
-                              widget.restaurant.vege
-                                  ? 'Propose des plats végétariens'
-                                  : 'Ne propose pas de plats végétariens',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ],
+                        Visibility(
+                          visible: widget.restaurant
+                              .vege, // Masquer le widget si vege est false
+                          child: Row(
+                            children: [
+                              Icon(Icons.eco), // Afficher l'icône eco
+                              SizedBox(width: 5),
+                              Text(
+                                'Propose des plats végétariens',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 10),
                         SizedBox(
@@ -296,6 +323,14 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                         Card(
                           child: Column(
                             children: [
+                              ListTile(
+                                leading: const Icon(Icons.menu_book),
+                                title: const Text('Menu'),
+                                onTap: () {
+                                  openURL(context, _siteInternet);
+                                },
+                              ),
+                              const Divider(),
                               ListTile(
                                 leading: const Icon(Icons.phone),
                                 title: Text(
@@ -315,14 +350,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                       ),
                                     );
                                   }
-                                },
-                              ),
-                              const Divider(),
-                              ListTile(
-                                leading: const Icon(Icons.menu_book),
-                                title: const Text('Menu'),
-                                onTap: () {
-                                  _launchUrl(_menu);
                                 },
                               ),
                               const Divider(),
