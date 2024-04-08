@@ -7,9 +7,19 @@ import 'package:yummap/search_bar.dart' as CustomSearchBar;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  
+  // List restList = await CallEndpointService.getRestaurantsFromXanos();
+  // var restListLank = restList[32];
+  // restList.clear();
+  // restList.add(restListLank);
+  // runApp(MyApp(restaurantList: restList.cast<Restaurant>()));
+
   List<Restaurant> restaurantList =
       (await CallEndpointService.getRestaurantsFromXanos()).cast<Restaurant>();
   runApp(MyApp(restaurantList: restaurantList));
+    
+
 }
 
 class MyApp extends StatelessWidget {

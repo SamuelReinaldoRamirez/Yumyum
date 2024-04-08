@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
 class HorairesRestaurant extends StatefulWidget {
   final List<List<String>> schedule;
@@ -113,7 +114,9 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
 
   // Construction du carré d'heures d'ouverture
   Widget _buildOpeningHoursBox(double containerWidth) {
+    var logger = Logger();
     List<String> times = widget.schedule[_selectedDayIndex];
+    //logger.e(times);
     times.sort((a, b) {
       // Trier par heure de début
       var startTimeA = a.split(' - ')[0];
