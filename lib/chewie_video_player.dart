@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
+import 'package:yummap/mixpanel_service.dart';
 import 'custom_controls.dart'; // Importer CustomControls ici
 
 class ChewieVideoPlayer extends StatefulWidget {
@@ -100,6 +101,7 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
   }
 
   void _enterFullScreen(BuildContext context) async {
+    MixpanelService.instance.track('PlayVideo');
     _chewieController.play(); // Lire la vidéo automatiquement en plein écran
     await Navigator.push(
       context,

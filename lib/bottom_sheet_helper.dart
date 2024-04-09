@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restau_details.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/video_carousel.dart';
@@ -102,6 +103,10 @@ class BottomSheetHelper {
   }
 
   static void _navigateToRestaurant(Restaurant restaurant) async {
+    MixpanelService.instance.track('MoveToResto', properties: {
+      'resto_id': restaurant.id,
+      'resto_name': restaurant.name,
+    });
     final url =
         'https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}';
     Uri uri = Uri.parse(url);
@@ -113,6 +118,10 @@ class BottomSheetHelper {
   }
 
   static void _navigateToTags(BuildContext context, Restaurant restaurant) {
+    MixpanelService.instance.track('DetailsResto', properties: {
+      'resto_id': restaurant.id,
+      'resto_name': restaurant.name,
+    });
     Navigator.push(
       context,
       MaterialPageRoute(

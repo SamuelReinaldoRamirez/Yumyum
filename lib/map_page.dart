@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
@@ -78,6 +79,12 @@ class MapPageState extends State<MapPage> {
 
   void _showMarkerInfo(BuildContext context, Restaurant restaurant) {
     BottomSheetHelper.showBottomSheet(context, restaurant);
+
+    // Envoyer l'événement "OpenPin" à Mixpanel
+    MixpanelService.instance.track('OpenPin', properties: {
+      'resto_id': restaurant.id,
+      'resto_name': restaurant.name,
+    });
   }
 
   void _setMapStyle(BuildContext context, GoogleMapController mapController) {

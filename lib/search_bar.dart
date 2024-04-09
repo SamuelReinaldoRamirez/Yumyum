@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/map_helper.dart';
+import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restaurant.dart';
 import 'filter_options_modal.dart';
 
@@ -56,6 +57,9 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   void _handleSubmitted(String value) {
+    MixpanelService.instance.track('TextSearch', properties: {
+      'searchText': value,
+    });
     CallEndpointService.searchRestaurantByName(value)
         .then((List<Restaurant> newRestaurants) {
       if (newRestaurants.length > 1) {
@@ -92,6 +96,7 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   void _clearSearch() {
+    MixpanelService.instance.track('ClearSearch');
     _searchController.clear();
     onSearchChanged('');
   }

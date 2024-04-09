@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/map_helper.dart';
+import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/tag.dart';
 
 import 'restaurant.dart';
@@ -30,6 +31,9 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
   }
 
   Widget _buildApplyButton(BuildContext context) {
+    MixpanelService.instance.track('FilterTagSearch', properties: {
+      'filter_ids': selectedTagIds,
+    });
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: ElevatedButton(
