@@ -49,12 +49,15 @@ class MarkerManager {
 }
 
 class MapHelper {
-  static void getCurrentLocation(Function callback) async {
+  static void getCurrentLocation(Function(Position) callback) async {
     LocationPermission permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied) {
       return;
     }
-    callback();
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    callback(position);
+    MarkerManager.updateMap();
   }
 
   static void createRestaurantLocations(
