@@ -42,8 +42,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   String? _siteInternet;
   int _price = 0;
   String? _cuisine;
-  String? _instagram;
-  String? _menu;
   List<List<String>>? _schedule;
   List<ReviewRestau> _reviews = [];
 
@@ -97,7 +95,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
       print("Erreur de conversion : $e");
     }
     // _instagram = widget.restaurant.instagram;
-    _menu = widget.restaurant.websiteUrl;
     _schedule = widget.restaurant.schedule;
     _reviews =
         widget.restaurant.reviews; // Assign reviews from Restaurant object
@@ -283,9 +280,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                         ),
                         const SizedBox(height: 10),
                         Visibility(
-                          visible: _price != null &&
-                              _price !=
-                                  0, // Rendre le widget visible si _price est valide
+                          visible: _price !=
+                              0, // Rendre le widget visible si _price est valide
                           child: Row(
                             children: [
                               Icon(Icons.payment), // Icône de paiement

@@ -80,7 +80,6 @@ class Restaurant {
             // Convertir les jours en format standard
             List<String> splitItem = item.split(': ');
             if (splitItem.length == 2) {
-              String day = splitItem[0];
               List<String> timeRanges = splitItem[1].split(', ');
               if (timeRanges.isNotEmpty) {
                 for (var timeRange in timeRanges) {
