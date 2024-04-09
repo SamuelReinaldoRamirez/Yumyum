@@ -447,7 +447,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        if (_reviews == []) ...[
+                        if (_reviews.isNotEmpty && _reviews != []) ...[
                           ListTile(
                             title: Text(_reviews[0].text),
                             subtitle: Column(
