@@ -1,6 +1,6 @@
 name: yummap
 description: "La carte aux tresors du Paris culinaire."
-version: 2.0.0+2
+version: 2.1.1+4  # Changement de la version ici
 environment:
   sdk: '>=3.2.6 <4.0.0'
 

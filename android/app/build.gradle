@@ -4,7 +4,7 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
-def flutterVersionCode = 3 // Définition du code de version
+def flutterVersionCode = 4 // Définition du code de version
 def flutterVersionName = "2.0.0" // Définition du nom de version
 
 android {
