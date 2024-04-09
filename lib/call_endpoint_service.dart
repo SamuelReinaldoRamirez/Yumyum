@@ -9,8 +9,8 @@ class CallEndpointService {
       'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/restaurants';
 
   static Future<List<Restaurant>> getRestaurantsFromXanos() async {
-    final logger = Logger();
-    logger.d('XANOS**********************');
+    // final logger = Logger();
+    // logger.d('XANOS**********************');
     try {
       final response = await http.get(Uri.parse(baseUrl));
 

@@ -63,10 +63,10 @@ class Restaurant {
 
     // Vérification du nom et du planning
     if (json.containsKey('name')) {
-      logger.e(json['name']);
+      //logger.e(json['name']);
     }
     if (json.containsKey('schedule')) {
-      logger.e(json['schedule']);
+      //logger.e(json['schedule']);
     }
 
     if (json.containsKey('schedule') &&

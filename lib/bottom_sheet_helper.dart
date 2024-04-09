@@ -107,13 +107,22 @@ class BottomSheetHelper {
       'resto_id': restaurant.id,
       'resto_name': restaurant.name,
     });
-    final url =
+
+    final String url =
         'https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}';
-    Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
+    final Uri uri = Uri.parse(url);
+
+    if (await canLaunch(uri.toString())) {
+      await launch(uri.toString(), forceSafariVC: false);
     } else {
-      //print('Could not launch $url');
+      final String fallbackUrl =
+          'https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}';
+      final Uri fallbackUri = Uri.parse(fallbackUrl);
+      if (await canLaunch(fallbackUri.toString())) {
+        await launch(fallbackUri.toString());
+      } else {
+        print('Could not launch the map.');
+      }
     }
   }
 

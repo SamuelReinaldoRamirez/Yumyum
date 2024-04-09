@@ -1,6 +1,6 @@
 name: yummap
 description: "La carte aux tresors du Paris culinaire."
-version: 2.1.1+4  # Changement de la version ici
+version: 2.1.2+4  # Changement de la version ici
 environment:
   sdk: '>=3.2.6 <4.0.0'
 
@@ -29,6 +29,9 @@ dependencies:
   flutter_rating_bar: ^4.0.0
   flutter_inappwebview: ^6.0.0
   mixpanel_flutter: ^2.2.0
+  flutter_secure_storage: ^9.0.0
+  uuid: ^4.4.0
+  mixpanel_analytics: ^2.1.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
