@@ -25,6 +25,7 @@ class MapPageState extends State<MapPage> {
     MapHelper.createRestaurantLocations(
         widget.restaurantList, restaurantLocations);
     _getCurrentLocation();
+    //_requestAppTrackingAuthorization(context);
     _createMarkers(); // Appel initial pour créer les marqueurs
   }
 
@@ -32,6 +33,10 @@ class MapPageState extends State<MapPage> {
     MapHelper.getCurrentLocation((Position position) {
       // Utilisez la position ici si nécessaire
     });
+  }
+
+  void _requestAppTrackingAuthorization(context) async {
+    MapHelper.requestAppTrackingAuthorization(context);
   }
 
   // Modifier _createMarkers pour mettre à jour la liste des marqueurs

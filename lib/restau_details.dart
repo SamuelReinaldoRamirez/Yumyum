@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart' as lat2;
 import 'package:url_launcher/url_launcher.dart';
 import 'restaurant.dart';
 import 'reviews_details.dart';
@@ -44,7 +45,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   String? _cuisine;
   List<List<String>>? _schedule;
   List<ReviewRestau> _reviews = [];
-
+  lat2.LatLng? _position;
   double convertFraction(double fraction) {
     fraction = (fraction * 10).roundToDouble();
     if (fraction < 1) {
@@ -89,6 +90,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     _photoReference = widget.restaurant.pictureProfile;
     _siteInternet = widget.restaurant.websiteUrl;
     _cuisine = widget.restaurant.cuisine;
+    _position =
+        lat2.LatLng(widget.restaurant.latitude, widget.restaurant.longitude);
     try {
       _price = int.parse(widget.restaurant.price);
     } catch (e) {
@@ -396,30 +399,36 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                               ),
                               SizedBox(
                                 height: 200,
-                                child: GoogleMap(
-                                  initialCameraPosition: CameraPosition(
-                                    target: LatLng(widget.restaurant.latitude,
-                                        widget.restaurant.longitude),
-                                    zoom: 14,
+                                child: FlutterMap(
+                                  options: MapOptions(
+                                    center: _position,
+                                    zoom: 18,
                                   ),
-                                  markers: {
-                                    Marker(
-                                      markerId:
-                                          const MarkerId('restaurant_location'),
-                                      position: LatLng(
-                                          widget.restaurant.latitude,
-                                          widget.restaurant.longitude),
-                                      infoWindow: const InfoWindow(
-                                        title: 'Restaurant',
-                                        snippet: '123 Rue du Restaurant, Ville',
-                                      ),
+                                  children: [
+                                    TileLayer(
+                                      urlTemplate:
+                                          "https://api.mapbox.com/styles/v1/yummaps/cluttp8k4003e01mjhi4vf0ii/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDEzeGQwMXVkMmxudWg5d2EybTlqIn0.hqUva2cQmp3rXHMbON8_Kw",
                                     ),
-                                  },
-                                  mapType: MapType.normal,
-                                  myLocationEnabled: true,
-                                  zoomControlsEnabled: false,
-                                  onMapCreated:
-                                      (GoogleMapController controller) {},
+                                    MarkerLayer(markers: [
+                                      Marker(
+                                        point: lat2.LatLng(
+                                            widget.restaurant.latitude,
+                                            widget.restaurant.longitude),
+                                        builder: (ctx) => Container(
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF95A472),
+                                            borderRadius:
+                                                BorderRadius.circular(20.0),
+                                          ),
+                                          child: Icon(
+                                            Icons.location_on,
+                                            color: Colors.white,
+                                            size: 30.0,
+                                          ),
+                                        ),
+                                      )
+                                    ])
+                                  ],
                                 ),
                               ),
                             ],

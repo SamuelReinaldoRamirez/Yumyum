@@ -1,9 +1,11 @@
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/map_page.dart';
+import 'package:yummap/tracking_transparency_helper.dart';
 
 class MarkerManager {
   static Set<Marker> markers = {};
@@ -58,6 +60,10 @@ class MapHelper {
         desiredAccuracy: LocationAccuracy.high);
     callback(position);
     MarkerManager.updateMap();
+  }
+
+  static Future<void> requestAppTrackingAuthorization(context) async {
+    TrackingStatusDialog.requestAppTrackingAuthorization(context);
   }
 
   static void createRestaurantLocations(
