@@ -125,15 +125,22 @@ class MapHelper {
         width: 30,
         height: 30,
         point: restaurantLocations[i],
-        builder: (ctx) => Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF95A472),
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          child: const Icon(
-            Icons.location_on,
-            color: Colors.white,
-            size: 30.0,
+        builder: (ctx) => GestureDetector(
+          onTap: () {
+            print(
+                "Tap"); // Imprime "Tap" lorsque l'utilisateur tape sur le marqueur
+            showMarkerInfo(context, restaurantList[i]);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF95A472),
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: const Icon(
+              Icons.location_on,
+              color: Colors.white,
+              size: 30.0,
+            ),
           ),
         ),
       );
