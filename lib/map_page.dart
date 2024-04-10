@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/plugin_api.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
+import 'package:latlong2/latlong.dart' as lat2;
 
 class MapPage extends StatefulWidget {
   final List<Restaurant> restaurantList;
@@ -16,8 +18,8 @@ class MapPage extends StatefulWidget {
 }
 
 class MapPageState extends State<MapPage> {
-  late GoogleMapController mapController;
-  List<LatLng> restaurantLocations = [];
+  late MapController mapController;
+  List<lat2.LatLng> restaurantLocations = [];
 
   @override
   void initState() {
@@ -26,7 +28,7 @@ class MapPageState extends State<MapPage> {
         widget.restaurantList, restaurantLocations);
     _getCurrentLocation();
     //_requestAppTrackingAuthorization(context);
-    _createMarkers(); // Appel initial pour créer les marqueurs
+    _createListMarkers(); // Appel initial pour créer les marqueurs
   }
 
   void _getCurrentLocation() async {
@@ -35,13 +37,17 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  void _requestAppTrackingAuthorization(context) async {
-    MapHelper.requestAppTrackingAuthorization(context);
-  }
-
   // Modifier _createMarkers pour mettre à jour la liste des marqueurs
   Future<void> _createMarkers() async {
     MarkerManager.markers = MapHelper.createMarkers(
+        context, widget.restaurantList, restaurantLocations, _showMarkerInfo);
+    MarkerManager.allmarkers = Set<Marker>.from(MarkerManager.markers);
+    setState(
+        () {}); // Mettre à jour l'état pour reconstruire la carte avec les nouveaux marqueurs
+  }
+
+  Future<void> _createListMarkers() async {
+    MarkerManager.markersList = MapHelper.createListMarkers(
         context, widget.restaurantList, restaurantLocations, _showMarkerInfo);
     MarkerManager.allmarkers = Set<Marker>.from(MarkerManager.markers);
     setState(
@@ -56,30 +62,26 @@ class MapPageState extends State<MapPage> {
           // Fermer le clavier lors du tap sur la carte
           FocusScope.of(context).unfocus();
         },
-        child: GoogleMap(
-          initialCameraPosition: const CameraPosition(
-            target: LatLng(48.8566, 2.339),
+        child: FlutterMap(
+          options: MapOptions(
+            center: lat2.LatLng(48.8566, 2.339),
             zoom: 12,
           ),
-          markers: MarkerManager.markers,
-          myLocationEnabled: true,
-          onMapCreated: _onMapCreated,
-          zoomControlsEnabled: false,
-          onTap: (_) {
-            // Fermer le clavier lors du tap sur la carte
-            FocusScope.of(context).unfocus();
-          },
+          children: [
+            TileLayer(
+              urlTemplate:
+                  "https://api.mapbox.com/styles/v1/yummaps/cluttp8k4003e01mjhi4vf0ii/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDEzeGQwMXVkMmxudWg5d2EybTlqIn0.hqUva2cQmp3rXHMbON8_Kw",
+              subdomains: const [
+                'a',
+                'b',
+                'c'
+              ], // pour les variations de serveur
+            ),
+            MarkerLayer(markers: MarkerManager.markersList),
+          ],
         ),
       ),
     );
-  }
-
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-    MarkerManager.mapPageState =
-        this as MapPageState?; // Affectation de la référence
-    MarkerManager.context = context;
-    _setMapStyle(context, mapController);
   }
 
   void _showMarkerInfo(BuildContext context, Restaurant restaurant) {
@@ -90,10 +92,6 @@ class MapPageState extends State<MapPage> {
       'resto_id': restaurant.id,
       'resto_name': restaurant.name,
     });
-  }
-
-  void _setMapStyle(BuildContext context, GoogleMapController mapController) {
-    MapHelper.setMapStyle(context, mapController);
   }
 
   @override

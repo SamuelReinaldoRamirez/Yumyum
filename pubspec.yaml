@@ -33,6 +33,7 @@ dependencies:
   uuid: ^4.4.0
   mixpanel_analytics: ^2.1.1
   app_tracking_transparency: ^2.0.4
+  latlong2: ^0.8.2
   #mapbox_gl: ^0.16.0
 dev_dependencies:
   flutter_test:

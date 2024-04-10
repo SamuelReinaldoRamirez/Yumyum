@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/map_page.dart';
 import 'package:yummap/tracking_transparency_helper.dart';
+import 'package:latlong2/latlong.dart' as lat2;
 
 class MarkerManager {
   static Set<Marker> markers = {};
   static Set<Marker> allmarkers = {};
   static MapPageState? mapPageState;
+  static List<Marker> markersList = [];
   static late BuildContext context;
 
   static void addMarker(Marker marker) {
@@ -66,16 +68,16 @@ class MapHelper {
   }
 
   static void createRestaurantLocations(
-      List<Restaurant> restaurantList, List<LatLng> restaurantLocations) {
+      List<Restaurant> restaurantList, List<lat2.LatLng> restaurantLocations) {
     for (var restaurant in restaurantList) {
       restaurantLocations
-          .add(LatLng(restaurant.latitude, restaurant.longitude));
+          .add(lat2.LatLng(restaurant.latitude, restaurant.longitude));
     }
   }
 
   static void createFull(
       BuildContext context, List<Restaurant> newRestaurants) {
-    List<LatLng> newLocations = [];
+    List<lat2.LatLng> newLocations = [];
     createRestaurantLocations(newRestaurants, newLocations);
     Set<Marker> newMarkers = MapHelper.createMarkers(
         context, newRestaurants, newLocations, _showMarkerInfo);
@@ -87,31 +89,58 @@ class MapHelper {
   }
 
   static Future<void> setMapStyle(
-      BuildContext context, GoogleMapController mapController) async {
-    String style = await DefaultAssetBundle.of(context)
-        .loadString('assets/custom_map.json');
-    mapController.setMapStyle(style);
+      BuildContext context, MapController mapController) async {
+    // String style = await DefaultAssetBundle.of(context)
+    //     .loadString('assets/custom_map.json');
+    //mapController.style(style);
   }
 
   static Set<Marker> createMarkers(
       BuildContext context,
       List<Restaurant> restaurantList,
-      List<LatLng> restaurantLocations,
+      List<lat2.LatLng> restaurantLocations,
       Function(BuildContext context, Restaurant r) showMarkerInfo) {
     Set<Marker> markers = {};
 
     for (int i = 0; i < restaurantLocations.length; i++) {
       Marker marker = Marker(
-        markerId: MarkerId(restaurantList[i].name),
-        position: restaurantLocations[i],
-        onTap: () {
-          showMarkerInfo(context, restaurantList[i]);
-        },
-      );
+          point: restaurantLocations[i],
+          builder: showMarkerInfo(context, restaurantList[i]));
       markers.add(marker);
     }
 
     MarkerManager.markers = markers;
+    return markers;
+  }
+
+  static List<Marker> createListMarkers(
+      BuildContext context,
+      List<Restaurant> restaurantList,
+      List<lat2.LatLng> restaurantLocations,
+      Function(BuildContext context, Restaurant r) showMarkerInfo) {
+    List<Marker> markers = [];
+
+    for (int i = 0; i < restaurantLocations.length; i++) {
+      Marker marker = Marker(
+        width: 30,
+        height: 30,
+        point: restaurantLocations[i],
+        builder: (ctx) => Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF95A472),
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: const Icon(
+            Icons.location_on,
+            color: Colors.white,
+            size: 30.0,
+          ),
+        ),
+      );
+      markers.add(marker);
+    }
+
+    MarkerManager.markersList = markers;
     return markers;
   }
 }

@@ -420,7 +420,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                             borderRadius:
                                                 BorderRadius.circular(20.0),
                                           ),
-                                          child: Icon(
+                                          child: const Icon(
                                             Icons.location_on,
                                             color: Colors.white,
                                             size: 30.0,
