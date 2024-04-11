@@ -114,10 +114,11 @@ class MapHelper {
   }
 
   static List<Marker> createListMarkers(
-      BuildContext context,
-      List<Restaurant> restaurantList,
-      List<lat2.LatLng> restaurantLocations,
-      Function(BuildContext context, Restaurant r) showMarkerInfo) {
+    BuildContext context,
+    List<Restaurant> restaurantList,
+    List<lat2.LatLng> restaurantLocations,
+    Function(BuildContext context, Restaurant r) showMarkerInfo,
+  ) {
     List<Marker> markers = [];
 
     for (int i = 0; i < restaurantLocations.length; i++) {
@@ -131,15 +132,27 @@ class MapHelper {
                 "Tap"); // Imprime "Tap" lorsque l'utilisateur tape sur le marqueur
             showMarkerInfo(context, restaurantList[i]);
           },
-          child: Container(
+          child: const DecoratedBox(
             decoration: BoxDecoration(
-              color: const Color(0xFF95A472),
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            child: const Icon(
-              Icons.location_on,
               color: Colors.white,
-              size: 30.0,
+              shape: BoxShape.circle,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(2),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Color(0xFF95A472),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  // Centrer l'icône à l'intérieur du cercle
+                  child: Icon(
+                    Icons.local_dining_outlined, // Utiliser l'icône de broche
+                    size: 24, // Ajuster la taille de l'icône selon vos besoins
+                    color: Color(0xFFDDFCAD), // Couleur de l'icône
+                  ),
+                ),
+              ),
             ),
           ),
         ),

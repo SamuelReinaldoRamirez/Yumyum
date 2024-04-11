@@ -70,7 +70,8 @@ class MapPageState extends State<MapPage> {
           children: [
             TileLayer(
               urlTemplate:
-                  "https://api.mapbox.com/styles/v1/yummaps/cluttp8k4003e01mjhi4vf0ii/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDEzeGQwMXVkMmxudWg5d2EybTlqIn0.hqUva2cQmp3rXHMbON8_Kw",
+                  //"https://api.mapbox.com/styles/v1/yummaps/cluttp8k4003e01mjhi4vf0ii/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDEzeGQwMXVkMmxudWg5d2EybTlqIn0.hqUva2cQmp3rXHMbON8_Kw",
+                  "https://api.mapbox.com/styles/v1/yummaps/cluuzxyp8005m01qxd9xhaipu/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDEzeGQwMXVkMmxudWg5d2EybTlqIn0.hqUva2cQmp3rXHMbON8_Kw",
               subdomains: const [
                 'a',
                 'b',
