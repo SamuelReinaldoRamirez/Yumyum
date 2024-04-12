@@ -55,6 +55,7 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
               ),
             );
           } else {
+            print(newRestaurants);
             MarkerManager.createFull(context, newRestaurants);
             Navigator.of(context).pop(); // Ferme le BottomSheet
           }

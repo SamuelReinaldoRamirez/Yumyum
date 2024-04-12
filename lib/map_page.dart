@@ -27,7 +27,10 @@ class MapPageState extends State<MapPage> {
     MapHelper.createRestaurantLocations(
         widget.restaurantList, restaurantLocations);
     _getCurrentLocation();
+    mapController = MapController();
     //_requestAppTrackingAuthorization(context);
+    MarkerManager.mapPageState = this;
+    MarkerManager.context = context;
     _createListMarkers(); // Appel initial pour créer les marqueurs
   }
 
@@ -39,9 +42,9 @@ class MapPageState extends State<MapPage> {
 
   // Modifier _createMarkers pour mettre à jour la liste des marqueurs
   Future<void> _createMarkers() async {
-    MarkerManager.markers = MapHelper.createMarkers(
+    MarkerManager.markersList = MapHelper.createMarkers(
         context, widget.restaurantList, restaurantLocations, _showMarkerInfo);
-    MarkerManager.allmarkers = Set<Marker>.from(MarkerManager.markers);
+    MarkerManager.allmarkers = List<Marker>.from(MarkerManager.markersList);
     setState(
         () {}); // Mettre à jour l'état pour reconstruire la carte avec les nouveaux marqueurs
   }
@@ -49,7 +52,7 @@ class MapPageState extends State<MapPage> {
   Future<void> _createListMarkers() async {
     MarkerManager.markersList = MapHelper.createListMarkers(
         context, widget.restaurantList, restaurantLocations, _showMarkerInfo);
-    MarkerManager.allmarkers = Set<Marker>.from(MarkerManager.markers);
+    MarkerManager.allmarkers = List<Marker>.from(MarkerManager.markersList);
     setState(
         () {}); // Mettre à jour l'état pour reconstruire la carte avec les nouveaux marqueurs
   }
@@ -57,42 +60,39 @@ class MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GestureDetector(
-        onTap: () {
-          // Fermer le clavier lors du tap sur la carte
-          FocusScope.of(context).unfocus();
-        },
-        child: FlutterMap(
-          options: MapOptions(
-            center: lat2.LatLng(48.8566, 2.339),
-            zoom: 12,
-          ),
-          children: [
-            TileLayer(
-              urlTemplate:
-                  "https://api.mapbox.com/styles/v1/yummaps/cluttp8k4003e01mjhi4vf0ii/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDEzeGQwMXVkMmxudWg5d2EybTlqIn0.hqUva2cQmp3rXHMbON8_Kw",
-              //"https://api.mapbox.com/styles/v1/yummaps/cluuzxyp8005m01qxd9xhaipu/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDEzeGQwMXVkMmxudWg5d2EybTlqIn0.hqUva2cQmp3rXHMbON8_Kw",
-              subdomains: const [
-                'a',
-                'b',
-                'c'
-              ], // pour les variations de serveur
-            ),
-            MarkerLayer(markers: MarkerManager.markersList),
-          ],
+      body: FlutterMap(
+        mapController: mapController,
+        options: MapOptions(
+          center: lat2.LatLng(48.8566, 2.339),
+          zoom: 12,
+          onTap: (tapPosition, point) {
+            // Fermer le clavier lors du tap sur la carte
+            FocusScope.of(context).unfocus();
+            print("unfocus");
+          },
         ),
+        children: [
+          TileLayer(
+            urlTemplate:
+                "https://api.mapbox.com/styles/v1/yummaps/cluttp8k4003e01mjhi4vf0ii/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDEzeGQwMXVkMmxudWg5d2EybTlqIn0.hqUva2cQmp3rXHMbON8_Kw",
+            subdomains: const ['a', 'b', 'c'],
+          ),
+          MarkerLayer(markers: MarkerManager.markersList),
+        ],
       ),
     );
   }
 
   void _showMarkerInfo(BuildContext context, Restaurant restaurant) {
-    BottomSheetHelper.showBottomSheet(context, restaurant);
-
     // Envoyer l'événement "OpenPin" à Mixpanel
     MixpanelService.instance.track('OpenPin', properties: {
       'resto_id': restaurant.id,
       'resto_name': restaurant.name,
     });
+
+    mapController.move(lat2.LatLng(restaurant.latitude, restaurant.longitude),
+        mapController.zoom);
+    BottomSheetHelper.showBottomSheet(context, restaurant);
   }
 
   @override

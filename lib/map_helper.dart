@@ -8,29 +8,29 @@ import 'package:yummap/tracking_transparency_helper.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 
 class MarkerManager {
-  static Set<Marker> markers = {};
-  static Set<Marker> allmarkers = {};
+  //static Set<Marker> markers = {};
+  static List<Marker> allmarkers = [];
   static MapPageState? mapPageState;
   static List<Marker> markersList = [];
   static late BuildContext context;
 
   static void addMarker(Marker marker) {
-    markers.add(marker);
+    markersList.add(marker);
     updateMap();
   }
 
   static void clearMarkers() {
-    markers.clear();
+    markersList.clear();
     updateMap();
   }
 
   static void removeMarker(Marker marker) {
-    markers.remove(marker);
+    markersList.remove(marker);
     updateMap();
   }
 
   static void pop() {
-    markers.remove(markers.first);
+    markersList.remove(markersList.first);
     updateMap();
   }
 
@@ -46,7 +46,7 @@ class MarkerManager {
   }
 
   static void resetMarkers() {
-    markers = Set<Marker>.from(allmarkers);
+    markersList = List<Marker>.from(allmarkers);
     updateMap();
   }
 }
@@ -79,9 +79,9 @@ class MapHelper {
       BuildContext context, List<Restaurant> newRestaurants) {
     List<lat2.LatLng> newLocations = [];
     createRestaurantLocations(newRestaurants, newLocations);
-    Set<Marker> newMarkers = MapHelper.createMarkers(
+    List<Marker> newMarkers = MapHelper.createListMarkers(
         context, newRestaurants, newLocations, _showMarkerInfo);
-    MarkerManager.markers = newMarkers;
+    MarkerManager.markersList = newMarkers;
   }
 
   static void _showMarkerInfo(BuildContext context, Restaurant restaurant) {
@@ -95,12 +95,12 @@ class MapHelper {
     //mapController.style(style);
   }
 
-  static Set<Marker> createMarkers(
+  static List<Marker> createMarkers(
       BuildContext context,
       List<Restaurant> restaurantList,
       List<lat2.LatLng> restaurantLocations,
       Function(BuildContext context, Restaurant r) showMarkerInfo) {
-    Set<Marker> markers = {};
+    List<Marker> markers = [];
 
     for (int i = 0; i < restaurantLocations.length; i++) {
       Marker marker = Marker(
@@ -109,7 +109,7 @@ class MapHelper {
       markers.add(marker);
     }
 
-    MarkerManager.markers = markers;
+    MarkerManager.markersList = markers;
     return markers;
   }
 
