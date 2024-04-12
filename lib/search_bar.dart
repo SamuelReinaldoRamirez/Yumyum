@@ -34,7 +34,7 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
           suffixIcon: IconButton(
             icon: const Icon(Icons.clear),
             onPressed: () async {
-              _clearSearch();
+              _clearSearch(context);
               MarkerManager.resetMarkers();
             },
           ),
@@ -89,9 +89,10 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
     });
   }
 
-  void _clearSearch() {
+  void _clearSearch(context) {
     MixpanelService.instance.track('ClearSearch');
     _searchController.clear();
     onSearchChanged('');
+    FocusScope.of(context).requestFocus(FocusNode());
   }
 }

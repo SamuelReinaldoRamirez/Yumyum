@@ -67,7 +67,7 @@ class MapPageState extends State<MapPage> {
           zoom: 12,
           onTap: (tapPosition, point) {
             // Fermer le clavier lors du tap sur la carte
-            FocusScope.of(context).unfocus();
+            FocusScope.of(context).requestFocus(FocusNode());
             print("unfocus");
           },
         ),
