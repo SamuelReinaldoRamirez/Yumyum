@@ -30,24 +30,63 @@ class BottomSheetHelper {
                       flex: 4,
                       child: Container(
                         margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          restaurant.name,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54,
-                          ),
+                        child: Column(
+                          children: [
+                            Text(
+                              restaurant.name,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF646165),
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.star,
+                                  color: Colors.amber, // Couleur de l'étoile
+                                ),
+                                Text(
+                                  restaurant.ratings
+                                      .toString(), // Affichage de la note du restaurant
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(top: 8),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                color:
+                                    Color(0xFF646165), // Couleur de la pastille
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                restaurant.cuisine,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ), // Deuxième colonne avec champ texte
                     ),
                     Expanded(
                       flex: 1,
                       child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                        margin: const EdgeInsets.only(right: 8.0),
                         child: IconButton(
                           icon: const Icon(Icons.info_outline),
-                          color: Colors.blue,
+                          iconSize: 40,
+                          color: Color(0xFF95A472),
                           onPressed: () {
                             _navigateToTags(context, restaurant);
                           },
@@ -65,13 +104,7 @@ class BottomSheetHelper {
                 //   ),
                 // ),
                 const SizedBox(height: 8),
-                Text(
-                  restaurant.address,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87,
-                  ),
-                ),
+
                 const SizedBox(height: 16),
                 VideoCarousel(videoLinks: restaurant.videoLinks),
                 const SizedBox(height: 16),

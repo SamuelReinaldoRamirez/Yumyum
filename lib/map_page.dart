@@ -26,12 +26,13 @@ class MapPageState extends State<MapPage> {
     super.initState();
     MapHelper.createRestaurantLocations(
         widget.restaurantList, restaurantLocations);
-    _getCurrentLocation();
+
     mapController = MapController();
     //_requestAppTrackingAuthorization(context);
     MarkerManager.mapPageState = this;
     MarkerManager.context = context;
     _createListMarkers(); // Appel initial pour créer les marqueurs
+    _getCurrentLocation();
   }
 
   void _getCurrentLocation() async {

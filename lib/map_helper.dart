@@ -60,6 +60,30 @@ class MapHelper {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
     callback(position);
+    Marker marker = Marker(
+      width: 20.0,
+      height: 20.0,
+      point: lat2.LatLng(
+          position.latitude,
+          position
+              .longitude), // Utilisation de LatLng pour définir les coordonnées
+      builder: (ctx) => const DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(2),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+      ),
+    );
+    MarkerManager.addMarker(marker);
     MarkerManager.updateMap();
   }
 
