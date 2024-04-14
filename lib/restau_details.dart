@@ -199,300 +199,309 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.restaurant.name),
-      ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      Image.network(
-                        _photoReference,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: 200,
-                      ),
-                      Positioned.fill(
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              colors: [
-                                Color.fromRGBO(0, 0, 0, 0.5),
-                                Colors.transparent,
-                              ],
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        if (details.primaryVelocity! > 0) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.restaurant.name),
+        ),
+        body: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        Image.network(
+                          _photoReference,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: 200,
+                        ),
+                        Positioned.fill(
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Color.fromRGBO(0, 0, 0, 0.5),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                            padding: const EdgeInsets.only(
+                                bottom: 15), // Ajout de la marge en bas
+                            alignment:
+                                Alignment.bottomCenter, // Alignement en bas
+                            child: Text(
+                              widget.restaurant.name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
-                          padding: const EdgeInsets.only(
-                              bottom: 15), // Ajout de la marge en bas
-                          alignment:
-                              Alignment.bottomCenter, // Alignement en bas
-                          child: Text(
-                            widget.restaurant.name,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          //const Icon(Icons.star, color: Colors.amber),
+                          Row(
+                              children:
+                                  buildStarRating(double.parse(_noteMoyenne))),
+                          const SizedBox(width: 5),
+                          Text(
+                            '$_noteMoyenne ($_userRatingsTotal avis)',
                             style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
+                              color: Colors.black,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Informations :',
+                            style: TextStyle(
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        //const Icon(Icons.star, color: Colors.amber),
-                        Row(
-                            children:
-                                buildStarRating(double.parse(_noteMoyenne))),
-                        const SizedBox(width: 5),
-                        Text(
-                          '$_noteMoyenne ($_userRatingsTotal avis)',
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Informations :',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Visibility(
-                          visible: _price !=
-                              0, // Rendre le widget visible si _price est valide
-                          child: Row(
-                            children: [
-                              Icon(Icons.payment), // Icône de paiement
-                              SizedBox(width: 5),
-                              Text(
-                                '€' *
-                                    _price, // Affichage du symbole € selon la valeur de price
-                                style: TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            Icon(Icons.local_dining), // Icône de la cuisine
-                            SizedBox(width: 5),
-                            Text(
-                              _cuisine ??
-                                  'Cuisine non spécifiée', // Exemple de type de cuisine
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            Icon(widget.restaurant.handicap
-                                ? Icons
-                                    .accessibility // Si accessible aux personnes à mobilité réduite
-                                : Icons
-                                    .not_accessible), // Si non accessible aux personnes à mobilité réduite
-                            SizedBox(width: 5),
-                            Text(
-                              widget.restaurant.handicap
-                                  ? 'Adapté à la mobilité réduite'
-                                  : 'Non adapté à la mobilité réduite',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 5),
-                        Visibility(
-                          visible: widget.restaurant
-                              .vege, // Masquer le widget si vege est false
-                          child: Row(
-                            children: [
-                              Icon(Icons.eco), // Afficher l'icône eco
-                              SizedBox(width: 5),
-                              Text(
-                                'Propose des plats végétariens',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          height: 130,
-                          child: HorairesRestaurant(
-                            schedule: _schedule ??
-                                [], // Utilisation de l'opérateur ?? pour fournir une valeur par défaut
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Card(
-                          child: Column(
-                            children: [
-                              ListTile(
-                                leading: const Icon(Icons.menu_book),
-                                title: const Text('Menu'),
-                                onTap: () {
-                                  openURL(context, _siteInternet);
-                                },
-                              ),
-                              const Divider(),
-                              ListTile(
-                                leading: const Icon(Icons.phone),
-                                title: Text(
-                                    widget.restaurant.phoneNumber.isNotEmpty
-                                        ? widget.restaurant.phoneNumber
-                                        : 'Indisponible'),
-                                onTap: () {
-                                  if (widget
-                                      .restaurant.phoneNumber.isNotEmpty) {
-                                    launch(
-                                        'tel://${widget.restaurant.phoneNumber}');
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            'Numéro de téléphone non disponible'),
-                                      ),
-                                    );
-                                  }
-                                },
-                              ),
-                              const Divider(),
-                              ListTile(
-                                leading: const Icon(Icons.location_on),
-                                title: Text(widget.restaurant.address),
-                                onTap: () {
-                                  Clipboard.setData(ClipboardData(
-                                      text: widget.restaurant.address));
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: const Text(
-                                          'Adresse copiée dans le presse-papiers'),
-                                    ),
-                                  );
-                                },
-                              ),
-                              SizedBox(
-                                height: 200,
-                                child: FlutterMap(
-                                  options: MapOptions(
-                                    center: _position,
-                                    zoom: 18,
-                                  ),
-                                  children: [
-                                    TileLayer(
-                                      urlTemplate:
-                                          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                                      subdomains: const ['a', 'b', 'c'],
-                                    ),
-                                    MarkerLayer(markers: [
-                                      Marker(
-                                        point: lat2.LatLng(
-                                            widget.restaurant.latitude,
-                                            widget.restaurant.longitude),
-                                        builder: (ctx) => Container(
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF95A472),
-                                            borderRadius:
-                                                BorderRadius.circular(20.0),
-                                          ),
-                                          child: const Icon(
-                                            Icons.location_on,
-                                            color: Colors.white,
-                                            size: 30.0,
-                                          ),
-                                        ),
-                                      )
-                                    ])
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Avis clients :',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        if (_reviews.isNotEmpty && _reviews != []) ...[
-                          ListTile(
-                            title: Text(_reviews[0].text),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(height: 10),
+                          Visibility(
+                            visible: _price !=
+                                0, // Rendre le widget visible si _price est valide
+                            child: Row(
                               children: [
-                                SizedBox(height: 5),
+                                Icon(Icons.payment), // Icône de paiement
+                                SizedBox(width: 5),
                                 Text(
-                                  '- ${_reviews[0].author}',
-                                  style: TextStyle(fontStyle: FontStyle.italic),
+                                  '€' *
+                                      _price, // Affichage du symbole € selon la valeur de price
+                                  style: TextStyle(fontSize: 16),
                                 ),
                               ],
                             ),
                           ),
-                          if (_reviews.length > 1) ...[
-                            const SizedBox(height: 10),
-                            ElevatedButton(
-                              onPressed: () {
-                                _navigateToReviewDetails(
-                                    context, widget.restaurant, _reviews);
-                              },
-                              child: const Text('Voir plus d\'avis'),
-                            ),
-                          ],
-                        ] else ...[
-                          const Row(
+                          const SizedBox(height: 5),
+                          Row(
                             children: [
-                              Icon(Icons.chat_outlined),
-                              SizedBox(width: 10),
-                              Text('Avis clients indisponibles'),
+                              Icon(Icons.local_dining), // Icône de la cuisine
+                              SizedBox(width: 5),
+                              Text(
+                                _cuisine ??
+                                    'Cuisine non spécifiée', // Exemple de type de cuisine
+                                style: TextStyle(fontSize: 16),
+                              ),
                             ],
-                          )
+                          ),
+                          const SizedBox(height: 5),
+                          Row(
+                            children: [
+                              Icon(widget.restaurant.handicap
+                                  ? Icons
+                                      .accessibility // Si accessible aux personnes à mobilité réduite
+                                  : Icons
+                                      .not_accessible), // Si non accessible aux personnes à mobilité réduite
+                              SizedBox(width: 5),
+                              Text(
+                                widget.restaurant.handicap
+                                    ? 'Adapté à la mobilité réduite'
+                                    : 'Non adapté à la mobilité réduite',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 5),
+                          Visibility(
+                            visible: widget.restaurant
+                                .vege, // Masquer le widget si vege est false
+                            child: Row(
+                              children: [
+                                Icon(Icons.eco), // Afficher l'icône eco
+                                SizedBox(width: 5),
+                                Text(
+                                  'Propose des plats végétariens',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            height: 130,
+                            child: HorairesRestaurant(
+                              schedule: _schedule ??
+                                  [], // Utilisation de l'opérateur ?? pour fournir une valeur par défaut
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Card(
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  leading: const Icon(Icons.menu_book),
+                                  title: const Text('Menu'),
+                                  onTap: () {
+                                    openURL(context, _siteInternet);
+                                  },
+                                ),
+                                const Divider(),
+                                ListTile(
+                                  leading: const Icon(Icons.phone),
+                                  title: Text(
+                                      widget.restaurant.phoneNumber.isNotEmpty
+                                          ? widget.restaurant.phoneNumber
+                                          : 'Indisponible'),
+                                  onTap: () {
+                                    if (widget
+                                        .restaurant.phoneNumber.isNotEmpty) {
+                                      launch(
+                                          'tel://${widget.restaurant.phoneNumber}');
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Numéro de téléphone non disponible'),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                                const Divider(),
+                                ListTile(
+                                  leading: const Icon(Icons.location_on),
+                                  title: Text(widget.restaurant.address),
+                                  onTap: () {
+                                    Clipboard.setData(ClipboardData(
+                                        text: widget.restaurant.address));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: const Text(
+                                            'Adresse copiée dans le presse-papiers'),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                SizedBox(
+                                  height: 200,
+                                  child: FlutterMap(
+                                    options: MapOptions(
+                                      center: _position,
+                                      zoom: 18,
+                                    ),
+                                    children: [
+                                      TileLayer(
+                                        urlTemplate:
+                                            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                                        subdomains: const ['a', 'b', 'c'],
+                                      ),
+                                      MarkerLayer(markers: [
+                                        Marker(
+                                          point: lat2.LatLng(
+                                              widget.restaurant.latitude,
+                                              widget.restaurant.longitude),
+                                          builder: (ctx) => Container(
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF95A472),
+                                              borderRadius:
+                                                  BorderRadius.circular(20.0),
+                                            ),
+                                            child: const Icon(
+                                              Icons.location_on,
+                                              color: Colors.white,
+                                              size: 30.0,
+                                            ),
+                                          ),
+                                        )
+                                      ])
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
                         ],
-                      ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 30),
-                ],
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Avis clients :',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          if (_reviews.isNotEmpty && _reviews != []) ...[
+                            ListTile(
+                              title: Text(_reviews[0].text),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 5),
+                                  Text(
+                                    '- ${_reviews[0].author}',
+                                    style:
+                                        TextStyle(fontStyle: FontStyle.italic),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (_reviews.length > 1) ...[
+                              const SizedBox(height: 10),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _navigateToReviewDetails(
+                                      context, widget.restaurant, _reviews);
+                                },
+                                child: const Text('Voir plus d\'avis'),
+                              ),
+                            ],
+                          ] else ...[
+                            const Row(
+                              children: [
+                                Icon(Icons.chat_outlined),
+                                SizedBox(width: 10),
+                                Text('Avis clients indisponibles'),
+                              ],
+                            )
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 }

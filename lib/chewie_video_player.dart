@@ -103,21 +103,47 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
   void _enterFullScreen(BuildContext context) async {
     MixpanelService.instance.track('PlayVideo');
     _chewieController.play(); // Lire la vidéo automatiquement en plein écran
+
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) {
+      PageRouteBuilder(
+        transitionDuration:
+            Duration(milliseconds: 500), // Durée de la transition
+        pageBuilder: (context, animation, secondaryAnimation) {
           return Scaffold(
             backgroundColor: Colors.black, // Fond noir
-            body: Center(
-              child: Chewie(
-                controller: _chewieController,
+            body: GestureDetector(
+              onVerticalDragUpdate: (details) {
+                // Si le geste est vers le bas, fermez la vidéo
+                if (details.delta.dy > 0) {
+                  Navigator.pop(context);
+                }
+              },
+              child: Center(
+                child: Chewie(
+                  controller: _chewieController,
+                ),
               ),
             ),
           );
         },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          var begin = Offset(0.0, 1.0); // Départ de la transition en bas
+          var end = Offset.zero; // Arrivée de la transition
+          var curve = Curves.easeInOut; // Courbe de l'animation
+
+          var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+          // Créer un SlideTransition avec l'animation donnée
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        },
       ),
     );
+
     _pauseVideo();
   }
 }
