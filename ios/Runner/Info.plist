@@ -51,12 +51,13 @@
     <key>UIStatusBarHidden</key>
     <false/>
 
-    <!-- Autorisation d'accès à la localisation -->
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Afficher votre position sur la carte</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>Utilisation de la localisation en arrière-plan</string>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>Utilisation de la localisation en premier plan et en arrière-plan</string>
+<!-- Autorisation d'accès à la localisation -->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Cette application utilise votre localisation pour afficher votre position sur la carte lorsque vous l'utilisez.</string>
+<key>NSLocationAlwaysUsageDescription</key>
+<string>Cette application utilise votre localisation en arrière-plan pour fournir des fonctionnalités supplémentaires, même lorsque vous ne l'utilisez pas activement.</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Cette application utilise votre localisation en premier plan et en arrière-plan pour des fonctionnalités critiques, telles que la navigation et les alertes de proximité.</string>
+
 </dict>
 </plist>
