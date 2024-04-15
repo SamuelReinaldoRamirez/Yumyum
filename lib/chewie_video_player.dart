@@ -110,16 +110,18 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
         transitionDuration:
             Duration(milliseconds: 500), // Durée de la transition
         pageBuilder: (context, animation, secondaryAnimation) {
-          return Scaffold(
-            backgroundColor: Colors.black, // Fond noir
-            body: GestureDetector(
-              onVerticalDragUpdate: (details) {
-                // Si le geste est vers le bas, fermez la vidéo
-                if (details.delta.dy > 0) {
-                  Navigator.pop(context);
-                }
-              },
-              child: Center(
+          return GestureDetector(
+            // Ajouter un GestureDetector
+            onVerticalDragEnd: (details) {
+              // Détecter le scroll vertical
+              if (details.primaryVelocity! > 0) {
+                // Si le scroll est vers le bas
+                Navigator.pop(context); // Quitter le plein écran
+              }
+            },
+            child: Scaffold(
+              backgroundColor: Colors.black, // Fond noir
+              body: Center(
                 child: Chewie(
                   controller: _chewieController,
                 ),

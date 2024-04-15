@@ -7,7 +7,7 @@ import 'package:yummap/chewie_video_player.dart';
 class VideoCarousel extends StatefulWidget {
   final List<String> videoLinks;
 
-  const VideoCarousel({super.key, required this.videoLinks});
+  const VideoCarousel({Key? key, required this.videoLinks}) : super(key: key);
 
   @override
   _VideoCarouselState createState() => _VideoCarouselState();
@@ -45,7 +45,7 @@ class _VideoCarouselState extends State<VideoCarousel>
       itemCount: widget.videoLinks.length,
       options: CarouselOptions(
         height: 200,
-        viewportFraction: 0.6,
+        viewportFraction: 0.5,
         enableInfiniteScroll: false,
         enlargeCenterPage: false,
         initialPage: 0,
