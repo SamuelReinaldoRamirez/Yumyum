@@ -71,13 +71,13 @@ class AppTextStyles {
   // Style de texte pour les hints (blanc et sombre)
   static const TextStyle hintTextWhiteStyle = TextStyle(
     fontFamily: AppFonts.textFontFamily,
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.white,
   );
 
   static const TextStyle hintTextDarkStyle = TextStyle(
     fontFamily: AppFonts.textFontFamily,
-    fontSize: 14,
+    fontSize: 13,
     color: AppColors.oliveGreen,
   );
 

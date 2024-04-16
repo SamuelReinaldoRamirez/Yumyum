@@ -62,7 +62,7 @@ class BottomSheetHelper {
                                 borderRadius: BorderRadius.circular(3),
                               ),
                               child: Text(restaurant.cuisine,
-                                  style: AppTextStyles.paragraphWhiteStyle),
+                                  style: AppTextStyles.hintTextWhiteStyle),
                             ),
                           ],
                         ),
