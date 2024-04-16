@@ -9,6 +9,19 @@ flutter:
   assets:
     - assets/splash.png
     - assets/custom_map.json
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins/Poppins-Italic.ttf
+        - asset: assets/fonts/Poppins/Poppins-Bold.ttf
+        - asset: assets/fonts/Poppins/Poppins-BoldItalic.ttf
+        # Ajoutez d'autres variantes de la police Poppins si nécessaire
+    - family: Sifonn
+      fonts:
+        - asset: assets/fonts/sifonn/SIFONN_PRO.otf
+        # Ajoutez d'autres variantes de la police Sifonn si nécessaire
+
 
 dependencies:
   flutter:

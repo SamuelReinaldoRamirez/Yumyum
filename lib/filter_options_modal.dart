@@ -3,6 +3,7 @@ import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/tag.dart';
+import 'package:yummap/theme.dart';
 
 import 'restaurant.dart';
 
@@ -60,21 +61,18 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
             Navigator.of(context).pop(); // Ferme le BottomSheet
           }
         },
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all<Color>(
-              Colors.grey.shade50), // Couleur de fond bleue
-        ),
+        style: AppButtonStyles.elevatedButtonStyle,
         child: const Text('Appliquer'),
       ),
     );
   }
 
   Widget _buildTitle(BuildContext context) {
-    return Padding(
+    return const Padding(
       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
       child: Text(
         'Filtres',
-        style: Theme.of(context).textTheme.titleLarge,
+        style: AppTextStyles.titleDarkStyle,
       ),
     );
   }
@@ -98,8 +96,13 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
                   itemBuilder: (context, index) {
                     final tag = tagList[index];
                     return CheckboxListTile(
-                      title: Text(tag.tag),
+                      title: Text(
+                        tag.tag,
+                        style: AppTextStyles.paragraphDarkStyle,
+                      ),
                       value: selectedTagIds.contains(tag.id),
+                      checkColor: Colors.white,
+                      activeColor: AppColors.greenishGrey,
                       onChanged: (bool? value) {
                         setState(() {
                           if (value != null && value) {

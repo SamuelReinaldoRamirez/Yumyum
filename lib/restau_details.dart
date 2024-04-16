@@ -4,6 +4,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:yummap/theme.dart';
 import 'restaurant.dart';
 import 'reviews_details.dart';
 import 'horaires_restaurant.dart';
@@ -132,7 +133,10 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                 Navigator.of(context).pop();
               },
             ),
-            title: const Text('Yummap Navigator'),
+            title: const Text(
+              'Yummap Navigator',
+              style: AppTextStyles.titleDarkStyle,
+            ),
           ),
           body: SafeArea(
             child: InAppWebView(
@@ -170,7 +174,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
 
     // Ajouter les étoiles pleines
     for (int i = 0; i < fullStars; i++) {
-      stars.add(Icon(Icons.star, color: Colors.amber));
+      stars.add(Icon(Icons.star, color: AppColors.orangeBG));
     }
 
     // Ajouter l'étoile partiellement remplie si nécessaire
@@ -181,9 +185,10 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
           children: <Widget>[
             ClipRect(
               clipper: FractionalClipper(convertFraction(fraction)),
-              child: Icon(Icons.star, size: 25, color: Colors.amber),
+              child: Icon(Icons.star, size: 25, color: AppColors.orangeBG),
             ),
-            Icon(Icons.star, size: 25, color: Colors.amber.withOpacity(0.3))
+            Icon(Icons.star,
+                size: 25, color: AppColors.orangeBG.withOpacity(0.3))
           ],
         ),
       ));
@@ -191,7 +196,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
 
     // Ajouter les étoiles vides pour compléter la note sur 5
     for (int i = stars.length; i < 5; i++) {
-      stars.add(Icon(Icons.star, color: Colors.amber.withOpacity(0.3)));
+      stars.add(Icon(Icons.star, color: AppColors.orangeBG.withOpacity(0.3)));
     }
 
     return stars;
@@ -207,7 +212,10 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.restaurant.name),
+          title: Text(
+            widget.restaurant.name,
+            style: AppTextStyles.titleDarkStyle,
+          ),
         ),
         body: _isLoading
             ? Center(child: CircularProgressIndicator())
@@ -242,11 +250,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                 Alignment.bottomCenter, // Alignement en bas
                             child: Text(
                               widget.restaurant.name,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: AppTextStyles.titleWhiteStyle,
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -266,10 +270,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                           const SizedBox(width: 5),
                           Text(
                             '$_noteMoyenne ($_userRatingsTotal avis)',
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 18,
-                            ),
+                            style: AppTextStyles.paragraphDarkStyle,
                           ),
                         ],
                       ),
@@ -282,10 +283,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                         children: [
                           const Text(
                             'Informations :',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTextStyles.titleDarkStyle,
                           ),
                           const SizedBox(height: 10),
                           Visibility(
@@ -298,7 +296,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                 Text(
                                   '€' *
                                       _price, // Affichage du symbole € selon la valeur de price
-                                  style: TextStyle(fontSize: 16),
+                                  style: AppTextStyles.paragraphDarkStyle,
                                 ),
                               ],
                             ),
@@ -311,7 +309,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                               Text(
                                 _cuisine ??
                                     'Cuisine non spécifiée', // Exemple de type de cuisine
-                                style: TextStyle(fontSize: 16),
+                                style: AppTextStyles.paragraphDarkStyle,
                               ),
                             ],
                           ),
@@ -328,7 +326,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                 widget.restaurant.handicap
                                     ? 'Adapté à la mobilité réduite'
                                     : 'Non adapté à la mobilité réduite',
-                                style: TextStyle(fontSize: 16),
+                                style: AppTextStyles.paragraphDarkStyle,
                               ),
                             ],
                           ),
@@ -336,13 +334,13 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                           Visibility(
                             visible: widget.restaurant
                                 .vege, // Masquer le widget si vege est false
-                            child: Row(
+                            child: const Row(
                               children: [
                                 Icon(Icons.eco), // Afficher l'icône eco
                                 SizedBox(width: 5),
                                 Text(
                                   'Propose des plats végétariens',
-                                  style: TextStyle(fontSize: 16),
+                                  style: AppTextStyles.paragraphDarkStyle,
                                 ),
                               ],
                             ),
@@ -361,7 +359,10 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                               children: [
                                 ListTile(
                                   leading: const Icon(Icons.menu_book),
-                                  title: const Text('Menu'),
+                                  title: const Text(
+                                    'Menu',
+                                    style: AppTextStyles.paragraphDarkStyle,
+                                  ),
                                   onTap: () {
                                     openURL(context, _siteInternet);
                                   },
@@ -370,9 +371,11 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                 ListTile(
                                   leading: const Icon(Icons.phone),
                                   title: Text(
-                                      widget.restaurant.phoneNumber.isNotEmpty
-                                          ? widget.restaurant.phoneNumber
-                                          : 'Indisponible'),
+                                    widget.restaurant.phoneNumber.isNotEmpty
+                                        ? widget.restaurant.phoneNumber
+                                        : 'Indisponible',
+                                    style: AppTextStyles.paragraphDarkStyle,
+                                  ),
                                   onTap: () {
                                     if (widget
                                         .restaurant.phoneNumber.isNotEmpty) {
@@ -392,7 +395,10 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                 const Divider(),
                                 ListTile(
                                   leading: const Icon(Icons.location_on),
-                                  title: Text(widget.restaurant.address),
+                                  title: Text(
+                                    widget.restaurant.address,
+                                    style: AppTextStyles.paragraphDarkStyle,
+                                  ),
                                   onTap: () {
                                     Clipboard.setData(ClipboardData(
                                         text: widget.restaurant.address));
@@ -452,17 +458,15 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Avis clients :',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          const Text('Avis clients :',
+                              style: AppTextStyles.titleDarkStyle),
                           const SizedBox(height: 10),
                           if (_reviews.isNotEmpty && _reviews != []) ...[
                             ListTile(
-                              title: Text(_reviews[0].text),
+                              title: Text(
+                                _reviews[0].text,
+                                style: AppTextStyles.paragraphDarkStyle,
+                              ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -482,7 +486,10 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                   _navigateToReviewDetails(
                                       context, widget.restaurant, _reviews);
                                 },
-                                child: const Text('Voir plus d\'avis'),
+                                child: const Text(
+                                  'Voir plus d\'avis',
+                                  style: AppTextStyles.paragraphDarkStyle,
+                                ),
                               ),
                             ],
                           ] else ...[
@@ -490,7 +497,10 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                               children: [
                                 Icon(Icons.chat_outlined),
                                 SizedBox(width: 10),
-                                Text('Avis clients indisponibles'),
+                                Text(
+                                  'Avis clients indisponibles',
+                                  style: AppTextStyles.paragraphDarkStyle,
+                                ),
                               ],
                             )
                           ],
