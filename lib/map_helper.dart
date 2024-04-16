@@ -73,7 +73,7 @@ class MapHelper {
           shape: BoxShape.circle,
         ),
         child: Padding(
-          padding: const EdgeInsets.all(2),
+          padding: EdgeInsets.all(2),
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: Colors.blue,
@@ -152,8 +152,7 @@ class MapHelper {
         point: restaurantLocations[i],
         builder: (ctx) => GestureDetector(
           onTap: () {
-            print(
-                "Tap"); // Imprime "Tap" lorsque l'utilisateur tape sur le marqueur
+            //Imprime "Tap" lorsque l'utilisateur tape sur le marqueur
             showMarkerInfo(context, restaurantList[i]);
           },
           child: const DecoratedBox(
@@ -162,7 +161,7 @@ class MapHelper {
               shape: BoxShape.circle,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(2),
+              padding: EdgeInsets.all(2),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: Color(0xFF95A472),

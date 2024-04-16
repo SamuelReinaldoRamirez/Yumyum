@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -51,9 +53,9 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     fraction = (fraction * 10).roundToDouble();
     if (fraction < 1) {
       return 0.15;
-    } else if (fraction < 2)
+    } else if (fraction < 2) {
       return 0.32;
-    else if (fraction < 3)
+    } else if (fraction < 3)
       return 0.35;
     else if (fraction < 4)
       return 0.40;
@@ -124,11 +126,12 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
 
   Future<void> openURL(BuildContext context, String? url) async {
     if (url != null && url.isNotEmpty) {
+      String updatedUrl = url.replaceAll("http:", "https:");
       await Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => Scaffold(
           appBar: AppBar(
             leading: IconButton(
-              icon: Icon(Icons.close),
+              icon: const Icon(Icons.close),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -140,8 +143,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
           ),
           body: SafeArea(
             child: InAppWebView(
-              initialUrlRequest:
-                  URLRequest(url: WebUri(url, forceToStringRawValue: true)),
+              initialUrlRequest: URLRequest(
+                  url: WebUri(updatedUrl, forceToStringRawValue: true)),
             ),
           ),
         ),
@@ -149,7 +152,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     } else {
       // Afficher un toast "Indisponible" si l'URL est vide
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Indisponible'),
         ),
       );
@@ -218,7 +221,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
           ),
         ),
         body: _isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -291,8 +294,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                 0, // Rendre le widget visible si _price est valide
                             child: Row(
                               children: [
-                                Icon(Icons.payment), // Icône de paiement
-                                SizedBox(width: 5),
+                                const Icon(Icons.payment), // Icône de paiement
+                                const SizedBox(width: 5),
                                 Text(
                                   '€' *
                                       _price, // Affichage du symbole € selon la valeur de price
@@ -304,8 +307,9 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                           const SizedBox(height: 5),
                           Row(
                             children: [
-                              Icon(Icons.local_dining), // Icône de la cuisine
-                              SizedBox(width: 5),
+                              const Icon(
+                                  Icons.local_dining), // Icône de la cuisine
+                              const SizedBox(width: 5),
                               Text(
                                 _cuisine ??
                                     'Cuisine non spécifiée', // Exemple de type de cuisine
@@ -321,7 +325,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                       .accessibility // Si accessible aux personnes à mobilité réduite
                                   : Icons
                                       .not_accessible), // Si non accessible aux personnes à mobilité réduite
-                              SizedBox(width: 5),
+                              const SizedBox(width: 5),
                               Text(
                                 widget.restaurant.handicap
                                     ? 'Adapté à la mobilité réduite'
@@ -330,7 +334,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           Visibility(
                             visible: widget.restaurant
                                 .vege, // Masquer le widget si vege est false
@@ -403,8 +407,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                     Clipboard.setData(ClipboardData(
                                         text: widget.restaurant.address));
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: const Text(
+                                      const SnackBar(
+                                        content: Text(
                                             'Adresse copiée dans le presse-papiers'),
                                       ),
                                     );
@@ -470,11 +474,11 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  SizedBox(height: 5),
+                                  const SizedBox(height: 5),
                                   Text(
                                     '- ${_reviews[0].author}',
-                                    style:
-                                        TextStyle(fontStyle: FontStyle.italic),
+                                    style: const TextStyle(
+                                        fontStyle: FontStyle.italic),
                                   ),
                                 ],
                               ),

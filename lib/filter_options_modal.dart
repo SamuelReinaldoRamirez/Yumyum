@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/map_helper.dart';
@@ -57,7 +59,7 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
               ),
             );
           } else {
-            print(newRestaurants);
+            //print(newRestaurants);
             MarkerManager.createFull(context, newRestaurants);
             Navigator.of(context).pop(); // Ferme le BottomSheet
           }
@@ -70,7 +72,7 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
 
   Widget _buildTitle(BuildContext context) {
     return const Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
+      padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
       child: Text(
         'Filtres',
         style: AppTextStyles.titleDarkStyle,

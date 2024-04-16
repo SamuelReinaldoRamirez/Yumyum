@@ -53,8 +53,8 @@ class BottomSheetHelper {
                               ],
                             ),
                             Container(
-                              margin: EdgeInsets.only(top: 8),
-                              padding: EdgeInsets.symmetric(
+                              margin: const EdgeInsets.only(top: 8),
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 4),
                               decoration: BoxDecoration(
                                 color: AppColors
@@ -75,7 +75,7 @@ class BottomSheetHelper {
                         child: IconButton(
                           icon: const Icon(Icons.info_outline),
                           iconSize: 40,
-                          color: Color(0xFF95A472),
+                          color: const Color(0xFF95A472),
                           onPressed: () {
                             _navigateToTags(context, restaurant);
                           },
@@ -99,13 +99,13 @@ class BottomSheetHelper {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text("Y aller"),
-                          SizedBox(
+                          const Text("Y aller"),
+                          const SizedBox(
                               width: 8), // Espacement entre l'icône et le texte
 
                           Transform.rotate(
                             angle: 90 * 3.141592653589793 / 180,
-                            child: Icon(
+                            child: const Icon(
                               Icons.navigation,
                               color: Colors.white,
                             ),
@@ -135,16 +135,16 @@ class BottomSheetHelper {
         'https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}';
     final Uri uri = Uri.parse(url);
 
-    if (await canLaunch(uri.toString())) {
+    if (await canLaunchUrl(uri)) {
       await launch(uri.toString(), forceSafariVC: false);
     } else {
       final String fallbackUrl =
           'https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}';
       final Uri fallbackUri = Uri.parse(fallbackUrl);
-      if (await canLaunch(fallbackUri.toString())) {
-        await launch(fallbackUri.toString());
+      if (await canLaunchUrl(fallbackUri)) {
+        await launchUrl(fallbackUri);
       } else {
-        print('Could not launch the map.');
+        //print('Could not launch the map.');
       }
     }
   }

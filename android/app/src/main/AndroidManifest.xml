@@ -11,7 +11,7 @@
     <application
         android:label="Yummap"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@drawable/icon">
 
         <!-- Déclaration de l'activité principale -->
         <activity

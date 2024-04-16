@@ -65,7 +65,7 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
               color: AppColors.orangeButton,
             ),
             padding: const EdgeInsets.all(8),
-            child: Icon(
+            child: const Icon(
               Icons.filter_list,
               color: Colors.white,
             ),

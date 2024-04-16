@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 
 class HorairesRestaurant extends StatefulWidget {
@@ -103,7 +105,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                         child: Center(
                           child: Text(
                             allDaysEmpty ? 'Horaires indisponibles' : 'Fermé',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
