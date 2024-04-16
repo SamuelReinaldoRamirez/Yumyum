@@ -32,13 +32,14 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
   }
 
   Widget _buildApplyButton(BuildContext context) {
-    MixpanelService.instance.track('FilterTagSearch', properties: {
-      'filter_ids': selectedTagIds,
-    });
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: ElevatedButton(
         onPressed: () async {
+          MixpanelService.instance.track('FilterTagSearch', properties: {
+            'filter_ids': selectedTagIds,
+          });
+
           List<Restaurant> newRestaurants =
               await CallEndpointService.getRestaurantsByTags(selectedTagIds);
           if (newRestaurants.isEmpty) {
