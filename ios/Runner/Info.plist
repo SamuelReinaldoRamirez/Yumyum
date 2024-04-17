@@ -71,7 +71,7 @@
 
 <!-- Autorisation d'accès à la localisation -->
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>Cette application utilise votre localisation pour afficher votre position sur la carte lorsque vous l'utilisez.</string>
+<string>Yummap a besoin d'accéder à votre position pour afficher les adresses autour de vous !</string>
 <key>NSLocationAlwaysUsageDescription</key>
 <string>Cette application utilise votre localisation en arrière-plan pour fournir des fonctionnalités supplémentaires, même lorsque vous ne l'utilisez pas activement.</string>
 <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
