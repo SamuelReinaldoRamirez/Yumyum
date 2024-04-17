@@ -123,6 +123,7 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
           ),
         ),
         _buildApplyButton(context),
+        const SizedBox(height: 10),
       ],
     );
   }

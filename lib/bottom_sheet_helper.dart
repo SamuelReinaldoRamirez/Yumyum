@@ -115,6 +115,7 @@ class BottomSheetHelper {
                     ),
                   ],
                 ),
+                const SizedBox(height: 10),
               ],
             ),
           ),
