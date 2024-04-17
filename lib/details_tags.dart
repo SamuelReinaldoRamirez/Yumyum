@@ -80,7 +80,8 @@ class _DetailsTagsState extends State<DetailsTags> {
 
     //List<Tag> filteredTags = _filterTags(restaurant.getTagStr().cast<String>());
 
-    List<Tag> filteredTags = _filterTags( intListToStringList(restaurant.getTagStr()) );
+    List<Tag> filteredTags =
+        _filterTags(intListToStringList(restaurant.getTagStr()));
 
     Map<String, List<Tag>> filteredTagsByType = {};
     for (var tag in filteredTags) {
@@ -93,12 +94,12 @@ class _DetailsTagsState extends State<DetailsTags> {
 
 //à mettre dans un helper si ca aide mieux que le cast
   List<String> intListToStringList(List<int> inputList) {
-      List<String> outputList = [];
-      for (int i in inputList) {
-        outputList.add(i.toString());
-      }
-      return outputList;
+    List<String> outputList = [];
+    for (int i in inputList) {
+      outputList.add(i.toString());
     }
+    return outputList;
+  }
 
   List<Tag> _filterTags(List<String> tagIds) {
     return tagList.where((tag) => tagIds.contains(tag.id)).toList();

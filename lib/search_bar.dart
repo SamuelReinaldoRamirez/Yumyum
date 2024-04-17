@@ -4,6 +4,7 @@ import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restaurant.dart';
+import 'package:yummap/theme.dart';
 import 'filter_options_modal.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 
@@ -27,12 +28,20 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
         onSubmitted: (value) {
           _handleSubmitted(value);
         },
+        style: AppTextStyles.paragraphDarkStyle,
         decoration: InputDecoration(
           hintText: 'Rechercher un restaurant',
+          hintStyle: AppTextStyles.hintTextDarkStyle,
           border: InputBorder.none,
-          prefixIcon: const Icon(Icons.search),
+          prefixIcon: const Icon(
+            Icons.search,
+            color: AppColors.greenishGrey,
+          ),
           suffixIcon: IconButton(
-            icon: const Icon(Icons.clear),
+            icon: const Icon(
+              Icons.clear,
+              color: AppColors.greenishGrey,
+            ),
             onPressed: () async {
               _clearSearch(context);
               MarkerManager.resetMarkers();
@@ -42,7 +51,6 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.filter_list),
           onPressed: () {
             showModalBottomSheet<void>(
               context: context,
@@ -51,6 +59,17 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
               },
             );
           },
+          icon: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.orangeButton,
+            ),
+            padding: const EdgeInsets.all(8),
+            child: const Icon(
+              Icons.filter_list,
+              color: Colors.white,
+            ),
+          ),
         ),
       ],
     );

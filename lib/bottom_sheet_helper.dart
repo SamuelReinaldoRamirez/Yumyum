@@ -4,6 +4,7 @@ import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restau_details.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/video_carousel.dart';
+import 'theme.dart';
 
 class BottomSheetHelper {
   static void showBottomSheet(BuildContext context, Restaurant restaurant) {
@@ -35,45 +36,33 @@ class BottomSheetHelper {
                             Text(
                               restaurant.name,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF646165),
-                              ),
+                              style: AppTextStyles.titleDarkStyle,
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
                                   Icons.star,
-                                  color: Colors.amber, // Couleur de l'étoile
+                                  color:
+                                      AppColors.orangeBG, // Couleur de l'étoile
                                 ),
                                 Text(
-                                  restaurant.ratings
-                                      .toString(), // Affichage de la note du restaurant
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black87,
-                                  ),
-                                ),
+                                    restaurant.ratings
+                                        .toString(), // Affichage de la note du restaurant
+                                    style: AppTextStyles.hintTextDarkStyle),
                               ],
                             ),
                             Container(
-                              margin: EdgeInsets.only(top: 8),
-                              padding: EdgeInsets.symmetric(
+                              margin: const EdgeInsets.only(top: 8),
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 4),
                               decoration: BoxDecoration(
-                                color:
-                                    Color(0xFF646165), // Couleur de la pastille
-                                borderRadius: BorderRadius.circular(20),
+                                color: AppColors
+                                    .darkGrey, // Couleur de la pastille
+                                borderRadius: BorderRadius.circular(3),
                               ),
-                              child: Text(
-                                restaurant.cuisine,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
+                              child: Text(restaurant.cuisine,
+                                  style: AppTextStyles.hintTextWhiteStyle),
                             ),
                           ],
                         ),
@@ -86,7 +75,7 @@ class BottomSheetHelper {
                         child: IconButton(
                           icon: const Icon(Icons.info_outline),
                           iconSize: 40,
-                          color: Color(0xFF95A472),
+                          color: const Color(0xFF95A472),
                           onPressed: () {
                             _navigateToTags(context, restaurant);
                           },
@@ -95,19 +84,10 @@ class BottomSheetHelper {
                     ),
                   ],
                 ),
-                // Text(
-                //   restaurant.name,
-                //   style: const TextStyle(
-                //     fontSize: 24,
-                //     fontWeight: FontWeight.bold,
-                //     color: Colors.black54,
-                //   ),
-                // ),
                 const SizedBox(height: 8),
-
                 const SizedBox(height: 16),
                 VideoCarousel(videoLinks: restaurant.videoLinks),
-                const SizedBox(height: 16),
+                const SizedBox(height: 30),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -115,16 +95,27 @@ class BottomSheetHelper {
                       onPressed: () {
                         _navigateToRestaurant(restaurant);
                       },
-                      child: const Text("Y aller"),
+                      style: AppButtonStyles.elevatedButtonStyle,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text("Y aller"),
+                          const SizedBox(
+                              width: 8), // Espacement entre l'icône et le texte
+
+                          Transform.rotate(
+                            angle: 90 * 3.141592653589793 / 180,
+                            child: const Icon(
+                              Icons.navigation,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     _navigateToTags(context, restaurant);
-                    //   },
-                    //   child: const Text("Tags"),
-                    // ),
                   ],
                 ),
+                const SizedBox(height: 10),
               ],
             ),
           ),
@@ -145,16 +136,16 @@ class BottomSheetHelper {
         'https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}';
     final Uri uri = Uri.parse(url);
 
-    if (await canLaunch(uri.toString())) {
+    if (await canLaunchUrl(uri)) {
       await launch(uri.toString(), forceSafariVC: false);
     } else {
       final String fallbackUrl =
           'https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}';
       final Uri fallbackUri = Uri.parse(fallbackUrl);
-      if (await canLaunch(fallbackUri.toString())) {
-        await launch(fallbackUri.toString());
+      if (await canLaunchUrl(fallbackUri)) {
+        await launchUrl(fallbackUri);
       } else {
-        print('Could not launch the map.');
+        //print('Could not launch the map.');
       }
     }
   }

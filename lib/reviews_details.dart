@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, no_logic_in_create_state
+
 import 'package:flutter/material.dart';
 import 'package:yummap/restaurant.dart';
 
@@ -15,8 +17,9 @@ class ReviewDetailsWidget extends StatefulWidget {
 
 class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
   Restaurant restaurant;
+  // ignore: prefer_final_fields
   List<ReviewRestau> _reviews = [];
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   _ReviewDetailsWidgetState(this.restaurant, this._reviews);
 

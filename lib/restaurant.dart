@@ -101,10 +101,8 @@ class Restaurant {
                           if (timeRange.substring(0, indexDuTiret - 1) !=
                               "12:00") {
                             var newtimeRange =
-                                timeRange.substring(0, indexDuTiret - 1) +
-                                    " PM" +
-                                    timeRange.substring(
-                                        indexDuTiret - 1, timerangeLength);
+                                "${timeRange.substring(0, indexDuTiret - 1)} PM${timeRange.substring(
+                                        indexDuTiret - 1, timerangeLength)}";
                             timeRange = newtimeRange;
                           }
                         }

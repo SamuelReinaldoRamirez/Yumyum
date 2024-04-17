@@ -108,7 +108,7 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
       context,
       PageRouteBuilder(
         transitionDuration:
-            Duration(milliseconds: 500), // Durée de la transition
+            const Duration(milliseconds: 500), // Durée de la transition
         pageBuilder: (context, animation, secondaryAnimation) {
           return GestureDetector(
             // Ajouter un GestureDetector
@@ -130,7 +130,7 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
           );
         },
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          var begin = Offset(0.0, 1.0); // Départ de la transition en bas
+          var begin = const Offset(0.0, 1.0); // Départ de la transition en bas
           var end = Offset.zero; // Arrivée de la transition
           var curve = Curves.easeInOut; // Courbe de l'animation
 
