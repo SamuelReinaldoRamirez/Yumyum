@@ -20,7 +20,7 @@ class TrackingStatusDialog {
         // L'utilisateur a autorisé le suivi sur cet appareil.
         break;
       case TrackingStatus.notSupported:
-        // TODO: Gérer ce cas.
+        //
         break;
     }
   }

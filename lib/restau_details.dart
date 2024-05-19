@@ -55,23 +55,25 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
       return 0.15;
     } else if (fraction < 2) {
       return 0.32;
-    } else if (fraction < 3)
+    } else if (fraction < 3) {
       return 0.35;
-    else if (fraction < 4)
+    } else if (fraction < 4) {
       return 0.40;
-    else if (fraction < 5)
+    } else if (fraction < 5) {
       return 0.45;
-    else if (fraction == 5)
+    } else if (fraction == 5) {
       return 0.5;
-    else if (fraction >= 9)
+    } else if (fraction >= 9) {
       return 0.80;
-    else if (fraction >= 8)
+    } else if (fraction >= 8) {
       return 0.65;
-    else if (fraction >= 7)
+    } else if (fraction >= 7) {
       return 0.60;
-    else if (fraction >= 6)
+    } else if (fraction >= 6) {
       return 0.55;
-    else if (fraction < 6) return 0.52;
+    } else if (fraction < 6) {
+      return 0.52;
+    }
     return 0.5;
   }
 
@@ -98,30 +100,23 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     try {
       _price = int.parse(widget.restaurant.price);
     } catch (e) {
-      print("Erreur de conversion : $e");
+      //print("Erreur de conversion : $e");
     }
     // _instagram = widget.restaurant.instagram;
     _schedule = widget.restaurant.schedule;
     _reviews =
         widget.restaurant.reviews; // Assign reviews from Restaurant object
 
-    print("*****************");
-    print('----');
+    // print("*****************");
+    // print('----');
 
-    print(_schedule);
-    print("*****************");
-    print('----');
+    // print(_schedule);
+    // print("*****************");
+    // print('----');
 
     setState(() {
       _isLoading = false;
     });
-  }
-
-  Future<void> _launchUrl(String? url) async {
-    if (url != null && await canLaunch(url)) {
-      // Utiliser canLaunch avec un String
-      await launch(url); // Utiliser launch avec un String
-    }
   }
 
   Future<void> openURL(BuildContext context, String? url) async {
@@ -383,8 +378,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                   onTap: () {
                                     if (widget
                                         .restaurant.phoneNumber.isNotEmpty) {
-                                      launch(
-                                          'tel://${widget.restaurant.phoneNumber}');
+                                      launchUrl(Uri.parse(
+                                          'tel://${widget.restaurant.phoneNumber}'));
                                     } else {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(

@@ -89,7 +89,7 @@ class Restaurant {
                   try {
                     indexDuTiret = timeRange.indexOf("–");
                     if (indexDuTiret != -1) {
-                      print(timeRange);
+                      //print(timeRange);
                       if (timeRange.substring(
                               timerangeLength - 2, timerangeLength) ==
                           "PM") {

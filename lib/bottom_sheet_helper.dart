@@ -137,6 +137,7 @@ class BottomSheetHelper {
     final Uri uri = Uri.parse(url);
 
     if (await canLaunchUrl(uri)) {
+      // ignore: deprecated_member_use
       await launch(uri.toString(), forceSafariVC: false);
     } else {
       final String fallbackUrl =
