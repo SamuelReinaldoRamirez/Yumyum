@@ -83,6 +83,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   height: MediaQuery.of(context).size.height * 0.12,
                   child: CustomSearchBar.SearchBar(
                     onSearchChanged: (value) {},
+                    restaurantList: widget.restaurantList
                   ),
                 ),
                 SizedBox(

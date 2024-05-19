@@ -7,18 +7,60 @@ import 'package:yummap/restaurant.dart';
 import 'package:yummap/theme.dart';
 import 'filter_options_modal.dart';
 import 'package:latlong2/latlong.dart' as lat2;
+import 'dart:math';
+import 'package:sensors_plus/sensors_plus.dart';
 
-class SearchBar extends StatelessWidget implements PreferredSizeWidget {
+class SearchBar extends StatefulWidget implements PreferredSizeWidget {
+  final List<Restaurant> restaurantList;
   final Function(String) onSearchChanged;
-  final TextEditingController _searchController = TextEditingController();
 
   SearchBar({
     Key? key,
     required this.onSearchChanged,
+    required this.restaurantList,
   }) : super(key: key);
 
   @override
+  _SearchBarState createState() => _SearchBarState();
+
+  @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class _SearchBarState extends State<SearchBar> {
+  final TextEditingController _searchController = TextEditingController();
+  static const double shakeThresholdGravity = 2.7;
+  static const int shakeSlopTimeMs = 500;
+  int lastShakeTimestamp = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    accelerometerEvents.listen((AccelerometerEvent event) {
+      final now = DateTime.now().millisecondsSinceEpoch;
+
+      if ((now - lastShakeTimestamp) > shakeSlopTimeMs) {
+        final gX = event.x / 9.81;
+        final gY = event.y / 9.81;
+        final gZ = event.z / 9.81;
+
+        final gForce = sqrt(gX * gX + gY * gY + gZ * gZ);
+
+        if (gForce > shakeThresholdGravity) {
+          lastShakeTimestamp = now;
+          _onShake();
+        }
+      }
+    });
+  }
+
+  void _onShake() {
+    Random random = Random();
+    int randomIndex = random.nextInt(widget.restaurantList.length);
+    FocusScope.of(context).requestFocus(FocusNode());
+    BottomSheetHelper.showBottomSheet(MarkerManager.context, widget.restaurantList[randomIndex]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,18 +126,15 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
       if (newRestaurants.length > 1) {
         MarkerManager.createFull(MarkerManager.context, newRestaurants);
       } else if (newRestaurants.length == 1) {
-        // Centrer la carte sur le restaurant trouvé
         final restaurant = newRestaurants[0];
         final latitude = restaurant.latitude;
         final longitude = restaurant.longitude;
 
         BottomSheetHelper.showBottomSheet(MarkerManager.context, restaurant);
-        // Centrer la carte sur le pin du restaurant
         MarkerManager.mapPageState?.mapController
             .move(lat2.LatLng(latitude, longitude), 15);
         MarkerManager.resetMarkers();
       } else {
-        // Afficher un SnackBar avec le message "Aucun résultat trouvé"
         ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
           const SnackBar(
             content: Text('Aucun résultat trouvé'),
@@ -111,7 +150,7 @@ class SearchBar extends StatelessWidget implements PreferredSizeWidget {
   void _clearSearch(context) {
     MixpanelService.instance.track('ClearSearch');
     _searchController.clear();
-    onSearchChanged('');
+    widget.onSearchChanged('');
     FocusScope.of(context).requestFocus(FocusNode());
   }
 }

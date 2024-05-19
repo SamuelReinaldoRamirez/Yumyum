@@ -26,6 +26,7 @@ flutter:
 dependencies:
   flutter:
     sdk: flutter
+  sensors_plus: ^2.0.0
   google_maps_flutter: ^2.5.3
   flutter_map: ^4.0.0
   latlng: any
