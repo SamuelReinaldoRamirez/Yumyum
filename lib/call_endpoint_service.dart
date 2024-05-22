@@ -131,4 +131,33 @@ class CallEndpointService {
       throw Exception('Failed to search workspace by name: $e');
     }
   }
+
+  static Future<List<Restaurant>> searchRestaurantsByPlaceIDs(List<String> placeIDs) async {
+  const String endpoint = 'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/restaurantsByPlaceIDs';
+  try {
+    final response = await http.post(
+      Uri.parse(endpoint),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({'placeIDs': placeIDs}),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = json.decode(response.body);
+
+      List<Restaurant> restaurants = jsonData.map((data) {
+        return Restaurant.fromJson(data);
+      }).toList();
+
+      return restaurants;
+    } else {
+      throw Exception('Failed to search restaurants by place IDs');
+    }
+  } catch (e) {
+    throw Exception('Failed to search restaurants by place IDs: $e');
+  }
+}
+
+
 }

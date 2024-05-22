@@ -154,46 +154,68 @@ class _SearchBarState extends State<SearchBar> {
   }
 
   void _showWorkspaceSelectionPage(BuildContext context, List<Workspace> workspaces, List<Restaurant> restaurants) async {
-    final selectedWorkspace = await Navigator.push(
+    final selectedItem  = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => WorkspaceSelectionPage(workspaces: workspaces, restaurants: restaurants)),
     );
 
-    if (selectedWorkspace != null) {
-      _handleWorkspaceSelection(selectedWorkspace);
+   
+    if (selectedItem != null && selectedItem is Restaurant) {
+      _handleRestaurantSelection(selectedItem);
+    } else if (selectedItem != null && selectedItem is Workspace) {
+      _handleWorkspaceSelection(selectedItem);
     }
   }
 
+   void _handleWorkspaceSelection(Workspace workspace) async {
+  // Récupérer les restaurants à partir des placeId
+  List<String> placeIds = workspace.restaurants_placeId;
+  List<Restaurant> restaurants = await CallEndpointService.searchRestaurantsByPlaceIDs(placeIds);
 
-  void _showWorkspaceDropdown(List<Workspace> workspaces) async {
-  final selectedWorkspace = await showDialog<Workspace>(
-    context: context,
-    builder: (BuildContext context) {
-      return SimpleDialog(
-        title: Text('Sélectionnez un workspace'),
-        children: workspaces.map((workspace) {
-          return SimpleDialogOption(
-            onPressed: () {
-              Navigator.pop(context, workspace);
-            },
-            child: Text(workspace.name),
-          );
-        }).toList(),
-      );
-    },
-  );
-
-  if (selectedWorkspace != null) {
-    _handleWorkspaceSelection(selectedWorkspace);
+  if (restaurants.isNotEmpty) {
+    // Afficher les restaurants sur la carte
+    MarkerManager.createFull(MarkerManager.context, restaurants);
+  } else {
+    ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
+      const SnackBar(
+        content: Text('Aucun restaurant trouvé pour ce workspace'),
+      ),
+    );
   }
 }
 
 
-
-  void _handleWorkspaceSelection(Workspace workspace) {
-    // Traiter la sélection du workspace ici
+  void _handleRestaurantSelection(Restaurant restaurant) {
+    BottomSheetHelper.showBottomSheet(MarkerManager.context, restaurant);
+    MarkerManager.mapPageState?.mapController
+        .move(lat2.LatLng(restaurant.latitude, restaurant.longitude), 15);
+    MarkerManager.resetMarkers();
   }
 
+
+
+//   void _showWorkspaceDropdown(List<Workspace> workspaces) async {
+//   final selectedWorkspace = await showDialog<Workspace>(
+//     context: context,
+//     builder: (BuildContext context) {
+//       return SimpleDialog(
+//         title: Text('Sélectionnez un workspace'),
+//         children: workspaces.map((workspace) {
+//           return SimpleDialogOption(
+//             onPressed: () {
+//               Navigator.pop(context, workspace);
+//             },
+//             child: Text(workspace.name),
+//           );
+//         }).toList(),
+//       );
+//     },
+//   );
+
+//   if (selectedWorkspace != null) {
+//     _handleWorkspaceSelection(selectedWorkspace);
+//   }
+// }
 
   void _clearSearch(context) {
     MixpanelService.instance.track('ClearSearch');
