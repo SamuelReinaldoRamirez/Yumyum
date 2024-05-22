@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:yummap/restaurant.dart';
+import 'package:yummap/workspace.dart';
 import 'package:yummap/tag.dart';
 
 class CallEndpointService {
@@ -105,6 +106,29 @@ class CallEndpointService {
       }
     } catch (e) {
       throw Exception('Failed to search restaurants by name: $e');
+    }
+  }
+
+  static Future<List<Workspace>> searchWorkspaceByName(
+      String workspaceName) async { 
+    final String endpoint =
+      'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/workspace/search/$workspaceName';
+    try {
+      final response = await http.get(Uri.parse(endpoint));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+
+        List<Workspace> workspaces = jsonData.map((data) {
+          return Workspace.fromJson(data);
+        }).toList();
+
+        return workspaces;
+      } else {
+        throw Exception('Failed to search workspace by name');
+      }
+    } catch (e) {
+      throw Exception('Failed to search workspace by name: $e');
     }
   }
 }

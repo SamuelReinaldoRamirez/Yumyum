@@ -36,7 +36,8 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode // Utilisation du code de version défini
         versionName flutterVersionName // Utilisation du nom de version défini
-    }
+        multiDexEnabled true
+        }
 
     buildTypes {
         release {
@@ -52,5 +53,6 @@ flutter {
 }
 
 dependencies {
+    implementation 'androidx.multidex:multidex:2.0.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version" // Ajout de la dépendance Kotlin
 }

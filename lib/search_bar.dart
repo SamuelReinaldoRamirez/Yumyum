@@ -5,6 +5,8 @@ import 'package:yummap/map_helper.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/theme.dart';
+import 'package:yummap/workspace.dart';
+import 'package:yummap/workspace_selection_page.dart';
 import 'filter_options_modal.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 import 'dart:math';
@@ -72,7 +74,7 @@ class _SearchBarState extends State<SearchBar> {
         },
         style: AppTextStyles.paragraphDarkStyle,
         decoration: InputDecoration(
-          hintText: 'Rechercher un restaurant',
+          hintText: 'Rechercher dans Yummap',
           hintStyle: AppTextStyles.hintTextDarkStyle,
           border: InputBorder.none,
           prefixIcon: const Icon(
@@ -117,35 +119,81 @@ class _SearchBarState extends State<SearchBar> {
     );
   }
 
-  void _handleSubmitted(String value) {
+    Future<void> _handleSubmitted(String value) async {
     MixpanelService.instance.track('TextSearch', properties: {
       'searchText': value,
     });
-    CallEndpointService.searchRestaurantByName(value)
-        .then((List<Restaurant> newRestaurants) {
-      if (newRestaurants.length > 1) {
-        MarkerManager.createFull(MarkerManager.context, newRestaurants);
-      } else if (newRestaurants.length == 1) {
-        final restaurant = newRestaurants[0];
-        final latitude = restaurant.latitude;
-        final longitude = restaurant.longitude;
 
-        BottomSheetHelper.showBottomSheet(MarkerManager.context, restaurant);
-        MarkerManager.mapPageState?.mapController
-            .move(lat2.LatLng(latitude, longitude), 15);
-        MarkerManager.resetMarkers();
-      } else {
-        ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
-          const SnackBar(
-            content: Text('Aucun résultat trouvé'),
-          ),
-        );
+    List<Workspace> workspacesToDisplay = await CallEndpointService.searchWorkspaceByName(value);
+
+    List<Restaurant> restaurantsToDisplay = await CallEndpointService.searchRestaurantByName(value);
+
+      if(workspacesToDisplay.isNotEmpty ){
+        _showWorkspaceSelectionPage(context, workspacesToDisplay, restaurantsToDisplay);
+      }else{
+        if (restaurantsToDisplay.length > 1) {
+            MarkerManager.createFull(MarkerManager.context, restaurantsToDisplay);
+          } else if (restaurantsToDisplay.length == 1) {
+            final restaurant = restaurantsToDisplay[0];
+            final latitude = restaurant.latitude;
+            final longitude = restaurant.longitude;
+
+            BottomSheetHelper.showBottomSheet(MarkerManager.context, restaurant);
+            MarkerManager.mapPageState?.mapController
+                .move(lat2.LatLng(latitude, longitude), 15);
+            MarkerManager.resetMarkers();
+          } else {
+            ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
+              const SnackBar(
+                content: Text('Aucun résultat trouvé'),
+              ),
+            );
+          }
       }
-    }).catchError((error) {
-      // Gérer les erreurs éventuelles
-      //print('Une erreur s\'est produite : $error');
-    });
+  ///
   }
+
+  void _showWorkspaceSelectionPage(BuildContext context, List<Workspace> workspaces, List<Restaurant> restaurants) async {
+    final selectedWorkspace = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => WorkspaceSelectionPage(workspaces: workspaces, restaurants: restaurants)),
+    );
+
+    if (selectedWorkspace != null) {
+      _handleWorkspaceSelection(selectedWorkspace);
+    }
+  }
+
+
+  void _showWorkspaceDropdown(List<Workspace> workspaces) async {
+  final selectedWorkspace = await showDialog<Workspace>(
+    context: context,
+    builder: (BuildContext context) {
+      return SimpleDialog(
+        title: Text('Sélectionnez un workspace'),
+        children: workspaces.map((workspace) {
+          return SimpleDialogOption(
+            onPressed: () {
+              Navigator.pop(context, workspace);
+            },
+            child: Text(workspace.name),
+          );
+        }).toList(),
+      );
+    },
+  );
+
+  if (selectedWorkspace != null) {
+    _handleWorkspaceSelection(selectedWorkspace);
+  }
+}
+
+
+
+  void _handleWorkspaceSelection(Workspace workspace) {
+    // Traiter la sélection du workspace ici
+  }
+
 
   void _clearSearch(context) {
     MixpanelService.instance.track('ClearSearch');
