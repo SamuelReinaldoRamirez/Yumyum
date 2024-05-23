@@ -3,12 +3,14 @@ import 'package:logger/logger.dart';
 class Workspace {
   final int id;
   final String name;
+  final String alias;
   final List<String> restaurants_placeId;
 
 
   Workspace({
     required this.id,
     required this.name,
+    required this.alias,
     required this.restaurants_placeId,
   });
 
@@ -34,6 +36,7 @@ class Workspace {
     return Workspace(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
+      alias: json['alias'] ?? '',
       restaurants_placeId: restaurants_placeID,
     );
   }

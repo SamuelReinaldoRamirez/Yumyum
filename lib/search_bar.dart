@@ -11,6 +11,7 @@ import 'filter_options_modal.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 import 'dart:math';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchBar extends StatefulWidget implements PreferredSizeWidget {
   final List<Restaurant> restaurantList;
@@ -119,7 +120,7 @@ class _SearchBarState extends State<SearchBar> {
     );
   }
 
-    Future<void> _handleSubmitted(String value) async {
+  Future<void> _handleSubmitted(String value) async {
     MixpanelService.instance.track('TextSearch', properties: {
       'searchText': value,
     });
@@ -128,38 +129,36 @@ class _SearchBarState extends State<SearchBar> {
 
     List<Restaurant> restaurantsToDisplay = await CallEndpointService.searchRestaurantByName(value);
 
-      if(workspacesToDisplay.isNotEmpty ){
-        _showWorkspaceSelectionPage(context, workspacesToDisplay, restaurantsToDisplay);
-      }else{
-        if (restaurantsToDisplay.length > 1) {
-            MarkerManager.createFull(MarkerManager.context, restaurantsToDisplay);
-          } else if (restaurantsToDisplay.length == 1) {
-            final restaurant = restaurantsToDisplay[0];
-            final latitude = restaurant.latitude;
-            final longitude = restaurant.longitude;
+    if (workspacesToDisplay.isNotEmpty) {
+      _showWorkspaceSelectionPage(context, workspacesToDisplay, restaurantsToDisplay);
+    } else {
+      if (restaurantsToDisplay.length > 1) {
+        MarkerManager.createFull(MarkerManager.context, restaurantsToDisplay);
+      } else if (restaurantsToDisplay.length == 1) {
+        final restaurant = restaurantsToDisplay[0];
+        final latitude = restaurant.latitude;
+        final longitude = restaurant.longitude;
 
-            BottomSheetHelper.showBottomSheet(MarkerManager.context, restaurant);
-            MarkerManager.mapPageState?.mapController
-                .move(lat2.LatLng(latitude, longitude), 15);
-            MarkerManager.resetMarkers();
-          } else {
-            ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
-              const SnackBar(
-                content: Text('Aucun résultat trouvé'),
-              ),
-            );
-          }
+        BottomSheetHelper.showBottomSheet(MarkerManager.context, restaurant);
+        MarkerManager.mapPageState?.mapController
+            .move(lat2.LatLng(latitude, longitude), 15);
+        MarkerManager.resetMarkers();
+      } else {
+        ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
+          const SnackBar(
+            content: Text('Aucun résultat trouvé'),
+          ),
+        );
       }
-  ///
+    }
   }
 
   void _showWorkspaceSelectionPage(BuildContext context, List<Workspace> workspaces, List<Restaurant> restaurants) async {
-    final selectedItem  = await Navigator.push(
+    final selectedItem = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => WorkspaceSelectionPage(workspaces: workspaces, restaurants: restaurants)),
     );
 
-   
     if (selectedItem != null && selectedItem is Restaurant) {
       _handleRestaurantSelection(selectedItem);
     } else if (selectedItem != null && selectedItem is Workspace) {
@@ -167,23 +166,60 @@ class _SearchBarState extends State<SearchBar> {
     }
   }
 
-   void _handleWorkspaceSelection(Workspace workspace) async {
-  // Récupérer les restaurants à partir des placeId
-  List<String> placeIds = workspace.restaurants_placeId;
-  List<Restaurant> restaurants = await CallEndpointService.searchRestaurantsByPlaceIDs(placeIds);
-
-  if (restaurants.isNotEmpty) {
-    // Afficher les restaurants sur la carte
-    MarkerManager.createFull(MarkerManager.context, restaurants);
-  } else {
-    ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
-      const SnackBar(
-        content: Text('Aucun restaurant trouvé pour ce workspace'),
-      ),
+  void _showAliasAlert(BuildContext context, List<String> aliasList, String title) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(aliasList.join(', ')),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
-}
 
+  void _handleWorkspaceSelection(Workspace workspace) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> aliasList = prefs.getStringList('workspaceAliases') ?? [];
+
+    // Afficher la liste actuelle des alias avant la mise à jour
+    _showAliasAlert(context, aliasList, 'Before setting');
+
+    // Supprimer l'ancien alias s'il existe déjà
+    aliasList.remove(workspace.alias);
+
+    // Ajouter le nouvel alias à la liste
+    aliasList.add(workspace.alias);
+
+    // Sauvegarder la liste mise à jour dans les préférences partagées
+    await prefs.setStringList('workspaceAliases', aliasList);
+
+    // Afficher la liste mise à jour des alias
+    _showAliasAlert(context, aliasList, 'After setting');
+
+    // Récupérer les restaurants à partir des placeId
+    List<String> placeIds = workspace.restaurants_placeId;
+    List<Restaurant> restaurants = await CallEndpointService.searchRestaurantsByPlaceIDs(placeIds);
+
+    if (restaurants.isNotEmpty) {
+      // Afficher les restaurants sur la carte
+      MarkerManager.createFull(MarkerManager.context, restaurants);
+    } else {
+      ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
+        const SnackBar(
+          content: Text('Aucun restaurant trouvé pour ce workspace'),
+        ),
+      );
+    }
+  }
 
   void _handleRestaurantSelection(Restaurant restaurant) {
     BottomSheetHelper.showBottomSheet(MarkerManager.context, restaurant);
@@ -191,31 +227,6 @@ class _SearchBarState extends State<SearchBar> {
         .move(lat2.LatLng(restaurant.latitude, restaurant.longitude), 15);
     MarkerManager.resetMarkers();
   }
-
-
-
-//   void _showWorkspaceDropdown(List<Workspace> workspaces) async {
-//   final selectedWorkspace = await showDialog<Workspace>(
-//     context: context,
-//     builder: (BuildContext context) {
-//       return SimpleDialog(
-//         title: Text('Sélectionnez un workspace'),
-//         children: workspaces.map((workspace) {
-//           return SimpleDialogOption(
-//             onPressed: () {
-//               Navigator.pop(context, workspace);
-//             },
-//             child: Text(workspace.name),
-//           );
-//         }).toList(),
-//       );
-//     },
-//   );
-
-//   if (selectedWorkspace != null) {
-//     _handleWorkspaceSelection(selectedWorkspace);
-//   }
-// }
 
   void _clearSearch(context) {
     MixpanelService.instance.track('ClearSearch');
