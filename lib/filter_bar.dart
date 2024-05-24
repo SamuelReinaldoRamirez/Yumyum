@@ -5,9 +5,13 @@ import 'package:yummap/workspace_options_modal.dart';
 import 'filter_options_modal.dart';
 
 class FilterBar extends StatefulWidget implements PreferredSizeWidget {
+  final ValueNotifier<List<int>> selectedTagIdsNotifier;
+  final ValueNotifier<List<int>> selectedWorkspacesNotifier;
+
 
   FilterBar({
     Key? key,
+    required this.selectedTagIdsNotifier, required this.selectedWorkspacesNotifier,
   }) : super(key: key);
 
   @override
@@ -18,11 +22,25 @@ class FilterBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _FilterBarState extends State<FilterBar> {
+  List<int> selectedTagIds = [];
 
   @override
   void initState() {
     super.initState();
     _lookPref();
+    widget.selectedTagIdsNotifier.addListener(_updateSelectedThings);
+    widget.selectedWorkspacesNotifier.addListener(_updateSelectedThings);
+  }
+
+  @override
+  void dispose() {
+    widget.selectedTagIdsNotifier.removeListener(_updateSelectedThings);
+    widget.selectedWorkspacesNotifier.removeListener(_updateSelectedThings);
+    super.dispose();
+  }
+
+  void _updateSelectedThings() {
+    setState(() {});
   }
 
   List<String> aliasList = [];
@@ -44,14 +62,39 @@ class _FilterBarState extends State<FilterBar> {
           children: [
             const SizedBox(width: 10),
             IconButton(
-              onPressed: () {
-                showModalBottomSheet<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return const FilterOptionsModal();
-                  },
-                );
-              },
+              onPressed: () 
+
+              {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return FilterOptionsModal( initialSelectedTagIds: selectedTagIds,
+                      onApply: (selectedIds) {
+                        setState(() {
+                          selectedTagIds = selectedIds;
+                        });
+                      },);
+                    },
+                  );
+                },
+
+              //   {
+              //   showModalBottomSheet<void>(
+              //     context: context,
+              //     builder: (BuildContext context) {
+              //       return FilterOptionsModal( 
+              //         initialSelectedTagIds: widget.selectedTagIdsNotifier.value,
+              //         // initialSelectedTagIds: selectedTagIds,
+              //         onApply: (selectedIds) {
+              //           setState(() {
+              //             widget.selectedTagIdsNotifier.value = selectedIds;
+              //             // selectedTagIds = selectedIds;
+              //           });
+              //         },);
+              //     },
+              //   );
+              // },
+
               icon: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -67,14 +110,39 @@ class _FilterBarState extends State<FilterBar> {
             ),
             Expanded(
               child: GestureDetector(
-                onTap: () {
-                  showModalBottomSheet<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return const FilterOptionsModal();
-                    },
-                  );
-                },
+                onTap: () 
+                
+                // {
+                //   showModalBottomSheet<void>(
+                //     context: context,
+                //     builder: (BuildContext context) {
+                //       return FilterOptionsModal( initialSelectedTagIds: selectedTagIds,
+                //       onApply: (selectedIds) {
+                //         setState(() {
+                //           selectedTagIds = selectedIds;
+                //         });
+                //       },);
+                //     },
+                //   );
+                // },
+
+                {
+                showModalBottomSheet<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return FilterOptionsModal( 
+                      initialSelectedTagIds: widget.selectedTagIdsNotifier.value,
+                      // initialSelectedTagIds: selectedTagIds,
+                      onApply: (selectedIds) {
+                        setState(() {
+                          widget.selectedTagIdsNotifier.value = selectedIds;
+                          // selectedTagIds = selectedIds;
+                        });
+                      },);
+                  },
+                );
+              },
+
                 child: Material(
                   elevation: 2, // élévation pour donner l'effet de surélévation
                   color: Colors.white,
@@ -99,7 +167,16 @@ class _FilterBarState extends State<FilterBar> {
                     showModalBottomSheet<void>(
                       context: context,
                       builder: (BuildContext context) {
-                        return const WorkspaceOptionsModal();
+                        return WorkspaceOptionsModal(
+                          initialSelectedWorkspaces: widget.selectedWorkspacesNotifier.value,
+                          // initialSelectedTagIds: selectedTagIds,
+                          onApply: (selectedIds) {
+                            setState(() {
+                              widget.selectedWorkspacesNotifier.value = selectedIds;
+                              // selectedTagIds = selectedIds;
+                            });
+                          }
+                        );
                       },
                     );
                   },

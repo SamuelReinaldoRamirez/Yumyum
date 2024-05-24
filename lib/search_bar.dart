@@ -7,7 +7,6 @@ import 'package:yummap/restaurant.dart';
 import 'package:yummap/theme.dart';
 import 'package:yummap/workspace.dart';
 import 'package:yummap/workspace_selection_page.dart';
-import 'filter_options_modal.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 import 'dart:math';
 import 'package:sensors_plus/sensors_plus.dart';
@@ -16,11 +15,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SearchBar extends StatefulWidget implements PreferredSizeWidget {
   final List<Restaurant> restaurantList;
   final Function(String) onSearchChanged;
+  final ValueNotifier<List<int>> selectedTagIdsNotifier;
+  final ValueNotifier<List<int>> selectedWorkspacesNotifier;
+
 
   SearchBar({
     Key? key,
     required this.onSearchChanged,
     required this.restaurantList,
+    required this.selectedTagIdsNotifier, 
+    required this.selectedWorkspacesNotifier,
   }) : super(key: key);
 
   @override
@@ -88,6 +92,11 @@ class _SearchBarState extends State<SearchBar> {
               color: AppColors.greenishGrey,
             ),
             onPressed: () async {
+              setState(() {
+                widget.selectedWorkspacesNotifier.value = [];
+                widget.selectedTagIdsNotifier.value = [];
+                // selectedTagIds = selectedIds;
+              });
               _clearSearch(context);
               MarkerManager.resetMarkers();
             },

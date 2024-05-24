@@ -34,6 +34,9 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late Mixpanel _mixpanel;
+  ValueNotifier<List<int>> selectedTagIdsNotifier = ValueNotifier<List<int>>([]);
+  ValueNotifier<List<int>> selectedWorkspacesNotifier = ValueNotifier<List<int>>([]);
+
 
   @override
   void initState() {
@@ -86,12 +89,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   height: MediaQuery.of(context).size.height * 0.08,
                   child: CustomSearchBar.SearchBar(
                     onSearchChanged: (value) {},
-                    restaurantList: widget.restaurantList
+                    restaurantList: widget.restaurantList,
+                    selectedTagIdsNotifier: selectedTagIdsNotifier, 
+                    selectedWorkspacesNotifier: selectedWorkspacesNotifier,
                   ),
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.06,
                   child: FilterBar(
+                    selectedTagIdsNotifier: selectedTagIdsNotifier,
+                    selectedWorkspacesNotifier: selectedWorkspacesNotifier,
                   ),
                 ),
                 // FilterBar(

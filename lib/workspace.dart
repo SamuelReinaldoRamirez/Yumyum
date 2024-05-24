@@ -41,4 +41,6 @@ class Workspace {
     );
   }
 
+  get placeIds => restaurants_placeId;
+
 }

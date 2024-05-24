@@ -12,7 +12,10 @@ import 'package:yummap/workspace.dart';
 import 'restaurant.dart';
 
 class WorkspaceOptionsModal extends StatefulWidget {
-  const WorkspaceOptionsModal({Key? key}) : super(key: key);
+  final List<int> initialSelectedWorkspaces;
+  final ValueChanged<List<int>> onApply;
+  
+  const WorkspaceOptionsModal({Key? key, required this.onApply, required this.initialSelectedWorkspaces}) : super(key: key);
 
   @override
   _WorkspaceOptionsModalState createState() => _WorkspaceOptionsModalState();
@@ -26,7 +29,21 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
   @override
   void initState() {
     super.initState();
-    _fetchWorkspaceList();
+    selectedTagIds = List.from(widget.initialSelectedWorkspaces);
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+  await _fetchWorkspaceList();
+  await _populateSelectedPlaceIDsList();
+}
+
+  Future<void> _populateSelectedPlaceIDsList() async {
+    List<Workspace> workspaceSelected = workspaceList.where((obj) => selectedTagIds.contains(obj.id)).toList();
+    List<List<String>> returnedPaceIdsList = workspaceSelected.map<List<String>>((obj) => obj.placeIds).toList();
+    setState(() {
+      selectedPlaceIDsList = returnedPaceIdsList;
+    });
   }
 
   Future<void> _fetchWorkspaceList() async {
@@ -65,6 +82,7 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
       padding: const EdgeInsets.only(bottom: 20.0),
       child: ElevatedButton(
         onPressed: () async {
+          widget.onApply(selectedTagIds);
           MixpanelService.instance.track('FilterWorkspaceSearch', properties: {
             'filter_ids': selectedTagIds,
           });
