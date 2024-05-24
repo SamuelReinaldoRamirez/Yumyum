@@ -176,18 +176,6 @@ class _SearchBarState extends State<SearchBar> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> aliasList = prefs.getStringList('workspaceAliases') ?? [];
 
-    // Afficher la liste actuelle des alias avant la mise à jour
-    _showAliasAlert(context, aliasList, 'Before setting');
-
-    // Supprimer l'ancien alias s'il existe déjà
-    aliasList.remove(workspace.alias);
-
-    // Ajouter le nouvel alias à la liste
-    aliasList.add(workspace.alias);
-
-    // Sauvegarder la liste mise à jour dans les préférences partagées
-    await prefs.setStringList('workspaceAliases', aliasList);
-
     // Afficher la liste mise à jour des alias
     _showAliasAlert(context, aliasList, 'After setting');
 
@@ -195,16 +183,16 @@ class _SearchBarState extends State<SearchBar> {
     List<String> placeIds = workspace.restaurants_placeId;
     List<Restaurant> restaurants = await CallEndpointService.searchRestaurantsByPlaceIDs(placeIds);
 
-    if (restaurants.isNotEmpty) {
-      // Afficher les restaurants sur la carte
-      MarkerManager.createFull(MarkerManager.context, restaurants);
-    } else {
-      ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
-        const SnackBar(
-          content: Text('Aucun restaurant trouvé pour ce workspace'),
-        ),
-      );
-    }
+    // if (restaurants.isNotEmpty) {
+    //   // Afficher les restaurants sur la carte
+    //   MarkerManager.createFull(MarkerManager.context, restaurants);
+    // } else {
+    //   ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text('Aucun restaurant trouvé pour ce workspace'),
+    //     ),
+    //   );
+    // }
   }
 
   void _handleRestaurantSelection(Restaurant restaurant) {
