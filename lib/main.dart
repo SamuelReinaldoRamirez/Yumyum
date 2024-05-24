@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
+import 'package:yummap/filter_bar.dart';
+import 'package:yummap/filter_options_modal.dart';
 import 'package:yummap/map_page.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/restaurant.dart';
@@ -9,6 +11,7 @@ import 'package:yummap/keys_data.dart'; // Importez le fichier contenant le toke
 import 'package:yummap/mixpanel_service.dart'; // Importez la classe MixpanelService
 // ignore: library_prefixes
 import 'package:yummap/search_bar.dart' as CustomSearchBar;
+import 'package:yummap/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -80,15 +83,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             child: Column(
               children: [
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.12,
+                  height: MediaQuery.of(context).size.height * 0.08,
                   child: CustomSearchBar.SearchBar(
                     onSearchChanged: (value) {},
                     restaurantList: widget.restaurantList
                   ),
                 ),
                 SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.06,
+                  child: FilterBar(
+                  ),
+                ),
+                // FilterBar(
+                //   ),
+                SizedBox(
                   height: MediaQuery.of(context).size.height *
-                      0.88, // 90% de la hauteur de l'écran
+                      0.86, // 90% de la hauteur de l'écran
                   child: MapPage(restaurantList: widget.restaurantList),
                 ),
               ],

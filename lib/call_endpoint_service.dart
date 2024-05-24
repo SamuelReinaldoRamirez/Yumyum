@@ -159,5 +159,32 @@ class CallEndpointService {
   }
 }
 
+  static Future<List<Workspace>> searchWorkspacesByAliass(List<String> Aliass) async {
+  const String endpoint = 'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/workspacesByAllias';
+  try {
+    final response = await http.post(
+      Uri.parse(endpoint),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({'alliasList': Aliass}),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = json.decode(response.body);
+
+      List<Workspace> restaurants = jsonData.map((data) {
+        return Workspace.fromJson(data);
+      }).toList();
+
+      return restaurants;
+    } else {
+      throw Exception('Failed to search restaurants by place IDs');
+    }
+  } catch (e) {
+    throw Exception('Failed to search restaurants by place IDs: $e');
+  }
+}
+
 
 }

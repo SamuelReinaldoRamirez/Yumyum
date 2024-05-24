@@ -94,29 +94,6 @@ class _SearchBarState extends State<SearchBar> {
           ),
         ),
       ),
-      actions: [
-        IconButton(
-          onPressed: () {
-            showModalBottomSheet<void>(
-              context: context,
-              builder: (BuildContext context) {
-                return const FilterOptionsModal();
-              },
-            );
-          },
-          icon: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.orangeButton,
-            ),
-            padding: const EdgeInsets.all(8),
-            child: const Icon(
-              Icons.filter_list,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
