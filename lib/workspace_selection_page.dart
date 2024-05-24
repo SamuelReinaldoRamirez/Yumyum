@@ -82,6 +82,47 @@ class WorkspaceSelectionPage extends StatelessWidget {
     );
   }
 
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       padding: EdgeInsets.all(8.0),
+//       child: Row(
+//         children: [
+//           Expanded(
+//             flex: 4,
+//             child: Text(
+//               '0' * numberOfZeroes,
+//               style: TextStyle(fontSize: 16.0), // Taille de police par défaut
+//               maxLines: 2, // Limite à 2 lignes
+//               overflow: TextOverflow.ellipsis, // Tronquer le texte si nécessaire
+//             ),
+//           ),
+//           Expanded(
+//             child: Container(
+//               child: Text(
+//                 longText,
+//                 style: TextStyle(fontSize: 16.0), // Taille de police par défaut
+//                 maxLines: 2, // Limite à 2 lignes
+//                 overflow: TextOverflow.ellipsis, // Tronquer le texte si nécessaire
+//               ),
+//             ),
+//           ),
+//           Expanded(
+//             child: Container(
+//               child: Text(
+//                 longText,
+//                 style: TextStyle(fontSize: 16.0), // Taille de police par défaut
+//                 maxLines: 2, // Limite à 2 lignes
+//                 overflow: TextOverflow.ellipsis, // Tronquer le texte si nécessaire
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+
   Widget _buildWorkspaceItem(BuildContext context, Workspace workspace) {
     return InkWell(
       onTap: () {
@@ -103,14 +144,58 @@ class WorkspaceSelectionPage extends StatelessWidget {
           ],
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Ajout du mainAxisAlignment
           children: [
-            Icon(Icons.business, color: AppColors.lightGreen), // Icône en vert clair
-            SizedBox(width: 10.0),
-            Expanded(
-              child: Text(
-                workspace.name,
-                style: AppTextStyles.paragraphWhiteStyle, // Utilise le style de texte pour les paragraphes
-              ),
+            Row(
+              children: [
+                Icon(Icons.business, color: AppColors.lightGreen), // Icône en vert clair
+                SizedBox(width: 10.0),
+                Text(
+                  workspace.name,
+                  style: AppTextStyles.paragraphWhiteStyle, // Utilise le style de texte pour les paragraphes
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: () {
+                    // Action pour le bouton "Voir"
+                  },
+                  child: Text(
+                    'Voir',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ButtonStyle(
+                    elevation: WidgetStateProperty.all(15.0), // Ajout d'élévation
+                    shape: WidgetStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        side: BorderSide(color: Colors.white.withOpacity(0.5)), // Bordure plus claire
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10.0),
+                TextButton(
+                  onPressed: () {
+                    // Action pour le bouton "Suivre"
+                  },
+                  child: Text(
+                    'Suivre',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ButtonStyle(
+                    elevation: WidgetStateProperty.all(15.0), // Ajout d'élévation
+                    shape: WidgetStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        side: BorderSide(color: Colors.white.withOpacity(0.5)), // Bordure plus claire
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -154,3 +239,4 @@ class WorkspaceSelectionPage extends StatelessWidget {
     );
   }
 }
+
