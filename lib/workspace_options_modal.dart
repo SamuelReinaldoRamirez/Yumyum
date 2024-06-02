@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,8 +13,12 @@ import 'restaurant.dart';
 class WorkspaceOptionsModal extends StatefulWidget {
   final List<int> initialSelectedWorkspaces;
   final ValueChanged<List<int>> onApply;
-  
-  const WorkspaceOptionsModal({Key? key, required this.onApply, required this.initialSelectedWorkspaces}) : super(key: key);
+
+  const WorkspaceOptionsModal(
+      {Key? key,
+      required this.onApply,
+      required this.initialSelectedWorkspaces})
+      : super(key: key);
 
   @override
   _WorkspaceOptionsModalState createState() => _WorkspaceOptionsModalState();
@@ -33,13 +37,15 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
   }
 
   Future<void> _initializeData() async {
-  await _fetchWorkspaceList();
-  await _populateSelectedPlaceIDsList();
-}
+    await _fetchWorkspaceList();
+    await _populateSelectedPlaceIDsList();
+  }
 
   Future<void> _populateSelectedPlaceIDsList() async {
-    List<Workspace> workspaceSelected = workspaceList.where((obj) => selectedTagIds.contains(obj.id)).toList();
-    List<List<String>> returnedPaceIdsList = workspaceSelected.map<List<String>>((obj) => obj.placeIds).toList();
+    List<Workspace> workspaceSelected =
+        workspaceList.where((obj) => selectedTagIds.contains(obj.id)).toList();
+    List<List<String>> returnedPaceIdsList =
+        workspaceSelected.map<List<String>>((obj) => obj.placeIds).toList();
     setState(() {
       selectedPlaceIDsList = returnedPaceIdsList;
     });
@@ -47,8 +53,9 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
 
   Future<void> _fetchWorkspaceList() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> Aliass = prefs.getStringList('workspaceAliases') ?? [];
-    List<Workspace> returnedWorkspaces = await CallEndpointService.searchWorkspacesByAliass(Aliass);
+    List<String> aliass = prefs.getStringList('workspaceAliases') ?? [];
+    List<Workspace> returnedWorkspaces =
+        await CallEndpointService.searchWorkspacesByAliass(aliass);
     setState(() {
       workspaceList = returnedWorkspaces;
     });
@@ -57,14 +64,15 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
   void _handleWorkspaceSelection(List<List<String>> placeIdsList) async {
     // Récupérer les restaurants à partir des placeId
     List<String> placeIds = [];
-    for (List<String> placeIDS in placeIdsList){
-      for(String placeId in placeIDS){
-        if(!placeIds.contains(placeId)) {
+    for (List<String> placeIDS in placeIdsList) {
+      for (String placeId in placeIDS) {
+        if (!placeIds.contains(placeId)) {
           placeIds.add(placeId);
         }
       }
     }
-    List<Restaurant> restaurants = await CallEndpointService.searchRestaurantsByPlaceIDs(placeIds);
+    List<Restaurant> restaurants =
+        await CallEndpointService.searchRestaurantsByPlaceIDs(placeIds);
     if (restaurants.isNotEmpty) {
       // Afficher les restaurants sur la carte
       MarkerManager.createFull(MarkerManager.context, restaurants);
@@ -139,7 +147,8 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
                             print(workspace.restaurants_placeId);
                             print("to");
                             print(selectedPlaceIDsList);
-                            selectedPlaceIDsList.add(workspace.restaurants_placeId);
+                            selectedPlaceIDsList
+                                .add(workspace.restaurants_placeId);
                             print(selectedPlaceIDsList);
                           } else {
                             selectedTagIds.remove(workspace.id);
@@ -147,7 +156,8 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
                             print(workspace.restaurants_placeId);
                             print("to");
                             print(selectedPlaceIDsList);
-                            selectedPlaceIDsList.remove(workspace.restaurants_placeId);
+                            selectedPlaceIDsList
+                                .remove(workspace.restaurants_placeId);
                             print(selectedPlaceIDsList);
                           }
                         });

@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
 import 'package:yummap/call_endpoint_service.dart';
@@ -185,22 +187,6 @@ class _SearchBarState extends State<SearchBar> {
 
     // Afficher la liste mise à jour des alias
     _showAliasAlert(context, aliasList, 'After setting');
-
-    // Récupérer les restaurants à partir des placeId
-    List<String> placeIds = workspace.restaurants_placeId;
-    List<Restaurant> restaurants =
-        await CallEndpointService.searchRestaurantsByPlaceIDs(placeIds);
-
-    // if (restaurants.isNotEmpty) {
-    //   // Afficher les restaurants sur la carte
-    //   MarkerManager.createFull(MarkerManager.context, restaurants);
-    // } else {
-    //   ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
-    //     const SnackBar(
-    //       content: Text('Aucun restaurant trouvé pour ce workspace'),
-    //     ),
-    //   );
-    // }
   }
 
   void _handleRestaurantSelection(Restaurant restaurant) {

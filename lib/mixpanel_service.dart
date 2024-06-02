@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart'; // pour kReleaseMode
-import 'package:device_info_plus/device_info_plus.dart';
+//import 'package:device_info_plus/device_info_plus.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
@@ -34,13 +34,13 @@ class MixpanelService {
     _mixpanel.identify(distinctId);
   }
 
-  static Future<bool> _isRunningOnEmulator() async {
-    final deviceInfo = DeviceInfoPlugin();
-    final androidInfo = await deviceInfo.androidInfo;
-    final iosInfo = await deviceInfo.iosInfo; // Si l'information est indisponible
+  // static Future<bool> _isRunningOnEmulator() async {
+  //   final deviceInfo = DeviceInfoPlugin();
+  //   final androidInfo = await deviceInfo.androidInfo;
+  //   final iosInfo = await deviceInfo.iosInfo; // Si l'information est indisponible
 
-    return !(androidInfo.isPhysicalDevice || iosInfo.isPhysicalDevice);
-  }
+  //   return !(androidInfo.isPhysicalDevice || iosInfo.isPhysicalDevice);
+  // }
 
   static Mixpanel get instance => _mixpanel;
 }

@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:yummap/call_endpoint_service.dart';
@@ -13,10 +13,11 @@ class FilterOptionsModal extends StatefulWidget {
   final List<int> initialSelectedTagIds;
   final ValueChanged<List<int>> onApply;
 
-  const FilterOptionsModal({Key? key,
-  required this.initialSelectedTagIds,
+  const FilterOptionsModal({
+    Key? key,
+    required this.initialSelectedTagIds,
     required this.onApply,
-    }) : super(key: key);
+  }) : super(key: key);
 
   @override
   _FilterOptionsModalState createState() => _FilterOptionsModalState();
@@ -89,54 +90,6 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
     );
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Column(
-  //     mainAxisSize: MainAxisSize.min,
-  //     children: [
-  //       _buildTitle(context),
-  //       Expanded(
-  //         child: SingleChildScrollView(
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.stretch,
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               ListView.builder(
-  //                 shrinkWrap: true,
-  //                 physics: const NeverScrollableScrollPhysics(),
-  //                 itemCount: tagList.length,
-  //                 itemBuilder: (context, index) {
-  //                   final tag = tagList[index];
-  //                   return CheckboxListTile(
-  //                     title: Text(
-  //                       tag.tag,
-  //                       style: AppTextStyles.paragraphDarkStyle,
-  //                     ),
-  //                     value: selectedTagIds.contains(tag.id),
-  //                     checkColor: Colors.white,
-  //                     activeColor: AppColors.greenishGrey,
-  //                     onChanged: (bool? value) {
-  //                       setState(() {
-  //                         if (value != null && value) {
-  //                           selectedTagIds.add(tag.id);
-  //                         } else {
-  //                           selectedTagIds.remove(tag.id);
-  //                         }
-  //                       });
-  //                     },
-  //                   );
-  //                 },
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //       _buildApplyButton(context),
-  //       const SizedBox(height: 10),
-  //     ],
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -190,5 +143,4 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
       ),
     );
   }
-
 }

@@ -42,13 +42,13 @@ class MapPageState extends State<MapPage> {
   }
 
   // Modifier _createMarkers pour mettre à jour la liste des marqueurs
-  Future<void> _createMarkers() async {
-    MarkerManager.markersList = MapHelper.createMarkers(
-        context, widget.restaurantList, restaurantLocations, _showMarkerInfo);
-    MarkerManager.allmarkers = List<Marker>.from(MarkerManager.markersList);
-    setState(
-        () {}); // Mettre à jour l'état pour reconstruire la carte avec les nouveaux marqueurs
-  }
+  // Future<void> _createMarkers() async {
+  //   MarkerManager.markersList = MapHelper.createMarkers(
+  //       context, widget.restaurantList, restaurantLocations, _showMarkerInfo);
+  //   MarkerManager.allmarkers = List<Marker>.from(MarkerManager.markersList);
+  //   setState(
+  //       () {}); // Mettre à jour l'état pour reconstruire la carte avec les nouveaux marqueurs
+  // }
 
   Future<void> _createListMarkers() async {
     MarkerManager.markersList = MapHelper.createListMarkers(

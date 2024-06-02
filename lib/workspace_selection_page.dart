@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yummap/call_endpoint_service.dart';
@@ -244,8 +246,8 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                         // Action pour le bouton "Voir"
                       },
                       style: ButtonStyle(
-                        elevation: WidgetStateProperty.all(
-                            15.0), // Ajout d'élévation
+                        elevation:
+                            WidgetStateProperty.all(15.0), // Ajout d'élévation
                         shape: WidgetStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),

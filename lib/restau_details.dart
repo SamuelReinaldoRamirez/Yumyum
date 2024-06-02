@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -55,23 +55,25 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
       return 0.15;
     } else if (fraction < 2) {
       return 0.32;
-    } else if (fraction < 3)
+    } else if (fraction < 3) {
       return 0.35;
-    else if (fraction < 4)
+    } else if (fraction < 4) {
       return 0.40;
-    else if (fraction < 5)
+    } else if (fraction < 5) {
       return 0.45;
-    else if (fraction == 5)
+    } else if (fraction == 5) {
       return 0.5;
-    else if (fraction >= 9)
+    } else if (fraction >= 9) {
       return 0.80;
-    else if (fraction >= 8)
+    } else if (fraction >= 8) {
       return 0.65;
-    else if (fraction >= 7)
+    } else if (fraction >= 7) {
       return 0.60;
-    else if (fraction >= 6)
+    } else if (fraction >= 6) {
       return 0.55;
-    else if (fraction < 6) return 0.52;
+    } else if (fraction < 6) {
+      return 0.52;
+    }
     return 0.5;
   }
 
@@ -117,12 +119,12 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     });
   }
 
-  Future<void> _launchUrl(String? url) async {
-    if (url != null && await canLaunch(url)) {
-      // Utiliser canLaunch avec un String
-      await launch(url); // Utiliser launch avec un String
-    }
-  }
+  // Future<void> _launchUrl(String? url) async {
+  //   if (url != null && await canLaunch(url)) {
+  //     // Utiliser canLaunch avec un String
+  //     await launch(url); // Utiliser launch avec un String
+  //   }
+  // }
 
   Future<void> openURL(BuildContext context, String? url) async {
     if (url != null && url.isNotEmpty) {
