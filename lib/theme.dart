@@ -19,19 +19,19 @@ class AppButtonStyles {
   // Style de bouton pour les boutons Elevés
   static ButtonStyle elevatedButtonStyle = ButtonStyle(
     minimumSize: WidgetStateProperty.all<Size>(const Size(150, 40)),
-    backgroundColor: MaterialStateProperty.all<Color>(AppColors.darkGrey),
-    foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-    textStyle: MaterialStateProperty.all<TextStyle>(
+    backgroundColor: WidgetStateProperty.all<Color>(AppColors.darkGrey),
+    foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
+    textStyle: WidgetStateProperty.all<TextStyle>(
       const TextStyle(
         fontFamily: AppFonts.textFontFamily,
         fontSize: 18,
         fontWeight: FontWeight.bold,
       ),
     ),
-    padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+    padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
       const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
     ),
-    shape: MaterialStateProperty.all<OutlinedBorder>(
+    shape: WidgetStateProperty.all<OutlinedBorder>(
       RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(30),
       ),

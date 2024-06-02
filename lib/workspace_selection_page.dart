@@ -34,7 +34,7 @@ class WorkspaceSelectionPage extends StatelessWidget {
                 color: AppColors.orangeButton, // Fond vert clair pour le cercle
               ),
               child: IconButton(
-                icon: Icon(
+                icon: const Icon(
                   Icons.arrow_back, // Icône de flèche de retour
                   color: Colors.white, // Couleur de l'icône
                 ),
@@ -43,10 +43,10 @@ class WorkspaceSelectionPage extends StatelessWidget {
                 },
               ),
             ),
-            SizedBox(width: 10.0),
+            const SizedBox(width: 10.0),
             Expanded(
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 5.0),
+                padding: const EdgeInsets.symmetric(vertical: 5.0),
                 decoration: BoxDecoration(
                   color: AppColors.darkGrey, // Fond gris foncé pour le titre
                   borderRadius: BorderRadius.circular(10.0),
@@ -103,8 +103,8 @@ class WorkspaceSelectionPage extends StatelessWidget {
             restaurant); // Retourne le restaurant sélectionné à la page précédente
       },
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-        padding: EdgeInsets.all(15.0),
+        margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+        padding: const EdgeInsets.all(15.0),
         decoration: BoxDecoration(
           color: Colors.red, // Fond gris foncé
           borderRadius: BorderRadius.circular(10.0),
@@ -113,15 +113,15 @@ class WorkspaceSelectionPage extends StatelessWidget {
               color: Colors.black.withOpacity(0.5),
               spreadRadius: 2,
               blurRadius: 5,
-              offset: Offset(0, 3),
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: Row(
           children: [
-            Icon(Icons.restaurant,
+            const Icon(Icons.restaurant,
                 color: AppColors.lightGreen), // Icône en vert clair
-            SizedBox(width: 10.0),
+            const SizedBox(width: 10.0),
             Expanded(
               child: Text(
                 restaurant.name,
@@ -171,7 +171,7 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
       future: _aliasListFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Ou un indicateur de chargement similaire
+          return const CircularProgressIndicator(); // Ou un indicateur de chargement similaire
         }
         if (snapshot.hasError) {
           return Text('Erreur: ${snapshot.error}');
@@ -184,8 +184,8 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
             // Navigator.pop(context, widget.workspace); // Retourne le workspace sélectionné à la page précédente
           },
           child: Container(
-            margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-            padding: EdgeInsets.all(15.0),
+            margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+            padding: const EdgeInsets.all(15.0),
             decoration: BoxDecoration(
               color: AppColors.darkGrey, // Fond gris foncé
               borderRadius: BorderRadius.circular(10.0),
@@ -194,7 +194,7 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                   color: Colors.black.withOpacity(0.5),
                   spreadRadius: 2,
                   blurRadius: 5,
-                  offset: Offset(0, 3),
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
@@ -203,9 +203,9 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.business,
+                    const Icon(Icons.business,
                         color: Colors.white), // Icône en vert clair
-                    SizedBox(width: 10.0),
+                    const SizedBox(width: 10.0),
                     SizedBox(
                       width: 150,
                       child: Text(
@@ -243,14 +243,10 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                         Navigator.pop(context, widget.workspace);
                         // Action pour le bouton "Voir"
                       },
-                      child: Text(
-                        'Voir',
-                        style: TextStyle(color: Colors.white),
-                      ),
                       style: ButtonStyle(
-                        elevation: MaterialStateProperty.all(
+                        elevation: WidgetStateProperty.all(
                             15.0), // Ajout d'élévation
-                        shape: MaterialStateProperty.all(
+                        shape: WidgetStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                             side: BorderSide(
@@ -259,8 +255,12 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                           ),
                         ),
                       ),
+                      child: const Text(
+                        'Voir',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
-                    SizedBox(width: 10.0),
+                    const SizedBox(width: 10.0),
                     if (!isFollowing)
                       TextButton(
                         onPressed: () async {
@@ -275,21 +275,21 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                           _updatePreferences();
                           FilterBar.showAccounts();
                         },
-                        child: Text(
-                          'Suivre',
-                          style: TextStyle(color: AppColors.lightGreen),
-                        ),
                         style: ButtonStyle(
-                          elevation: MaterialStateProperty.all(
+                          elevation: WidgetStateProperty.all(
                               15.0), // Ajout d'élévation
-                          shape: MaterialStateProperty.all(
+                          shape: WidgetStateProperty.all(
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8.0),
-                              side: BorderSide(
+                              side: const BorderSide(
                                   color: AppColors
                                       .lightGreen), // Bordure plus claire
                             ),
                           ),
+                        ),
+                        child: const Text(
+                          'Suivre',
+                          style: TextStyle(color: AppColors.lightGreen),
                         ),
                       ),
                     if (isFollowing)
@@ -310,14 +310,10 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                             FilterBar.hideAccounts();
                           }
                         },
-                        child: Text(
-                          'Désabonner',
-                          style: TextStyle(color: Colors.white),
-                        ),
                         style: ButtonStyle(
-                          elevation: MaterialStateProperty.all(
+                          elevation: WidgetStateProperty.all(
                               15.0), // Ajout d'élévation
-                          shape: MaterialStateProperty.all(
+                          shape: WidgetStateProperty.all(
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8.0),
                               side: BorderSide(
@@ -326,6 +322,10 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                               ),
                             ),
                           ),
+                        ),
+                        child: const Text(
+                          'Désabonner',
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                   ],

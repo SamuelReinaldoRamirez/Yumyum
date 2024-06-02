@@ -11,7 +11,7 @@ class MixpanelService {
     // Initialiser le stockage sécurisé partagé
     const storage = FlutterSecureStorage();
     //final bool isEmulator = await _isRunningOnEmulator();
-    final bool isDebugMode = kDebugMode;
+    const bool isDebugMode = kDebugMode;
 
     // Récupérer l'ID aléatoire sauvegardé localement, ou en générer un nouveau
     String? distinctId = await storage.read(key: 'ydistinctId');
@@ -37,12 +37,7 @@ class MixpanelService {
   static Future<bool> _isRunningOnEmulator() async {
     final deviceInfo = DeviceInfoPlugin();
     final androidInfo = await deviceInfo.androidInfo;
-    final iosInfo = await deviceInfo.iosInfo;
-
-    if (androidInfo.isPhysicalDevice == null)
-      return false; // Si l'information est indisponible
-    if (iosInfo.isPhysicalDevice == null)
-      return false; // Si l'information est indisponible
+    final iosInfo = await deviceInfo.iosInfo; // Si l'information est indisponible
 
     return !(androidInfo.isPhysicalDevice || iosInfo.isPhysicalDevice);
   }

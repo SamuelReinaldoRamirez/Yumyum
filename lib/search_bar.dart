@@ -18,7 +18,7 @@ class SearchBar extends StatefulWidget implements PreferredSizeWidget {
   final ValueNotifier<List<int>> selectedTagIdsNotifier;
   final ValueNotifier<List<int>> selectedWorkspacesNotifier;
 
-  SearchBar({
+  const SearchBar({
     Key? key,
     required this.onSearchChanged,
     required this.restaurantList,

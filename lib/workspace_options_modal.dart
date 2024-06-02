@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/mixpanel_service.dart';
-import 'package:yummap/tag.dart';
 import 'package:yummap/theme.dart';
 import 'package:yummap/workspace.dart';
 
@@ -60,8 +59,9 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
     List<String> placeIds = [];
     for (List<String> placeIDS in placeIdsList){
       for(String placeId in placeIDS){
-        if(!placeIds.contains(placeId))
+        if(!placeIds.contains(placeId)) {
           placeIds.add(placeId);
+        }
       }
     }
     List<Restaurant> restaurants = await CallEndpointService.searchRestaurantsByPlaceIDs(placeIds);

@@ -8,7 +8,7 @@ class FilterBar extends StatefulWidget implements PreferredSizeWidget {
   final ValueNotifier<List<int>> selectedTagIdsNotifier;
   final ValueNotifier<List<int>> selectedWorkspacesNotifier;
 
-  FilterBar({
+  const FilterBar({
     Key? key,
     required this.selectedTagIdsNotifier,
     required this.selectedWorkspacesNotifier,
@@ -130,7 +130,7 @@ class _FilterBarState extends State<FilterBar> {
                   color: Colors.white,
                   child: Container(
                     alignment: Alignment.center,
-                    child: Text(
+                    child: const Text(
                       'Filtres',
                       style: TextStyle(
                         color: AppColors.darkGrey,
@@ -172,7 +172,7 @@ class _FilterBarState extends State<FilterBar> {
                         color: Colors.white,
                         child: Container(
                           alignment: Alignment.center,
-                          child: Text(
+                          child: const Text(
                             'Comptes Suivis',
                             style: TextStyle(
                               color: AppColors.darkGrey,
