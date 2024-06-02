@@ -37,6 +37,7 @@ class BottomSheetHelper {
                               restaurant.name,
                               textAlign: TextAlign.center,
                               style: AppTextStyles.titleDarkStyle,
+                              maxLines: 1,
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,

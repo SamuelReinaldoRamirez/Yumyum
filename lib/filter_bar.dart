@@ -8,10 +8,10 @@ class FilterBar extends StatefulWidget implements PreferredSizeWidget {
   final ValueNotifier<List<int>> selectedTagIdsNotifier;
   final ValueNotifier<List<int>> selectedWorkspacesNotifier;
 
-
   FilterBar({
     Key? key,
-    required this.selectedTagIdsNotifier, required this.selectedWorkspacesNotifier,
+    required this.selectedTagIdsNotifier,
+    required this.selectedWorkspacesNotifier,
   }) : super(key: key);
 
   @override
@@ -19,10 +19,28 @@ class FilterBar extends StatefulWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  static ValueNotifier<bool> showFollowedAccounts = ValueNotifier<bool>(true);
+
+  static void toggleFollowedAccountsFilter() {
+    showFollowedAccounts.value = !showFollowedAccounts.value;
+    _FilterBarState()._updateSelectedThings();
+  }
+
+  static void showAccounts() {
+    showFollowedAccounts.value = true;
+    _FilterBarState()._updateSelectedThings();
+  }
+
+  static void hideAccounts() {
+    showFollowedAccounts.value = false;
+    _FilterBarState()._updateSelectedThings();
+  }
 }
 
 class _FilterBarState extends State<FilterBar> {
   List<int> selectedTagIds = [];
+  List<String> aliasList = [];
 
   @override
   void initState() {
@@ -43,7 +61,6 @@ class _FilterBarState extends State<FilterBar> {
     setState(() {});
   }
 
-  List<String> aliasList = [];
   // Fonction asynchrone pour récupérer les workspaces sauvegardés
   Future<void> _lookPref() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -52,49 +69,31 @@ class _FilterBarState extends State<FilterBar> {
     });
   }
 
- @override
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       top: false, // Ne pas respecter la marge en haut
       child: Container(
-        color: Colors.white, // Couleur de fond jaune
+        color: Colors.white, // Couleur de fond blanc
         child: Row(
           children: [
             const SizedBox(width: 10),
             IconButton(
-              onPressed: () 
-
-              {
-                  showModalBottomSheet<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return FilterOptionsModal( initialSelectedTagIds: selectedTagIds,
+              onPressed: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return FilterOptionsModal(
+                      initialSelectedTagIds: selectedTagIds,
                       onApply: (selectedIds) {
                         setState(() {
                           selectedTagIds = selectedIds;
                         });
-                      },);
-                    },
-                  );
-                },
-
-              //   {
-              //   showModalBottomSheet<void>(
-              //     context: context,
-              //     builder: (BuildContext context) {
-              //       return FilterOptionsModal( 
-              //         initialSelectedTagIds: widget.selectedTagIdsNotifier.value,
-              //         // initialSelectedTagIds: selectedTagIds,
-              //         onApply: (selectedIds) {
-              //           setState(() {
-              //             widget.selectedTagIdsNotifier.value = selectedIds;
-              //             // selectedTagIds = selectedIds;
-              //           });
-              //         },);
-              //     },
-              //   );
-              // },
-
+                      },
+                    );
+                  },
+                );
+              },
               icon: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -104,45 +103,28 @@ class _FilterBarState extends State<FilterBar> {
                 child: const Icon(
                   Icons.filter_list,
                   color: Colors.white,
-                  size: 25
+                  size: 25,
                 ),
               ),
             ),
             Expanded(
               child: GestureDetector(
-                onTap: () 
-                
-                // {
-                //   showModalBottomSheet<void>(
-                //     context: context,
-                //     builder: (BuildContext context) {
-                //       return FilterOptionsModal( initialSelectedTagIds: selectedTagIds,
-                //       onApply: (selectedIds) {
-                //         setState(() {
-                //           selectedTagIds = selectedIds;
-                //         });
-                //       },);
-                //     },
-                //   );
-                // },
-
-                {
-                showModalBottomSheet<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return FilterOptionsModal( 
-                      initialSelectedTagIds: widget.selectedTagIdsNotifier.value,
-                      // initialSelectedTagIds: selectedTagIds,
-                      onApply: (selectedIds) {
-                        setState(() {
-                          widget.selectedTagIdsNotifier.value = selectedIds;
-                          // selectedTagIds = selectedIds;
-                        });
-                      },);
-                  },
-                );
-              },
-
+                onTap: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return FilterOptionsModal(
+                        initialSelectedTagIds:
+                            widget.selectedTagIdsNotifier.value,
+                        onApply: (selectedIds) {
+                          setState(() {
+                            widget.selectedTagIdsNotifier.value = selectedIds;
+                          });
+                        },
+                      );
+                    },
+                  );
+                },
                 child: Material(
                   elevation: 2, // élévation pour donner l'effet de surélévation
                   color: Colors.white,
@@ -160,48 +142,54 @@ class _FilterBarState extends State<FilterBar> {
                 ),
               ),
             ),
-            if (aliasList.isNotEmpty)
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    showModalBottomSheet<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return WorkspaceOptionsModal(
-                          initialSelectedWorkspaces: widget.selectedWorkspacesNotifier.value,
-                          // initialSelectedTagIds: selectedTagIds,
-                          onApply: (selectedIds) {
-                            setState(() {
-                              widget.selectedWorkspacesNotifier.value = selectedIds;
-                              // selectedTagIds = selectedIds;
-                            });
-                          }
+            ValueListenableBuilder<bool>(
+              valueListenable: FilterBar.showFollowedAccounts,
+              builder: (context, show, child) {
+                return Visibility(
+                  visible: aliasList.isNotEmpty && show,
+                  child: Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet<void>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return WorkspaceOptionsModal(
+                              initialSelectedWorkspaces:
+                                  widget.selectedWorkspacesNotifier.value,
+                              onApply: (selectedIds) {
+                                setState(() {
+                                  widget.selectedWorkspacesNotifier.value =
+                                      selectedIds;
+                                });
+                              },
+                            );
+                          },
                         );
                       },
-                    );
-                  },
-                  child: Material(
-                    elevation: 2, // élévation pour donner l'effet de surélévation
-                    color: Colors.white,
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Comptes Suivis',
-                        style: TextStyle(
-                          color: AppColors.darkGrey,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      child: Material(
+                        elevation:
+                            2, // élévation pour donner l'effet de surélévation
+                        color: Colors.white,
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Comptes Suivis',
+                            style: TextStyle(
+                              color: AppColors.darkGrey,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
-              // Ajoutez d'autres widgets de votre barre d'outils ici si nécessaire
+                );
+              },
+            ),
           ],
         ),
       ),
     );
   }
-
 }

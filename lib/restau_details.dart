@@ -420,6 +420,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                     options: MapOptions(
                                       center: _position,
                                       zoom: 18,
+                                      maxZoom: 18.4,
+                                      minZoom: 1,
                                     ),
                                     children: [
                                       TileLayer(

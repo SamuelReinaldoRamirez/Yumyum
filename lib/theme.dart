@@ -18,7 +18,7 @@ class AppFonts {
 class AppButtonStyles {
   // Style de bouton pour les boutons Elevés
   static ButtonStyle elevatedButtonStyle = ButtonStyle(
-    minimumSize: MaterialStateProperty.all<Size>(const Size(150, 40)),
+    minimumSize: WidgetStateProperty.all<Size>(const Size(150, 40)),
     backgroundColor: MaterialStateProperty.all<Color>(AppColors.darkGrey),
     foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
     textStyle: MaterialStateProperty.all<TextStyle>(

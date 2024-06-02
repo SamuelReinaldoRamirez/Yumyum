@@ -51,6 +51,7 @@ dependencies:
   latlong2: ^0.8.2 # Mise à jour de la version de latlong2 pour répondre aux exigences de flutter_map_location_marker
   flutter_map_marker_cluster: ^1.1.1
   flutter_map_location_marker: ^6.0.0
+  device_info_plus: ^10.1.0
   
 dev_dependencies:
   flutter_test:

@@ -67,6 +67,7 @@ class MapPageState extends State<MapPage> {
           center: lat2.LatLng(48.8566, 2.339),
           zoom: 12,
           maxZoom: 18.4,
+          minZoom: 1,
           onTap: (tapPosition, point) {
             // Fermer le clavier lors du tap sur la carte
             FocusScope.of(context).requestFocus(FocusNode());
@@ -75,7 +76,7 @@ class MapPageState extends State<MapPage> {
         children: [
           TileLayer(
             urlTemplate:
-                "https://api.mapbox.com/styles/v1/yummaps/cluttp8k4003e01mjhi4vf0ii/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDEzeGQwMXVkMmxudWg5d2EybTlqIn0.hqUva2cQmp3rXHMbON8_Kw",
+                "https://api.mapbox.com/styles/v1/yummaps/clw628gqc02ok01qzbth1aaql/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDEzeGQwMXVkMmxudWg5d2EybTlqIn0.hqUva2cQmp3rXHMbON8_Kw",
             subdomains: const ['a', 'b', 'c'],
           ),
           MarkerLayer(markers: MarkerManager.markersList),

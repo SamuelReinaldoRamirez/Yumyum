@@ -18,12 +18,11 @@ class SearchBar extends StatefulWidget implements PreferredSizeWidget {
   final ValueNotifier<List<int>> selectedTagIdsNotifier;
   final ValueNotifier<List<int>> selectedWorkspacesNotifier;
 
-
   SearchBar({
     Key? key,
     required this.onSearchChanged,
     required this.restaurantList,
-    required this.selectedTagIdsNotifier, 
+    required this.selectedTagIdsNotifier,
     required this.selectedWorkspacesNotifier,
   }) : super(key: key);
 
@@ -66,7 +65,8 @@ class _SearchBarState extends State<SearchBar> {
     Random random = Random();
     int randomIndex = random.nextInt(widget.restaurantList.length);
     FocusScope.of(context).requestFocus(FocusNode());
-    BottomSheetHelper.showBottomSheet(MarkerManager.context, widget.restaurantList[randomIndex]);
+    BottomSheetHelper.showBottomSheet(
+        MarkerManager.context, widget.restaurantList[randomIndex]);
   }
 
   @override
@@ -111,12 +111,15 @@ class _SearchBarState extends State<SearchBar> {
       'searchText': value,
     });
 
-    List<Workspace> workspacesToDisplay = await CallEndpointService.searchWorkspaceByName(value);
+    List<Workspace> workspacesToDisplay =
+        await CallEndpointService.searchWorkspaceByName(value);
 
-    List<Restaurant> restaurantsToDisplay = await CallEndpointService.searchRestaurantByName(value);
+    List<Restaurant> restaurantsToDisplay =
+        await CallEndpointService.searchRestaurantByName(value);
 
     if (workspacesToDisplay.isNotEmpty) {
-      _showWorkspaceSelectionPage(context, workspacesToDisplay, restaurantsToDisplay);
+      _showWorkspaceSelectionPage(
+          context, workspacesToDisplay, restaurantsToDisplay);
     } else {
       if (restaurantsToDisplay.length > 1) {
         MarkerManager.createFull(MarkerManager.context, restaurantsToDisplay);
@@ -139,10 +142,13 @@ class _SearchBarState extends State<SearchBar> {
     }
   }
 
-  void _showWorkspaceSelectionPage(BuildContext context, List<Workspace> workspaces, List<Restaurant> restaurants) async {
+  void _showWorkspaceSelectionPage(BuildContext context,
+      List<Workspace> workspaces, List<Restaurant> restaurants) async {
     final selectedItem = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => WorkspaceSelectionPage(workspaces: workspaces, restaurants: restaurants)),
+      MaterialPageRoute(
+          builder: (context) => WorkspaceSelectionPage(
+              workspaces: workspaces, restaurants: restaurants)),
     );
 
     if (selectedItem != null && selectedItem is Restaurant) {
@@ -152,7 +158,8 @@ class _SearchBarState extends State<SearchBar> {
     }
   }
 
-  void _showAliasAlert(BuildContext context, List<String> aliasList, String title) {
+  void _showAliasAlert(
+      BuildContext context, List<String> aliasList, String title) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -181,7 +188,8 @@ class _SearchBarState extends State<SearchBar> {
 
     // Récupérer les restaurants à partir des placeId
     List<String> placeIds = workspace.restaurants_placeId;
-    List<Restaurant> restaurants = await CallEndpointService.searchRestaurantsByPlaceIDs(placeIds);
+    List<Restaurant> restaurants =
+        await CallEndpointService.searchRestaurantsByPlaceIDs(placeIds);
 
     // if (restaurants.isNotEmpty) {
     //   // Afficher les restaurants sur la carte
