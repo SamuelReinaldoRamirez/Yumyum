@@ -32,9 +32,10 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late Mixpanel _mixpanel;
-  ValueNotifier<List<int>> selectedTagIdsNotifier = ValueNotifier<List<int>>([]);
-  ValueNotifier<List<int>> selectedWorkspacesNotifier = ValueNotifier<List<int>>([]);
-
+  ValueNotifier<List<int>> selectedTagIdsNotifier =
+      ValueNotifier<List<int>>([]);
+  ValueNotifier<List<int>> selectedWorkspacesNotifier =
+      ValueNotifier<List<int>>([]);
 
   @override
   void initState() {
@@ -73,7 +74,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
+          //backgroundColor: Colors.white,
           elevation: 0,
         ),
       ),
@@ -84,11 +85,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             child: Column(
               children: [
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.08,
+                  height: MediaQuery.of(context).size.height * 0.10,
                   child: CustomSearchBar.SearchBar(
                     onSearchChanged: (value) {},
                     restaurantList: widget.restaurantList,
-                    selectedTagIdsNotifier: selectedTagIdsNotifier, 
+                    selectedTagIdsNotifier: selectedTagIdsNotifier,
                     selectedWorkspacesNotifier: selectedWorkspacesNotifier,
                   ),
                 ),
@@ -103,7 +104,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 //   ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height *
-                      0.86, // 90% de la hauteur de l'écran
+                      0.84, // 90% de la hauteur de l'écran
                   child: MapPage(restaurantList: widget.restaurantList),
                 ),
               ],

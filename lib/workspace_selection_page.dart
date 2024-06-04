@@ -209,7 +209,7 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                         color: Colors.white), // Icône en vert clair
                     const SizedBox(width: 10.0),
                     SizedBox(
-                      width: 150,
+                      width: 100,
                       child: Text(
                         widget.workspace.name,
                         overflow: TextOverflow.ellipsis,

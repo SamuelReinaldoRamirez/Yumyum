@@ -75,8 +75,8 @@ class _FilterBarState extends State<FilterBar> {
   Widget build(BuildContext context) {
     return SafeArea(
       top: false, // Ne pas respecter la marge en haut
+      bottom: false,
       child: Container(
-        color: Colors.white, // Couleur de fond blanc
         child: Row(
           children: [
             const SizedBox(width: 10),
@@ -109,36 +109,35 @@ class _FilterBarState extends State<FilterBar> {
                 ),
               ),
             ),
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  showModalBottomSheet<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return FilterOptionsModal(
-                        initialSelectedTagIds:
-                            widget.selectedTagIdsNotifier.value,
-                        onApply: (selectedIds) {
-                          setState(() {
-                            widget.selectedTagIdsNotifier.value = selectedIds;
-                          });
-                        },
-                      );
-                    },
-                  );
-                },
-                child: Material(
-                  elevation: 2, // élévation pour donner l'effet de surélévation
-                  color: Colors.white,
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Filtres',
-                      style: TextStyle(
-                        color: AppColors.darkGrey,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+            SizedBox(
+              width: 20,
+            ),
+            GestureDetector(
+              onTap: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return FilterOptionsModal(
+                      initialSelectedTagIds:
+                          widget.selectedTagIdsNotifier.value,
+                      onApply: (selectedIds) {
+                        setState(() {
+                          widget.selectedTagIdsNotifier.value = selectedIds;
+                        });
+                      },
+                    );
+                  },
+                );
+              },
+              child: Material(
+                child: Container(
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Filtres',
+                    style: TextStyle(
+                      color: AppColors.darkGrey,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -169,9 +168,6 @@ class _FilterBarState extends State<FilterBar> {
                         );
                       },
                       child: Material(
-                        elevation:
-                            2, // élévation pour donner l'effet de surélévation
-                        color: Colors.white,
                         child: Container(
                           alignment: Alignment.center,
                           child: const Text(
