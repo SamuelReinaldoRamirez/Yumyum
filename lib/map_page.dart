@@ -41,14 +41,11 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  // Modifier _createMarkers pour mettre à jour la liste des marqueurs
-  // Future<void> _createMarkers() async {
-  //   MarkerManager.markersList = MapHelper.createMarkers(
-  //       context, widget.restaurantList, restaurantLocations, _showMarkerInfo);
-  //   MarkerManager.allmarkers = List<Marker>.from(MarkerManager.markersList);
-  //   setState(
-  //       () {}); // Mettre à jour l'état pour reconstruire la carte avec les nouveaux marqueurs
-  // }
+  void _centercamera() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    mapController.move(lat2.LatLng(position.latitude, position.longitude), 12);
+  }
 
   Future<void> _createListMarkers() async {
     MarkerManager.markersList = MapHelper.createListMarkers(
@@ -61,25 +58,39 @@ class MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FlutterMap(
-        mapController: mapController,
-        options: MapOptions(
-          center: lat2.LatLng(48.8566, 2.339),
-          zoom: 12,
-          maxZoom: 18.4,
-          minZoom: 1,
-          onTap: (tapPosition, point) {
-            // Fermer le clavier lors du tap sur la carte
-            FocusScope.of(context).requestFocus(FocusNode());
-          },
-        ),
+      body: Stack(
         children: [
-          TileLayer(
-            urlTemplate:
-                "https://api.mapbox.com/styles/v1/yummaps/clw628gqc02ok01qzbth1aaql/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDEzeGQwMXVkMmxudWg5d2EybTlqIn0.hqUva2cQmp3rXHMbON8_Kw",
-            subdomains: const ['a', 'b', 'c'],
+          FlutterMap(
+            mapController: mapController,
+            options: MapOptions(
+              center: lat2.LatLng(48.8566, 2.339),
+              zoom: 12,
+              maxZoom: 18.4,
+              minZoom: 1,
+              onTap: (tapPosition, point) {
+                // Fermer le clavier lors du tap sur la carte
+                FocusScope.of(context).requestFocus(FocusNode());
+              },
+            ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                    "https://api.mapbox.com/styles/v1/yummaps/clw628gqc02ok01qzbth1aaql/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDEzeGQwMXVkMmxudWg5d2EybTlqIn0.hqUva2cQmp3rXHMbON8_Kw",
+                subdomains: const ['a', 'b', 'c'],
+              ),
+              MarkerLayer(markers: MarkerManager.markersList),
+            ],
           ),
-          MarkerLayer(markers: MarkerManager.markersList),
+          Positioned(
+            bottom: 16.0,
+            right: 16.0,
+            child: FloatingActionButton(
+              onPressed: _centercamera,
+              child: Icon(Icons.my_location),
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+            ),
+          ),
         ],
       ),
     );

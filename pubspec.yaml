@@ -22,13 +22,11 @@ flutter:
         - asset: assets/fonts/sifonn/SIFONN_PRO.otf
         # Ajoutez d'autres variantes de la police Sifonn si nécessaire
 
-
 dependencies:
   flutter:
     sdk: flutter
   shared_preferences: ^2.0.6
   sensors_plus: ^2.0.0
-  google_maps_flutter: ^2.5.3
   flutter_map: ^4.0.0
   latlng: any
   http: ^0.13.3
@@ -52,8 +50,14 @@ dependencies:
   flutter_map_marker_cluster: ^1.1.1
   flutter_map_location_marker: ^6.0.0
   device_info_plus: ^10.1.0
-  
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/splash.png
+  ios: true
+  android: true
