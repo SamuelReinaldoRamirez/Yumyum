@@ -68,6 +68,7 @@ class _FilterBarState extends State<FilterBar> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       aliasList = prefs.getStringList('workspaceAliases') ?? [];
+      FilterBar.showFollowedAccounts.value = aliasList.isNotEmpty;
     });
   }
 
@@ -147,7 +148,7 @@ class _FilterBarState extends State<FilterBar> {
               valueListenable: FilterBar.showFollowedAccounts,
               builder: (context, show, child) {
                 return Visibility(
-                  visible: aliasList.isNotEmpty && show,
+                  visible: show,
                   child: Expanded(
                     child: GestureDetector(
                       onTap: () {
