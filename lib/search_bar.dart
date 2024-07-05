@@ -113,11 +113,21 @@ class _SearchBarState extends State<SearchBar> {
       'searchText': value,
     });
 
+    if(value == ",dev,"){
+      print("TO DEV ??");
+      await CallEndpointService.switchToDev();
+      value = "";
+    }
+    if(value == ",prod,"){
+      await CallEndpointService.switchToProd();
+      value = "";
+    }
+
     List<Workspace> workspacesToDisplay =
-        await CallEndpointService.searchWorkspaceByName(value);
+        await CallEndpointService().searchWorkspaceByName(value);
 
     List<Restaurant> restaurantsToDisplay =
-        await CallEndpointService.searchRestaurantByName(value);
+        await CallEndpointService().searchRestaurantByName(value);
 
     if (workspacesToDisplay.isNotEmpty) {
       _showWorkspaceSelectionPage(

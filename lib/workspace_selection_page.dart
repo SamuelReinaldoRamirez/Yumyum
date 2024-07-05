@@ -226,7 +226,7 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                       onPressed: () async {
                         List<String> placeIds =
                             widget.workspace.restaurants_placeId;
-                        List<Restaurant> restaurants = await CallEndpointService
+                        List<Restaurant> restaurants = await CallEndpointService()
                             .searchRestaurantsByPlaceIDs(placeIds);
 
                         if (restaurants.isNotEmpty) {

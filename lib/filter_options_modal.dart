@@ -36,7 +36,7 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
   }
 
   Future<void> _fetchTagList() async {
-    List<Tag> tags = await CallEndpointService.getTagsFromXanos();
+    List<Tag> tags = await CallEndpointService().getTagsFromXanos();
     setState(() {
       tagList = tags;
     });
@@ -53,7 +53,7 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
           });
 
           List<Restaurant> newRestaurants =
-              await CallEndpointService.getRestaurantsByTags(selectedTagIds);
+              await CallEndpointService().getRestaurantsByTags(selectedTagIds);
           if (newRestaurants.isEmpty) {
             Navigator.of(context).pop(); // Ferme le BottomSheet
             ScaffoldMessenger.of(context).showSnackBar(

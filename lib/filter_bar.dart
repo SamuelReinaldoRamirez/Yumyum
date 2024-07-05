@@ -81,32 +81,52 @@ class _FilterBarState extends State<FilterBar> {
         child: Row(
           children: [
             const SizedBox(width: 10),
-            IconButton(
-              onPressed: () {
-                showModalBottomSheet<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return FilterOptionsModal(
-                      initialSelectedTagIds: selectedTagIds,
-                      onApply: (selectedIds) {
-                        setState(() {
-                          selectedTagIds = selectedIds;
-                        });
-                      },
-                    );
-                  },
-                );
-              },
-              icon: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.orangeButton,
-                ),
-                padding: const EdgeInsets.all(8),
-                child: const Icon(
-                  Icons.filter_list,
-                  color: Colors.white,
-                  size: 25,
+            //ANCIEN BOUTON FILTRE
+            // IconButton(
+            //   onPressed: () {
+            //     showModalBottomSheet<void>(
+            //       context: context,
+            //       builder: (BuildContext context) {
+            //         return FilterOptionsModal(
+            //           initialSelectedTagIds: selectedTagIds,
+            //           onApply: (selectedIds) {
+            //             setState(() {
+            //               selectedTagIds = selectedIds;
+            //             });
+            //           },
+            //         );
+            //       },
+            //     );
+            //   },
+            //   icon: Container(
+            //     decoration: BoxDecoration(
+            //       shape: BoxShape.circle,
+            //       color: AppColors.orangeButton,
+            //     ),
+            //     padding: const EdgeInsets.all(8),
+            //     child: const Icon(
+            //       Icons.filter_list,
+            //       color: Colors.white,
+            //       size: 25,
+            //     ),
+            //   ),
+            // ),
+            //Nouvel icon de filtre pas un bouton
+            Container(
+              width: MediaQuery.of(context).size.width * (8/100), // 5% de l'espace horizontal
+              child: FractionallySizedBox(
+                alignment: Alignment.center,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.orangeButton,
+                  ),
+                  padding: const EdgeInsets.all(5),
+                  child: const Icon(
+                    Icons.filter_list,
+                    color: Colors.white,
+                    size: 25,
+                  ),
                 ),
               ),
             ),

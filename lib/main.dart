@@ -17,7 +17,7 @@ void main() async {
   await MixpanelService.initialize(mixpanelToken);
 
   List<Restaurant> restaurantList =
-      (await CallEndpointService.getRestaurantsFromXanos()).cast<Restaurant>();
+      (await CallEndpointService().getRestaurantsFromXanos()).cast<Restaurant>();
   runApp(MyApp(restaurantList: restaurantList));
 }
 

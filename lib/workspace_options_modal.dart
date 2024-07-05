@@ -55,7 +55,7 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> aliass = prefs.getStringList('workspaceAliases') ?? [];
     List<Workspace> returnedWorkspaces =
-        await CallEndpointService.searchWorkspacesByAliass(aliass);
+        await CallEndpointService().searchWorkspacesByAliass(aliass);
     setState(() {
       workspaceList = returnedWorkspaces;
     });
@@ -72,7 +72,7 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
       }
     }
     List<Restaurant> restaurants =
-        await CallEndpointService.searchRestaurantsByPlaceIDs(placeIds);
+        await CallEndpointService().searchRestaurantsByPlaceIDs(placeIds);
     if (restaurants.isNotEmpty) {
       // Afficher les restaurants sur la carte
       MarkerManager.createFull(MarkerManager.context, restaurants);

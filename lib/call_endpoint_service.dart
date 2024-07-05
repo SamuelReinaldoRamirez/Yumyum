@@ -5,13 +5,85 @@ import 'package:yummap/workspace.dart';
 import 'package:yummap/tag.dart';
 
 class CallEndpointService {
-  static const String baseUrl =
-      'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/restaurants';
+  // Instance unique de la classe
+  static final CallEndpointService _instance = CallEndpointService._internal();
 
-  static Future<List<Restaurant>> getRestaurantsFromXanos() async {
-    // final logger = Logger();
-    // logger.d('XANOS**********************');
+  // Constructeur privé
+  CallEndpointService._internal() {
+    init();
+  }
+
+  // Méthode factory pour retourner l'instance
+  factory CallEndpointService() {
+    return _instance;
+  }
+
+  // Variables d'instance pour les URL de base
+  static String rootUrl = "";
+  static String baseUrl = "";
+  static String allTagsUrl = "";
+
+  // Méthode pour initialiser les variables
+  void init() {
+    print("INIT");
+    //on regarde les prefs de l'utilisateur pour savoir s'il est en prod ou en dev avant de setter
+    rootUrl = "https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX";
+    baseUrl = rootUrl + '/restaurants';
+    allTagsUrl = rootUrl + '/tags';
+  }
+
+    // Méthode pour changer l'URL en fonction de l'environnement
+  static Future<void> switchToEnv(String envId) async {
+    final String endpoint = rootUrl + "/env/$envId";
+
     try {
+      final response = await http.get(Uri.parse(endpoint));
+      print(endpoint);
+      print('response');
+      print(response.body);
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonData = json.decode(response.body);
+        print("jsonData");
+        print(jsonData);
+        jsonData.forEach((key, value) {
+          print('Key: $key, Value: $value');
+          if(key=='xano_endpoint'){
+            print("egal");
+          }
+        });
+        print(jsonData['xano_endpoint']);
+        rootUrl = jsonData['xano_endpoint'];
+        print("aa");
+        baseUrl = rootUrl + '/restaurants';
+        print("aa");
+        allTagsUrl = rootUrl + '/tags';
+        print("aa");
+        print("Switched to environment: $envId, rootUrl: $rootUrl");
+      } else {
+        throw Exception('Failed to switch environment');
+      }
+    } catch (e) {
+      throw Exception('Failed to switch environment: $e');
+    }
+  }
+
+  static Future<void> switchToProd() async {
+    print("TOPROD");
+    await switchToEnv('2');
+  }
+
+  static Future<void> switchToDev() async {
+    print("TODEV");
+    await switchToEnv('1');
+  }
+
+  Future<List<Restaurant>> getRestaurantsFromXanos() async {
+    if (baseUrl.isEmpty) {
+      throw Exception('Service not initialized. Call init() first.');
+    }
+
+    try {
+      print(baseUrl);
       final response = await http.get(Uri.parse(baseUrl));
 
       if (response.statusCode == 200) {
@@ -30,18 +102,17 @@ class CallEndpointService {
     }
   }
 
-  static const String allTagsUrl =
-      'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/tags';
+  Future<List<Tag>> getTagsFromXanos() async {
+    if (allTagsUrl.isEmpty) {
+      throw Exception('Service not initialized. Call init() first.');
+    }
 
-  static Future<List<Tag>> getTagsFromXanos() async {
     try {
       final response = await http.get(Uri.parse(allTagsUrl));
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
 
         List<Tag> tags = jsonData.map((data) {
-          // logger.e(data);
-
           return Tag.fromJson(data);
         }).toList();
 
@@ -54,8 +125,11 @@ class CallEndpointService {
     }
   }
 
-  static Future<List<Restaurant>> getRestaurantsByTags(List<int> tagsId) async {
-    // Convertir la liste d'entiers en une chaîne de requête
+  Future<List<Restaurant>> getRestaurantsByTags(List<int> tagsId) async {
+    if (baseUrl.isEmpty) {
+      throw Exception('Service not initialized. Call init() first.');
+    }
+
     String tagsIdQueryString = jsonEncode({'tags_id': tagsId});
 
     String url = '$baseUrl/tags/';
@@ -85,10 +159,12 @@ class CallEndpointService {
     }
   }
 
-  static Future<List<Restaurant>> searchRestaurantByName(
-      String restaurantName) async {
-    final String endpoint =
-        'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/restaurants/search/$restaurantName';
+  Future<List<Restaurant>> searchRestaurantByName(String restaurantName) async {
+    if (rootUrl.isEmpty) {
+      throw Exception('Service not initialized. Call init() first.');
+    }
+
+    final String endpoint = '$rootUrl/restaurants/search/$restaurantName';
 
     try {
       final response = await http.get(Uri.parse(endpoint));
@@ -109,12 +185,15 @@ class CallEndpointService {
     }
   }
 
-  static Future<List<Workspace>> searchWorkspaceByName(
-      String workspaceName) async {
-    final String endpoint =
-        'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/workspace/search/$workspaceName';
+  Future<List<Workspace>> searchWorkspaceByName(String workspaceName) async {
+    if (rootUrl.isEmpty) {
+      throw Exception('Service not initialized. Call init() first.');
+    }
+
+    final String endpoint = '$rootUrl/workspace/search/$workspaceName';
     try {
       final response = await http.get(Uri.parse(endpoint));
+      print(response);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
@@ -132,10 +211,12 @@ class CallEndpointService {
     }
   }
 
-  static Future<List<Restaurant>> searchRestaurantsByPlaceIDs(
-      List<String> placeIDs) async {
-    const String endpoint =
-        'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/restaurantsByPlaceIDs';
+  Future<List<Restaurant>> searchRestaurantsByPlaceIDs(List<String> placeIDs) async {
+    if (rootUrl.isEmpty) {
+      throw Exception('Service not initialized. Call init() first.');
+    }
+
+    String endpoint = '$rootUrl/restaurantsByPlaceIDs';
     try {
       final response = await http.post(
         Uri.parse(endpoint),
@@ -161,10 +242,12 @@ class CallEndpointService {
     }
   }
 
-  static Future<List<Workspace>> searchWorkspacesByAliass(
-      List<String> alias) async {
-    const String endpoint =
-        'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/workspacesByAllias';
+  Future<List<Workspace>> searchWorkspacesByAliass(List<String> alias) async {
+    if (rootUrl.isEmpty) {
+      throw Exception('Service not initialized. Call init() first.');
+    }
+
+    String endpoint = '$rootUrl/workspacesByAllias';
     try {
       final response = await http.post(
         Uri.parse(endpoint),

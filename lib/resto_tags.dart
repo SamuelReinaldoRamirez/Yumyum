@@ -29,7 +29,7 @@ class _RestoTagsState extends State<RestoTags> {
   }
 
   Future<void> _fetchTagList() async {
-    List<Tag> tags = await CallEndpointService.getTagsFromXanos();
+    List<Tag> tags = await CallEndpointService().getTagsFromXanos();
     setState(() {
       tagList = tags;
     });
