@@ -123,23 +123,13 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> aliasListMemory = prefs.getStringList('workspaceAliases') ?? [];
-
     List workspaceIdsList = await CallEndpointService().getWorkspaceIdsByAliases(aliasListMemory);
-    print(workspaceIdsList);
-
     List<Review> reviews = await CallEndpointService().getReviewsByRestaurantAndWorkspaces(restaurant.id, workspaceIdsList.map((item) => item['id'] as int).toList());
 
     setState(() {
       _workspaceReviews = reviews.cast<Review>();
     });
   }
-
-  // Future<void> _launchUrl(String? url) async {
-  //   if (url != null && await canLaunch(url)) {
-  //     // Utiliser canLaunch avec un String
-  //     await launch(url); // Utiliser launch avec un String
-  //   }
-  // }
 
   Future<void> openURL(BuildContext context, String? url) async {
     if (url != null && url.isNotEmpty) {
