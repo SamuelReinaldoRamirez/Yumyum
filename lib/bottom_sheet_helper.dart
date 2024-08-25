@@ -69,20 +69,62 @@ class BottomSheetHelper {
                         ),
                       ), // Deuxième colonne avec champ texte
                     ),
-                    Expanded(
-                      flex: 1,
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 8.0),
-                        child: IconButton(
-                          icon: const Icon(Icons.info_outline),
-                          iconSize: 40,
-                          color: const Color(0xFF95A472),
-                          onPressed: () {
-                            _navigateToTags(context, restaurant);
-                          },
-                        ),
-                      ), // Troisième colonne avec bouton
+
+
+                    // Expanded(
+                    //   flex: 1,
+                    //   child: Container(
+                    //     margin: const EdgeInsets.only(right: 8.0),
+                    //     child: IconButton(
+                    //       icon: const Icon(Icons.info_outline),
+                    //       iconSize: 40,
+                    //       color: const Color(0xFF95A472),
+                    //       onPressed: () {
+                    //         _navigateToTags(context, restaurant);
+                    //       },
+                    //     ),
+                    //   ), // Troisième colonne avec bouton
+                    // ),
+
+                    //                    FloatingActionButton(
+                    //   onPressed: () {
+                    //     _navigateToTags(context, restaurant);
+                    //   },
+                    //   backgroundColor: const Color(0xFF95A472),
+                    //   child: 
+                    //   const Icon(Icons.info_outline),
+                    // ),
+
+
+
+                    // FloatingActionButton.extended(
+                    //   onPressed: () {
+                    //     _navigateToTags(context, restaurant);
+                    //   },
+                    //   backgroundColor: const Color(0xFF95A472),
+                    //   label: const Text(
+                    //     'Voir +',
+                    //     style: TextStyle(
+                    //       color: Colors.white, // Couleur du texte
+                    //       fontSize: 18, // Taille de la police augmentée
+                    //     ),
+                    //   ),
+                    //   icon: const SizedBox.shrink(), // Supprime l'icône
+                    // ),
+
+
+                    FloatingActionButton(
+                      onPressed: () {
+                        _navigateToTags(context, restaurant);
+                      },
+                      backgroundColor: const Color(0xFF95A472),
+                      child: const Icon(
+                        Icons.info_outline,
+                        color: Colors.white, // Couleur de l'icône en blanc
+                        size: 30, // Ajuste la taille de l'icône si nécessaire
+                      ),
                     ),
+
                   ],
                 ),
                 const SizedBox(height: 8),
