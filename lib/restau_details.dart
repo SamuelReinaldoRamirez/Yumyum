@@ -177,6 +177,20 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     );
   }
 
+  Widget _buildStarRating(double rating) {
+    List<Widget> stars = [];
+    for (int i = 1; i <= 5; i++) {
+      stars.add(
+        Icon(
+          i <= rating ? Icons.star : Icons.star_border,
+          color: Colors.amber,
+          size: 20,
+        ),
+      );
+    }
+    return Row(children: stars);
+  }
+
   List<Widget> buildStarRating(double rating) {
     List<Widget> stars = [];
     int fullStars = rating.floor();
@@ -465,6 +479,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                         ],
                       ),
                     ),
+
                     Container(
                       padding: const EdgeInsets.all(20),
                       child: Column(
@@ -473,21 +488,28 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                           if (_workspaceReviews.isNotEmpty) ...[
                             const Text('Avis des Hôtels :', style: AppTextStyles.titleDarkStyle),
                             const SizedBox(height: 10),
-                            ListTile(
-                              // leading: const Icon(Icons.chat_outlined), // Ajout de l'icône
-                              title: Text(
-                                _workspaceReviews[0].comment,
-                                style: AppTextStyles.paragraphDarkStyle,
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    '- ${_workspaceReviews[0].author}',
-                                    style: const TextStyle(fontStyle: FontStyle.italic),
-                                  ),
-                                ],
+                            // Affiche le premier avis dans une carte
+                            Card(
+                              margin: const EdgeInsets.symmetric(vertical: 8.0),
+                              elevation: 4,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _workspaceReviews[0].comment,
+                                      style: AppTextStyles.paragraphDarkStyle,
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      '- ${_workspaceReviews[0].author}',
+                                      style: const TextStyle(fontStyle: FontStyle.italic),
+                                    ),
+                                    const SizedBox(height: 8.0),
+                                    _buildStarRating(_workspaceReviews[0].rating), // Ajout de la fonction pour les étoiles
+                                  ],
+                                ),
                               ),
                             ),
                             if (_workspaceReviews.length > 1) ...[
@@ -507,39 +529,43 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                       ),
                     ),
 
-
                     Container(
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Avis Google :',
-                              style: AppTextStyles.titleDarkStyle),
+                          const Text('Avis Google :', style: AppTextStyles.titleDarkStyle),
                           const SizedBox(height: 10),
-                          if (_reviews.isNotEmpty && _reviews != []) ...[
-                            ListTile(
-                              title: Text(
-                                _reviews[0].text,
-                                style: AppTextStyles.paragraphDarkStyle,
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    '- ${_reviews[0].author}',
-                                    style: const TextStyle(
-                                        fontStyle: FontStyle.italic),
-                                  ),
-                                ],
+                          if (_reviews.isNotEmpty && _reviews.isNotEmpty) ...[
+                            // Affiche le premier avis dans une carte
+                            Card(
+                              margin: const EdgeInsets.symmetric(vertical: 8.0),
+                              elevation: 4,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _reviews[0].text,
+                                      style: AppTextStyles.paragraphDarkStyle,
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      '- ${_reviews[0].author}',
+                                      style: const TextStyle(fontStyle: FontStyle.italic),
+                                    ),
+                                    const SizedBox(height: 8.0),
+                                    _buildStarRating(_reviews[0].rating), // Ajoute la fonction pour les étoiles
+                                  ],
+                                ),
                               ),
                             ),
                             if (_reviews.length > 1) ...[
                               const SizedBox(height: 10),
                               ElevatedButton(
                                 onPressed: () {
-                                  _navigateToReviewDetails(
-                                      context, widget.restaurant, _reviews);
+                                  _navigateToReviewDetails(context, widget.restaurant, _reviews);
                                 },
                                 child: const Text(
                                   'Voir plus d\'avis',
@@ -562,6 +588,10 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                         ],
                       ),
                     ),
+                    
+
+
+
 
                     const SizedBox(height: 30),
                   ],
@@ -570,4 +600,5 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
       ),
     );
   }
+
 }

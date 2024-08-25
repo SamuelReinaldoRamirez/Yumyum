@@ -16,7 +16,6 @@ class ReviewDetailsWidget extends StatefulWidget {
 
 class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
   Restaurant restaurant;
-  // ignore: prefer_final_fields
   List<ReviewInterface> _reviews = [];
   final bool _isLoading = false;
 
@@ -33,7 +32,21 @@ class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
   Future<void> _fetchRestaurantDetails() async {
     // Votre logique de récupération des avis depuis l'API Google Places
   }
-  
+
+  Widget _buildStarRating(double rating) {
+    List<Widget> stars = [];
+    for (int i = 1; i <= 5; i++) {
+      stars.add(
+        Icon(
+          i <= rating ? Icons.star : Icons.star_border,
+          color: Colors.amber,
+          size: 20,
+        ),
+      );
+    }
+    return Row(children: stars);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,17 +56,42 @@ class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
+              padding: const EdgeInsets.all(16.0),
               itemCount: widget.reviews.length,
               itemBuilder: (context, index) {
                 final review = widget.reviews[index];
-                return ListTile(
-                  title: Text('Auteur: ${review.author}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Note: ${review.rating}'),
-                      Text('Avis: ${review.comment}'),
-                    ],
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8.0),
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Auteur: ${review.author}',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8.0),
+                        _buildStarRating(review.rating),
+                        const SizedBox(height: 8.0),
+                        Text(
+                          'Avis:',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4.0),
+                        Text(
+                          review.comment,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -61,4 +99,5 @@ class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
     );
   }
 }
+
 
