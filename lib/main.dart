@@ -100,8 +100,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     selectedWorkspacesNotifier: selectedWorkspacesNotifier,
                   ),
                 ),
-                // FilterBar(
-                //   ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height *
                       0.84, // 90% de la hauteur de l'écran

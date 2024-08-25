@@ -1,14 +1,13 @@
-// ignore_for_file: library_private_types_in_public_api, no_logic_in_create_state
-
 import 'package:flutter/material.dart';
 import 'package:yummap/restaurant.dart';
+import 'package:yummap/review_interface.dart';
 
 class ReviewDetailsWidget extends StatefulWidget {
   const ReviewDetailsWidget(
       {Key? key, required this.restaurant, required this.reviews})
       : super(key: key);
   final Restaurant restaurant;
-  final List<ReviewRestau> reviews;
+  final List<ReviewInterface> reviews;
 
   @override
   _ReviewDetailsWidgetState createState() =>
@@ -18,7 +17,7 @@ class ReviewDetailsWidget extends StatefulWidget {
 class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
   Restaurant restaurant;
   // ignore: prefer_final_fields
-  List<ReviewRestau> _reviews = [];
+  List<ReviewInterface> _reviews = [];
   final bool _isLoading = false;
 
   _ReviewDetailsWidgetState(this.restaurant, this._reviews);
@@ -34,12 +33,12 @@ class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
   Future<void> _fetchRestaurantDetails() async {
     // Votre logique de récupération des avis depuis l'API Google Places
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Avis Google'),
+        title: Text(_reviews.isNotEmpty ? 'Avis ${_reviews[0].type}' : 'Avis'),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -53,7 +52,7 @@ class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Note: ${review.rating}'),
-                      Text('Avis: ${review.text}'),
+                      Text('Avis: ${review.comment}'),
                     ],
                   ),
                 );
@@ -62,3 +61,4 @@ class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
     );
   }
 }
+

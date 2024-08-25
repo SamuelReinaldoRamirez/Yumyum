@@ -5,7 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as lat2;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:yummap/call_endpoint_service.dart';
+import 'package:yummap/review.dart';
+import 'package:yummap/review_interface.dart';
 import 'package:yummap/theme.dart';
 import 'restaurant.dart';
 import 'reviews_details.dart';
@@ -48,6 +52,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   String? _cuisine;
   List<List<String>>? _schedule;
   List<ReviewRestau> _reviews = [];
+  List<Review> _workspaceReviews = [];
   lat2.LatLng? _position;
   double convertFraction(double fraction) {
     fraction = (fraction * 10).roundToDouble();
@@ -107,15 +112,25 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     _reviews =
         widget.restaurant.reviews; // Assign reviews from Restaurant object
 
-    print("*****************");
-    print('----');
-
-    print(_schedule);
-    print("*****************");
-    print('----');
+    _fetchReviewList(widget.restaurant);
 
     setState(() {
       _isLoading = false;
+    });
+  }
+
+  Future<void> _fetchReviewList(Restaurant restaurant) async {
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> aliasListMemory = prefs.getStringList('workspaceAliases') ?? [];
+
+    List workspaceIdsList = await CallEndpointService().getWorkspaceIdsByAliases(aliasListMemory);
+    print(workspaceIdsList);
+
+    List<Review> reviews = await CallEndpointService().getReviewsByRestaurantAndWorkspaces(restaurant.id, workspaceIdsList.map((item) => item['id'] as int).toList());
+
+    setState(() {
+      _workspaceReviews = reviews.cast<Review>();
     });
   }
 
@@ -162,7 +177,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   }
 
   static void _navigateToReviewDetails(
-      BuildContext context, Restaurant restaurant, List<ReviewRestau> reviews) {
+      BuildContext context, Restaurant restaurant, List<ReviewInterface> reviews) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -460,13 +475,55 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
                     Container(
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Avis clients :',
+                          if (_workspaceReviews.isNotEmpty) ...[
+                            const Text('Avis des Hôtels :', style: AppTextStyles.titleDarkStyle),
+                            const SizedBox(height: 10),
+                            ListTile(
+                              // leading: const Icon(Icons.chat_outlined), // Ajout de l'icône
+                              title: Text(
+                                _workspaceReviews[0].comment,
+                                style: AppTextStyles.paragraphDarkStyle,
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    '- ${_workspaceReviews[0].author}',
+                                    style: const TextStyle(fontStyle: FontStyle.italic),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (_workspaceReviews.length > 1) ...[
+                              const SizedBox(height: 10),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _navigateToReviewDetails(context, widget.restaurant, _workspaceReviews); // Fonction pour voir plus d'avis
+                                },
+                                child: const Text(
+                                  'Voir plus d\'avis',
+                                  style: AppTextStyles.paragraphDarkStyle,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ],
+                      ),
+                    ),
+
+
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Avis Google :',
                               style: AppTextStyles.titleDarkStyle),
                           const SizedBox(height: 10),
                           if (_reviews.isNotEmpty && _reviews != []) ...[
@@ -506,7 +563,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                 Icon(Icons.chat_outlined),
                                 SizedBox(width: 10),
                                 Text(
-                                  'Avis clients indisponibles',
+                                  'Avis Google indisponibles',
                                   style: AppTextStyles.paragraphDarkStyle,
                                 ),
                               ],
@@ -515,6 +572,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                         ],
                       ),
                     ),
+
                     const SizedBox(height: 30),
                   ],
                 ),

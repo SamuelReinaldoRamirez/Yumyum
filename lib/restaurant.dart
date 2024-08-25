@@ -1,4 +1,5 @@
 import 'package:logger/logger.dart';
+import 'package:yummap/review_interface.dart';
 
 class Restaurant {
   final int id;
@@ -170,6 +171,21 @@ class Restaurant {
           : 0.0;
     }
 
+    double ratings = 0.0;
+    if (json.containsKey('ratings')) {   
+      if (json['ratings'] is double) {
+        ratings = json['ratings'];
+      } else if (json['ratings'] is String) {
+        ratings = double.tryParse(json['ratings']) ?? 0.0;
+        logger.d('Conversion de ratings String vers double: $ratings');
+      } else if (json['ratings'] is int) {
+        ratings = (json['ratings'] as int).toDouble();
+        logger.d('Conversion de ratings int vers double: $ratings');
+      } else {
+        logger.e('Type inattendu pour ratings: ${json['ratings'].runtimeType}');
+      }
+    }
+
     return Restaurant(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
@@ -181,13 +197,13 @@ class Restaurant {
       phoneNumber: json['phone_number'] ?? '',
       tagStr: tagsId,
       placeId: json['placeId'] ?? '',
-      ratings: json['ratings'] != null ? json['ratings'].toDouble() : 0.0,
+      ratings: ratings,  // Utilisation de la valeur convertie et loggée
       reviews: reviews,
       price: json['price'] ?? '',
       websiteUrl: json['website_url'] ?? '',
       handicap: json['handicap'] ?? false,
       vege: json['vege'] ?? false,
-      schedule: schedule, // Utilisation de la nouvelle structure pour l'horaire
+      schedule: schedule,  // Utilisation de la nouvelle structure pour l'horaire
       pictureProfile: json['picture_profile'] ?? '',
       numberOfReviews: json['number_of_reviews'] ?? 0,
       cuisine: json.containsKey('cuisine')
@@ -244,24 +260,42 @@ class Restaurant {
   String getPlaceId() {
     return placeId;
   }
+
+  List<ReviewRestau> getReviews() {
+    return reviews;
+  }
 }
 
-class ReviewRestau {
-  final String author;
+class ReviewRestau implements ReviewInterface {
+  final String _author;
   final String text;
-  final String rating;
+  final double _rating;
 
   ReviewRestau({
-    required this.author,
+    required String author,
     required this.text,
-    required this.rating,
-  });
+    required double rating,
+  })  : _author = author,
+        _rating = rating;
+
+  @override
+  String get comment => text;
+
+  @override
+  double get rating => _rating;
+
+  @override
+  String get author => _author;
+
+  @override
+  String get type => "Google";
 
   factory ReviewRestau.fromJson(Map<String, dynamic> json) {
     return ReviewRestau(
       author: json['author'] ?? '',
       text: json['text'] ?? '',
-      rating: json['rating'] ?? '',
+      rating: double.tryParse(json['rating'].toString()) ?? 0.0,
     );
   }
+
 }

@@ -1,12 +1,16 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import 'package:yummap/restaurant.dart';
+import 'package:yummap/review.dart';
 import 'package:yummap/workspace.dart';
 import 'package:yummap/tag.dart';
 
 class CallEndpointService {
   // Instance unique de la classe
   static final CallEndpointService _instance = CallEndpointService._internal();
+  static var logger = Logger();
+
 
   // Constructeur privé
   CallEndpointService._internal() {
@@ -38,27 +42,12 @@ class CallEndpointService {
 
     try {
       final response = await http.get(Uri.parse(endpoint));
-      print(endpoint);
-      print('response');
-      print(response.body);
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = json.decode(response.body);
-        print("jsonData");
-        print(jsonData);
-        jsonData.forEach((key, value) {
-          print('Key: $key, Value: $value');
-          if(key=='xano_endpoint'){
-            print("egal");
-          }
-        });
-        print(jsonData['xano_endpoint']);
         rootUrl = jsonData['xano_endpoint'];
-        print("aa");
         baseUrl = rootUrl + '/restaurants';
-        print("aa");
         allTagsUrl = rootUrl + '/tags';
-        print("aa");
-        print("Switched to environment: $envId, rootUrl: $rootUrl");
+        logger.d("Switched to environment: $envId, rootUrl: $rootUrl");
       } else {
         throw Exception('Failed to switch environment');
       }
@@ -81,9 +70,7 @@ class CallEndpointService {
     if (baseUrl.isEmpty) {
       throw Exception('Service not initialized. Call init() first.');
     }
-
     try {
-      print(baseUrl);
       final response = await http.get(Uri.parse(baseUrl));
 
       if (response.statusCode == 200) {
@@ -124,6 +111,149 @@ class CallEndpointService {
       throw Exception('Failed to load tags: $e');
     }
   }
+
+  Future<List<Review>> getReviewsByRestaurantAndWorkspaces(int restaurant_id, List<int> workspace_ids) async {
+    final String url = '$rootUrl/review/restaurant/workspaces/$restaurant_id';
+  // final String url = 'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/review/restaurant/workspaces/$restaurant_id';
+
+    try {
+      // Préparation du corps de la requête
+      final Map<String, List<int>> body = {
+        'workspaces_ids': workspace_ids,
+      };
+
+      // Envoi de la requête POST
+      final http.Response response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+
+      // Vérification du statut de la réponse
+      if (response.statusCode == 200) {
+        // Décodage de la réponse JSON en liste
+        final List<dynamic> jsonData = json.decode(response.body);
+        // return jsonData;
+        final List<Review> reviews = jsonData.map((data) => Review.fromJson(data)).toList();
+
+        return reviews;
+      } else {
+        // Gestion de l'erreur si la requête a échoué
+        throw Exception('Failed to load reviews');
+      }
+    } catch (e) {
+      // Gestion de toute autre exception
+      throw Exception('Failed to load reviews: $e');
+    }
+  }
+
+  // Future<List<Review>> getReviewsByRestaurantAndWorkspacesFromXano(int restaurant_id, List<int> workspace_ids) async {
+  //   try {
+  //     final response = await http.get(Uri.parse('$rootUrl/review/restaurant/workspaces/$restaurant_id/$workspace_ids'));
+  //     // final response = await http.get(Uri.parse('https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/review/restaurant/workspaces/$restaurant_id/$workspace_ids'));
+  //     if (response.statusCode == 200) {
+  //       final List<dynamic> jsonData = json.decode(response.body);
+
+  //       List<Review> reviews = jsonData.map((data) {
+  //         return Review.fromJson(data);
+  //       }).toList();
+
+  //       return reviews;
+  //     } else {
+  //       throw Exception('Failed to load reviews');
+  //     }
+  //   } catch (e) {
+  //     throw Exception('Failed to load reviews: $e');
+  //   }
+  // }
+
+  Future<List> getWorkspaceIdsByAliases(List<String> aliasList) async {
+  // final String url = 'https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/workspace/byAlias';
+  final String url = '$rootUrl/workspace/byAlias';
+
+    try {
+      // Préparation du corps de la requête
+      final Map<String, List<String>> body = {
+        'alias_list': aliasList,
+      };
+
+      // Envoi de la requête POST
+      final http.Response response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+
+      // Vérification du statut de la réponse
+      if (response.statusCode == 200) {
+        // Décodage de la réponse JSON en liste
+        final List<dynamic> jsonData = json.decode(response.body);
+        return jsonData;
+      } else {
+        // Gestion de l'erreur si la requête a échoué
+        throw Exception('Failed to load workspaces from alias');
+      }
+    } catch (e) {
+      // Gestion de toute autre exception
+      throw Exception('Failed to load workspaces from alias: $e');
+    }
+  }
+  
+
+  // Future<List> getWorkspacesIdsFromAliasFromXano(List<String> alias_list) async {
+  //   try {
+  //     // Préparation du corps de la requête
+  //     // List<String> guillemetsList = alias_list.map((element) => '"$element"').toList();
+  //     List<String> guillemetsList = alias_list;
+  //     final response = await http.get(Uri.parse('https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/workspace/byAlias/$guillemetsList'));
+  //     if (response.statusCode == 200) {
+  //       print(guillemetsList);
+  //       print(response.body);
+  //       print(response.request);
+
+  //       final List<dynamic> jsonData = json.decode(response.body);
+
+  //       print("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
+  //       print(alias_list);
+  //       print(jsonData);
+
+  //       List idsOfWorkspaces = jsonData.map((data) {
+  //         print("eyoo");
+  //         print(data);
+  //         return data.id;
+  //       }).toList();
+  //       return jsonData;
+  //     } else {
+  //       throw Exception('Failed to load Workspaces from alias');
+  //     }
+  //   } catch (e) {
+  //     throw Exception('Failed to load Workspaces from alias: $e');
+  //   }
+  // }
+
+
+
+
+  // Future<List<Review>> getReviewsFromXanos() async {
+  //   // if (allTagsUrl.isEmpty) {
+  //   //   throw Exception('Service not initialized. Call init() first.');
+  //   // }
+  //   try {
+  //     final response = await http.get(Uri.parse("https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/review"));
+  //     if (response.statusCode == 200) {
+  //       final List<dynamic> jsonData = json.decode(response.body);
+  //       List<Review> reviews = jsonData.map((data) {
+  //         return Review.fromJson(data);
+  //       }).toList();
+  //       return reviews;
+  //     } else {
+  //       throw Exception('Failed to load reviews');
+  //     }
+  //   } catch (e) {
+  //     throw Exception('Failed to load reviews: $e');
+  //   }
+  // }
+  
 
   Future<List<Restaurant>> getRestaurantsByTags(List<int> tagsId) async {
     if (baseUrl.isEmpty) {
@@ -189,19 +319,14 @@ class CallEndpointService {
     if (rootUrl.isEmpty) {
       throw Exception('Service not initialized. Call init() first.');
     }
-
     final String endpoint = '$rootUrl/workspace/search/$workspaceName';
     try {
       final response = await http.get(Uri.parse(endpoint));
-      print(response);
-
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
-
         List<Workspace> workspaces = jsonData.map((data) {
           return Workspace.fromJson(data);
         }).toList();
-
         return workspaces;
       } else {
         throw Exception('Failed to search workspace by name');
