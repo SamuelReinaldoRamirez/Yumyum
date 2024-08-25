@@ -1,32 +1,35 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:mixpanel_flutter/mixpanel_flutter.dart'; // Importez Mixpanel
 import 'package:yummap/main.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+    // Créez un Mixpanel simulé pour le test
+
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp(
       restaurantList: [],
+      // Fournissez le Mixpanel simulé ici
     ));
 
-    // Verify that our counter starts at 0.
+    // Vérifiez que notre counter démarre à 0.
     expect(find.text('0'), findsOneWidget);
     expect(find.text('1'), findsNothing);
 
-    // Tap the '+' icon and trigger a frame.
+    // Taper sur l'icône '+' et déclencher un frame.
     await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
 
-    // Verify that our counter has incremented.
+    // Vérifiez que notre counter a été incrémenté.
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
   });
+}
+
+// Créez une classe MockMixpanel pour simuler Mixpanel dans les tests
+class MockMixpanel extends Mixpanel {
+  MockMixpanel(String token) : super(token);
+
+  // Implémentez d'autres méthodes simulées selon les besoins de votre test
 }

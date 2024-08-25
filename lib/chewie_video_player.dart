@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
+import 'package:yummap/mixpanel_service.dart';
 import 'custom_controls.dart'; // Importer CustomControls ici
 
 class ChewieVideoPlayer extends StatefulWidget {
@@ -100,22 +101,51 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
   }
 
   void _enterFullScreen(BuildContext context) async {
+    MixpanelService.instance.track('PlayVideo');
     _chewieController.play(); // Lire la vidéo automatiquement en plein écran
+
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) {
-          return Scaffold(
-            backgroundColor: Colors.black, // Fond noir
-            body: Center(
-              child: Chewie(
-                controller: _chewieController,
+      PageRouteBuilder(
+        transitionDuration:
+            const Duration(milliseconds: 500), // Durée de la transition
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return GestureDetector(
+            // Ajouter un GestureDetector
+            onVerticalDragEnd: (details) {
+              // Détecter le scroll vertical
+              if (details.primaryVelocity! > 0) {
+                // Si le scroll est vers le bas
+                Navigator.pop(context); // Quitter le plein écran
+              }
+            },
+            child: Scaffold(
+              backgroundColor: Colors.black, // Fond noir
+              body: Center(
+                child: Chewie(
+                  controller: _chewieController,
+                ),
               ),
             ),
           );
         },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          var begin = const Offset(0.0, 1.0); // Départ de la transition en bas
+          var end = Offset.zero; // Arrivée de la transition
+          var curve = Curves.easeInOut; // Courbe de l'animation
+
+          var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+          // Créer un SlideTransition avec l'animation donnée
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        },
       ),
     );
+
     _pauseVideo();
   }
 }

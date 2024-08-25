@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:yummap/mixpanel_service.dart';
+import 'package:yummap/restau_details.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/video_carousel.dart';
+import 'theme.dart';
 
 class BottomSheetHelper {
   static void showBottomSheet(BuildContext context, Restaurant restaurant) {
@@ -18,25 +21,74 @@ class BottomSheetHelper {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  restaurant.name,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Container(), // Première colonne vide
+                    ),
+                    Expanded(
+                      flex: 4,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              restaurant.name,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.titleDarkStyle,
+                              maxLines: 1,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.star,
+                                  color:
+                                      AppColors.orangeBG, // Couleur de l'étoile
+                                ),
+                                Text(
+                                    restaurant.ratings
+                                        .toString(), // Affichage de la note du restaurant
+                                    style: AppTextStyles.hintTextDarkStyle),
+                              ],
+                            ),
+                            Container(
+                              margin: const EdgeInsets.only(top: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors
+                                    .darkGrey, // Couleur de la pastille
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                              child: Text(restaurant.cuisine,
+                                  style: AppTextStyles.hintTextWhiteStyle),
+                            ),
+                          ],
+                        ),
+                      ), // Deuxième colonne avec champ texte
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 8.0),
+                        child: IconButton(
+                          icon: const Icon(Icons.info_outline),
+                          iconSize: 40,
+                          color: const Color(0xFF95A472),
+                          onPressed: () {
+                            _navigateToTags(context, restaurant);
+                          },
+                        ),
+                      ), // Troisième colonne avec bouton
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  restaurant.address,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87,
-                  ),
-                ),
                 const SizedBox(height: 16),
                 VideoCarousel(videoLinks: restaurant.videoLinks),
-                const SizedBox(height: 16),
+                const SizedBox(height: 30),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -44,16 +96,27 @@ class BottomSheetHelper {
                       onPressed: () {
                         _navigateToRestaurant(restaurant);
                       },
-                      child: const Text("Y aller"),
+                      style: AppButtonStyles.elevatedButtonStyle,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text("Y aller"),
+                          const SizedBox(
+                              width: 8), // Espacement entre l'icône et le texte
+
+                          Transform.rotate(
+                            angle: 90 * 3.141592653589793 / 180,
+                            child: const Icon(
+                              Icons.navigation,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     _navigateToTags(context, restaurant);
-                    //   },
-                    //   child: const Text("Tags"),
-                    // ),
                   ],
                 ),
+                const SizedBox(height: 10),
               ],
             ),
           ),
@@ -65,21 +128,41 @@ class BottomSheetHelper {
   }
 
   static void _navigateToRestaurant(Restaurant restaurant) async {
-    final url =
+    MixpanelService.instance.track('MoveToResto', properties: {
+      'resto_id': restaurant.id,
+      'resto_name': restaurant.name,
+    });
+
+    final String url =
         'https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}';
-    Uri uri = Uri.parse(url);
+    final Uri uri = Uri.parse(url);
+
     if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
+      await launch(uri.toString(), forceSafariVC: false);
     } else {
-      //print('Could not launch $url');
+      final String fallbackUrl =
+          'https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}';
+      final Uri fallbackUri = Uri.parse(fallbackUrl);
+      if (await canLaunchUrl(fallbackUri)) {
+        await launchUrl(fallbackUri);
+      } else {
+        //print('Could not launch the map.');
+      }
     }
   }
 
-  // static void _navigateToTags(BuildContext context, Restaurant restaurant) {
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //         builder: (context) => DetailsTags(restaurant: restaurant)),
-  //   );
-  // }
+  static void _navigateToTags(BuildContext context, Restaurant restaurant) {
+    MixpanelService.instance.track('DetailsResto', properties: {
+      'resto_id': restaurant.id,
+      'resto_name': restaurant.name,
+    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          // builder: (context) => RestaurantDetailsWidget()),
+          builder: (context) =>
+              RestaurantDetailsWidget(restaurant: restaurant)),
+      // builder: (context) => DetailsTags(restaurant: restaurant)),
+    );
+  }
 }

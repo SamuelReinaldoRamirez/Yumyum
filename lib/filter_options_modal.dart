@@ -1,12 +1,23 @@
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/map_helper.dart';
+import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/tag.dart';
+import 'package:yummap/theme.dart';
 
 import 'restaurant.dart';
 
 class FilterOptionsModal extends StatefulWidget {
-  const FilterOptionsModal({Key? key}) : super(key: key);
+  final List<int> initialSelectedTagIds;
+  final ValueChanged<List<int>> onApply;
+
+  const FilterOptionsModal({
+    Key? key,
+    required this.initialSelectedTagIds,
+    required this.onApply,
+  }) : super(key: key);
 
   @override
   _FilterOptionsModalState createState() => _FilterOptionsModalState();
@@ -19,11 +30,13 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
   @override
   void initState() {
     super.initState();
+    //possible incohérence i on a des tags qui sont supprimés en bdd apres la premiere selection et avant de retourner sur la page de selection des filtres
+    selectedTagIds = List.from(widget.initialSelectedTagIds);
     _fetchTagList();
   }
 
   Future<void> _fetchTagList() async {
-    List<Tag> tags = await CallEndpointService.getTagsFromXanos();
+    List<Tag> tags = await CallEndpointService().getTagsFromXanos();
     setState(() {
       tagList = tags;
     });
@@ -34,8 +47,13 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
       padding: const EdgeInsets.only(bottom: 20.0),
       child: ElevatedButton(
         onPressed: () async {
+          widget.onApply(selectedTagIds);
+          MixpanelService.instance.track('FilterTagSearch', properties: {
+            'filter_ids': selectedTagIds,
+          });
+
           List<Restaurant> newRestaurants =
-              await CallEndpointService.getRestaurantsByTags(selectedTagIds);
+              await CallEndpointService().getRestaurantsByTags(selectedTagIds);
           if (newRestaurants.isEmpty) {
             Navigator.of(context).pop(); // Ferme le BottomSheet
             ScaffoldMessenger.of(context).showSnackBar(
@@ -51,68 +69,78 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
               ),
             );
           } else {
+            //print(newRestaurants);
             MarkerManager.createFull(context, newRestaurants);
             Navigator.of(context).pop(); // Ferme le BottomSheet
           }
         },
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all<Color>(
-              Colors.grey.shade50), // Couleur de fond bleue
-        ),
+        style: AppButtonStyles.elevatedButtonStyle,
         child: const Text('Appliquer'),
       ),
     );
   }
 
   Widget _buildTitle(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
       child: Text(
         'Filtres',
-        style: Theme.of(context).textTheme.titleLarge,
+        style: AppTextStyles.titleDarkStyle,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildTitle(context),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: tagList.length,
-                  itemBuilder: (context, index) {
-                    final tag = tagList[index];
-                    return CheckboxListTile(
-                      title: Text(tag.tag),
-                      value: selectedTagIds.contains(tag.id),
-                      onChanged: (bool? value) {
-                        setState(() {
-                          if (value != null && value) {
-                            selectedTagIds.add(tag.id);
-                          } else {
-                            selectedTagIds.remove(tag.id);
-                          }
-                        });
-                      },
-                    );
-                  },
-                ),
-              ],
+    return WillPopScope(
+      onWillPop: () async {
+        widget.onApply(selectedTagIds);
+        return true;
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildTitle(context),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: tagList.length,
+                    itemBuilder: (context, index) {
+                      final tag = tagList[index];
+                      return CheckboxListTile(
+                        title: Text(
+                          tag.tag,
+                          style: AppTextStyles.paragraphDarkStyle,
+                        ),
+                        value: selectedTagIds.contains(tag.id),
+                        checkColor: Colors.white,
+                        activeColor: AppColors.greenishGrey,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            if (value != null && value) {
+                              selectedTagIds.add(tag.id);
+                            } else {
+                              selectedTagIds.remove(tag.id);
+                            }
+                          });
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        _buildApplyButton(context),
-      ],
+          _buildApplyButton(context),
+          const SizedBox(height: 10),
+        ],
+      ),
     );
   }
 }

@@ -24,11 +24,12 @@ class _DetailsTagsState extends State<DetailsTags> {
   @override
   void initState() {
     super.initState();
+    //oulala pourquoi on fait ca
     _fetchTagList();
   }
 
   Future<void> _fetchTagList() async {
-    List<Tag> tags = await CallEndpointService.getTagsFromXanos();
+    List<Tag> tags = await CallEndpointService().getTagsFromXanos();
     setState(() {
       tagList = tags;
     });
@@ -77,7 +78,10 @@ class _DetailsTagsState extends State<DetailsTags> {
       tagsByType[tag.type]!.add(tag);
     }
 
-    List<Tag> filteredTags = _filterTags(restaurant.getTagStr().cast<String>());
+    //List<Tag> filteredTags = _filterTags(restaurant.getTagStr().cast<String>());
+
+    List<Tag> filteredTags =
+        _filterTags(intListToStringList(restaurant.getTagStr()));
 
     Map<String, List<Tag>> filteredTagsByType = {};
     for (var tag in filteredTags) {
@@ -86,6 +90,15 @@ class _DetailsTagsState extends State<DetailsTags> {
     }
 
     return filteredTagsByType;
+  }
+
+//à mettre dans un helper si ca aide mieux que le cast
+  List<String> intListToStringList(List<int> inputList) {
+    List<String> outputList = [];
+    for (int i in inputList) {
+      outputList.add(i.toString());
+    }
+    return outputList;
   }
 
   List<Tag> _filterTags(List<String> tagIds) {

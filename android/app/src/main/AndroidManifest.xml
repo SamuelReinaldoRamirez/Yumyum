@@ -11,7 +11,7 @@
     <application
         android:label="Yummap"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@drawable/icon">
 
         <!-- Déclaration de l'activité principale -->
         <activity
@@ -21,7 +21,9 @@
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
+            android:enableOnBackInvokedCallback="true"
             android:windowSoftInputMode="adjustResize">
+            
 
             <!-- Définition du thème -->
             <meta-data
@@ -39,6 +41,13 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- Clé d'API Mapbox -->
+        <meta-data
+            android:name="com.mapbox.token"
+            android:value="pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDRiMXEwMXZuMmpvNjN0MmcydTZ2In0.6I0LRM8gPT-soCOIcu__dg"/>
+
+        <!-- Clé d'API Google Maps (si nécessaire) -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U"/>
