@@ -226,6 +226,104 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     return stars;
   }
 
+  Widget buildReviewContainer({
+    required BuildContext context,
+    required String title,
+    required List<ReviewInterface> reviews,
+    required Restaurant restaurant,
+    required bool isGoogleReview,
+  }) {
+    // Détermine si on doit afficher le message "Avis indisponibles"
+    final showUnavailableMessage = isGoogleReview && reviews.isEmpty;
+
+    // Détermine si on doit afficher le bouton "Voir plus d'avis"
+    final showSeeMoreButton = reviews.length > 1;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Titre
+          if (reviews.isNotEmpty || showUnavailableMessage) ...[
+            Text(title, style: AppTextStyles.titleDarkStyle),
+            const SizedBox(height: 10),
+          ],
+
+          // Gestion de l'affichage selon les avis disponibles
+          if (reviews.isNotEmpty) ...[
+            // Affiche le premier avis dans une carte
+            Card(
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildStarRating(reviews[0].rating), // Ajoute la fonction pour les étoiles
+                      ],
+                    ),
+                    const SizedBox(height: 8.0),
+                    Text(
+                      reviews[0].comment,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    const SizedBox(height: 16.0),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Text(
+                        reviews[0].author,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Affiche le bouton "Voir plus d'avis" s'il y a plus d'un avis et si c'est nécessaire
+            if (showSeeMoreButton) ...[
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  _navigateToReviewDetails(context, restaurant, reviews); // Fonction pour voir plus d'avis
+                },
+                child: const Text(
+                  'Voir plus d\'avis',
+                  style: AppTextStyles.paragraphDarkStyle,
+                ),
+              ),
+            ],
+          ] else if (showUnavailableMessage) ...[
+            // Affiche un message si les avis Google sont indisponibles
+            const Row(
+              children: [
+                Icon(Icons.chat_outlined),
+                SizedBox(width: 10),
+                Text(
+                  'Avis Google indisponibles',
+                  style: AppTextStyles.paragraphDarkStyle,
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -480,147 +578,20 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                       ),
                     ),
 
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (_workspaceReviews.isNotEmpty) ...[
-                            const Text('Avis des Hôtels :', style: AppTextStyles.titleDarkStyle),
-                            const SizedBox(height: 10),
-                            // Affiche le premier avis dans une carte
-                            Card(
-                              margin: const EdgeInsets.symmetric(vertical: 8.0),
-                              elevation: 4,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        _buildStarRating(_workspaceReviews[0].rating), // Ajout de la fonction pour les étoiles
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8.0),
-                                    Text(
-                                      _workspaceReviews[0].comment,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey,
-                                        fontFamily: 'Poppins',
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16.0),
-                                    Align(
-                                      alignment: Alignment.bottomRight,
-                                      child: Text(
-                                        _workspaceReviews[0].author,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                          fontFamily: 'Poppins',
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            if (_workspaceReviews.length > 1) ...[
-                              const SizedBox(height: 10),
-                              ElevatedButton(
-                                onPressed: () {
-                                  _navigateToReviewDetails(context, widget.restaurant, _workspaceReviews); // Fonction pour voir plus d'avis
-                                },
-                                child: const Text(
-                                  'Voir plus d\'avis',
-                                  style: AppTextStyles.paragraphDarkStyle,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ],
-                      ),
+                    buildReviewContainer(
+                      context: context,
+                      title: 'Avis des Hôtels :',
+                      reviews: _workspaceReviews,
+                      restaurant: widget.restaurant,
+                      isGoogleReview: false,
                     ),
-
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Avis Google :', style: AppTextStyles.titleDarkStyle),
-                          const SizedBox(height: 10),
-                          if (_reviews.isNotEmpty) ...[
-                            // Affiche le premier avis dans une carte
-                            Card(
-                              margin: const EdgeInsets.symmetric(vertical: 8.0),
-                              elevation: 4,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        _buildStarRating(_reviews[0].rating), // Ajoute la fonction pour les étoiles
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8.0),
-                                    Text(
-                                      _reviews[0].text,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey,
-                                        fontFamily: 'Poppins',
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16.0),
-                                    Align(
-                                      alignment: Alignment.bottomRight,
-                                      child: Text(
-                                        _reviews[0].author,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                          fontFamily: 'Poppins',
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            if (_reviews.length > 1) ...[
-                              const SizedBox(height: 10),
-                              ElevatedButton(
-                                onPressed: () {
-                                  _navigateToReviewDetails(context, widget.restaurant, _reviews);
-                                },
-                                child: const Text(
-                                  'Voir plus d\'avis',
-                                  style: AppTextStyles.paragraphDarkStyle,
-                                ),
-                              ),
-                            ],
-                          ] else ...[
-                            const Row(
-                              children: [
-                                Icon(Icons.chat_outlined),
-                                SizedBox(width: 10),
-                                Text(
-                                  'Avis Google indisponibles',
-                                  style: AppTextStyles.paragraphDarkStyle,
-                                ),
-                              ],
-                            )
-                          ],
-                        ],
-                      ),
+                    
+                    buildReviewContainer(
+                      context: context,
+                      title: 'Avis Google :',
+                      reviews: _reviews,
+                      restaurant: widget.restaurant,
+                      isGoogleReview: true,
                     ),
 
                     const SizedBox(height: 30),
