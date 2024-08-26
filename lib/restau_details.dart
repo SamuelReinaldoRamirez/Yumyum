@@ -497,17 +497,34 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      _workspaceReviews[0].comment,
-                                      style: AppTextStyles.paragraphDarkStyle,
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      '- ${_workspaceReviews[0].author}',
-                                      style: const TextStyle(fontStyle: FontStyle.italic),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        _buildStarRating(_workspaceReviews[0].rating), // Ajout de la fonction pour les étoiles
+                                      ],
                                     ),
                                     const SizedBox(height: 8.0),
-                                    _buildStarRating(_workspaceReviews[0].rating), // Ajout de la fonction pour les étoiles
+                                    Text(
+                                      _workspaceReviews[0].comment,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16.0),
+                                    Align(
+                                      alignment: Alignment.bottomRight,
+                                      child: Text(
+                                        _workspaceReviews[0].author,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                          fontFamily: 'Poppins',
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -536,7 +553,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                         children: [
                           const Text('Avis Google :', style: AppTextStyles.titleDarkStyle),
                           const SizedBox(height: 10),
-                          if (_reviews.isNotEmpty && _reviews.isNotEmpty) ...[
+                          if (_reviews.isNotEmpty) ...[
                             // Affiche le premier avis dans une carte
                             Card(
                               margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -546,17 +563,34 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      _reviews[0].text,
-                                      style: AppTextStyles.paragraphDarkStyle,
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      '- ${_reviews[0].author}',
-                                      style: const TextStyle(fontStyle: FontStyle.italic),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        _buildStarRating(_reviews[0].rating), // Ajoute la fonction pour les étoiles
+                                      ],
                                     ),
                                     const SizedBox(height: 8.0),
-                                    _buildStarRating(_reviews[0].rating), // Ajoute la fonction pour les étoiles
+                                    Text(
+                                      _reviews[0].text,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16.0),
+                                    Align(
+                                      alignment: Alignment.bottomRight,
+                                      child: Text(
+                                        _reviews[0].author,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                          fontFamily: 'Poppins',
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -588,10 +622,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                         ],
                       ),
                     ),
-                    
-
-
-
 
                     const SizedBox(height: 30),
                   ],

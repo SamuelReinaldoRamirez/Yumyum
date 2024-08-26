@@ -32,7 +32,7 @@ class Review implements ReviewInterface {
   String get author => _workspaceName;
 
   @override
-  String get type => "Hôtel";
+  String get type => "des Hôtels";
 
   // Méthode pour créer une instance de Review à partir d'un JSON
   factory Review.fromJson(Map<String, dynamic> json) {
