@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yummap/call_endpoint_service.dart';
+import 'package:yummap/global.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/theme.dart';
@@ -76,8 +77,20 @@ class FilterBarState extends State<FilterBar> {
   }
 
   Future<List<Restaurant>> generalFilter() async{
-   List<Restaurant> newRestoList =  await CallEndpointService().getRestaurantsByTagsAndWorkspaces(widget.selectedTagIdsNotifier.value, widget.selectedWorkspacesNotifier.value);
+    List<int> filterTags = widget.selectedTagIdsNotifier.value;
+    List<int> workspaceIds = widget.selectedWorkspacesNotifier.value;
+    List<Restaurant> newRestoList =  await CallEndpointService().getRestaurantsByTagsAndWorkspaces(filterTags, workspaceIds);
     MarkerManager.createFull(MarkerManager.context, newRestoList);
+    print("workspaceIds == [] && filterTags == []");
+    print(workspaceIds);
+    print(workspaceIds == []);
+    print(filterTags);
+    print(filterTags == []);
+    if(workspaceIds.isEmpty && filterTags.isEmpty){
+      filterIsOn.value = false;
+    }else{
+      filterIsOn.value = true;
+    }
     return newRestoList;
   }
 

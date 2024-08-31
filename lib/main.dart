@@ -24,7 +24,7 @@ void main() async {
 class MyApp extends StatefulWidget {
   final List<Restaurant> restaurantList;
 
-  const MyApp({Key? key, required this.restaurantList}) : super(key: key);
+  MyApp({Key? key, required this.restaurantList}) : super(key: key);
 
   @override
   _MyAppState createState() => _MyAppState();

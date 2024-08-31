@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
 import 'package:yummap/call_endpoint_service.dart';
+import 'package:yummap/global.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restaurant.dart';
@@ -40,6 +41,15 @@ class _SearchBarState extends State<SearchBar> {
   static const double shakeThresholdGravity = 2.7;
   static const int shakeSlopTimeMs = 500;
   int lastShakeTimestamp = 0;
+  // static bool _filterIsOn = false;
+
+
+@override
+  void dispose() {
+    // Ne pas oublier de retirer l'écouteur lors de la destruction du widget
+    filterIsOn.removeListener(() {});
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -60,6 +70,10 @@ class _SearchBarState extends State<SearchBar> {
           _onShake();
         }
       }
+    });
+    // Écouter les changements de filterIsOn
+    filterIsOn.addListener(() {
+      setState(() {});
     });
   }
 
@@ -89,18 +103,35 @@ class _SearchBarState extends State<SearchBar> {
             color: AppColors.greenishGrey,
           ),
           suffixIcon: IconButton(
-            icon: const Icon(
-              Icons.clear,
-              color: AppColors.greenishGrey,
+            // icon: const Icon(
+            //   Icons.clear,
+            //   // color: AppColors.greenishGrey,
+            //   color: Colors.blueAccent,
+            // ),
+            icon: Container(
+              decoration: filterIsOn.value
+                ? BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.orange,
+                      width: 2.0,
+                    ),
+                  )
+                : null, // Pas de bordure si non pressé
+              child: Icon(
+                Icons.clear,
+                color: AppColors.greenishGrey,
+              ),
+              padding: EdgeInsets.all(4.0), // Espace entre l'icône et la bordure
             ),
             onPressed: () async {
               setState(() {
                 widget.selectedWorkspacesNotifier.value = [];
                 widget.selectedTagIdsNotifier.value = [];
-                // selectedTagIds = selectedIds;
               });
               _clearSearch(context);
               MarkerManager.resetMarkers();
+              filterIsOn.value = false;
             },
           ),
         ),

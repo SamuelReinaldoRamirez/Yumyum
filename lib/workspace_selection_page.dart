@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yummap/call_endpoint_service.dart';
+import 'package:yummap/global.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/workspace.dart'; // Importez le modèle de données Workspace si nécessaire
 import 'package:yummap/restaurant.dart'; // Importez le modèle de données Restaurant si nécessaire
@@ -229,6 +230,9 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                           // Afficher les restaurants sur la carte
                           MarkerManager.createFull(
                               MarkerManager.context, restaurants);
+                          //SI l'hotel recommande TOUS les restos de notre bdd, la croix sera entourée mais le veut-on?!
+                          //quand on clique sur voir les recommandations de l'hotel, ne faudrait-il pas que ca le coche dans les workspaces filtres si on est déjà abonné?
+                          filterIsOn.value = true;
                         } else {
                           ScaffoldMessenger.of(MarkerManager.context)
                               .showSnackBar(
