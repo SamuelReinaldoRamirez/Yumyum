@@ -196,7 +196,7 @@ class _SearchBarState extends State<SearchBar> {
     List<String> aliasList = prefs.getStringList('workspaceAliases') ?? [];
 
     // Afficher la liste mise à jour des alias
-    _showAliasAlert(context, aliasList, 'After setting');
+    // _showAliasAlert(context, aliasList, 'After setting');
   }
 
   void _handleRestaurantSelection(Restaurant restaurant) {

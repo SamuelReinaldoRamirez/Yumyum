@@ -29,8 +29,7 @@ class CallEndpointService {
 
   // Méthode pour initialiser les variables
   void init() {
-    print("INIT");
-    //on regarde les prefs de l'utilisateur pour savoir s'il est en prod ou en dev avant de setter
+    //on devrait regarder les prefs de l'utilisateur pour savoir s'il est en prod ou en dev avant de setter
     rootUrl = "https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX";
     baseUrl = rootUrl + '/restaurants';
     allTagsUrl = rootUrl + '/tags';
@@ -131,7 +130,6 @@ class CallEndpointService {
       if (response.statusCode == 200) {
         // Décodage de la réponse JSON en liste
         final List<dynamic> jsonData = json.decode(response.body);
-        // return jsonData;
         final List<Review> reviews = jsonData.map((data) => Review.fromJson(data)).toList();
 
         return reviews;
@@ -175,40 +173,86 @@ class CallEndpointService {
       throw Exception('Failed to load workspaces from alias: $e');
     }
   }
-  
-  Future<List<Restaurant>> getRestaurantsByTags(List<int> tagsId) async {
+
+
+  Future<List<Restaurant>> getRestaurantsByTagsAndWorkspaces(
+      List<int> tagsId, List<int> workspaceIds) async {
+    
     if (baseUrl.isEmpty) {
       throw Exception('Service not initialized. Call init() first.');
     }
 
-    String tagsIdQueryString = jsonEncode({'tags_id': tagsId});
+    // Créer le corps de la requête avec tags_id et workspace_ids
+    String requestBody = jsonEncode({
+      'tags_id': tagsId,
+      'workspace_ids': workspaceIds,
+    });
 
-    String url = '$baseUrl/tags/';
-
+    String url = '$baseUrl/tagsAndWorkspaces';
     try {
       final response = await http.post(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: tagsIdQueryString,
+        body: requestBody, 
       );
-
       if (response.statusCode == 200) {
-        final List<dynamic> jsonData = json.decode(response.body);
-
-        List<Restaurant> restaurants = jsonData.map((data) {
-          return Restaurant.fromJson(data);
-        }).toList();
-
-        return restaurants;
+        // Décoder la réponse JSON
+        final dynamic jsonData = json.decode(response.body);
+        // Accéder à la clé "restaurants1" pour obtenir la liste des restaurants
+        if (jsonData is Map<String, dynamic> && jsonData.containsKey('restaurants1')) {
+          List<dynamic> restaurantList = jsonData['restaurants1'];
+          // Convertir chaque élément de la liste en un objet Restaurant
+          List<Restaurant> restaurants = restaurantList.map((data) {
+            return Restaurant.fromJson(data);
+          }).toList();
+          return restaurants;
+        } else {
+          throw Exception('Expected a Map with key "restaurants1", but received a different type');
+        }
       } else {
-        throw Exception('Failed to load restaurants by tags');
+        throw Exception('Failed to load restaurants by tags and workspaces');
       }
     } catch (e) {
-      throw Exception('Failed to load restaurants by tags: $e');
+      throw Exception('Failed to load restaurants by tags and workspaces: $e');
     }
   }
+
+//AVANT DE SUPPRIMER : SUPPRIME LE ENDPOINT DANS XANO
+  // Future<List<Restaurant>> getRestaurantsByTags(List<int> tagsId) async {
+  //   if (baseUrl.isEmpty) {
+  //     throw Exception('Service not initialized. Call init() first.');
+  //   }
+
+  //   String tagsIdQueryString = jsonEncode({'tags_id': tagsId});
+
+  //   String url = '$baseUrl/tags/';
+
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(url),
+  //       headers: <String, String>{
+  //         'Content-Type': 'application/json; charset=UTF-8',
+  //       },
+  //       body: tagsIdQueryString,
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final List<dynamic> jsonData = json.decode(response.body);
+
+  //       List<Restaurant> restaurants = jsonData.map((data) {
+  //         return Restaurant.fromJson(data);
+  //       }).toList();
+
+  //       return restaurants;
+  //     } else {
+  //       throw Exception('Failed to load restaurants by tags');
+  //     }
+  //   } catch (e) {
+  //     throw Exception('Failed to load restaurants by tags: $e');
+  //   }
+  // }
 
   Future<List<Restaurant>> searchRestaurantByName(String restaurantName) async {
     if (rootUrl.isEmpty) {
@@ -257,36 +301,37 @@ class CallEndpointService {
     }
   }
 
-  Future<List<Restaurant>> searchRestaurantsByPlaceIDs(List<String> placeIDs) async {
-    if (rootUrl.isEmpty) {
-      throw Exception('Service not initialized. Call init() first.');
-    }
+//AVANT DE SUPPRIMER : SUPRIME LE ENDPOINT DANS XANO
+  // Future<List<Restaurant>> searchRestaurantsByPlaceIDs(List<String> placeIDs) async {
+  //   if (rootUrl.isEmpty) {
+  //     throw Exception('Service not initialized. Call init() first.');
+  //   }
 
-    String endpoint = '$rootUrl/restaurantsByPlaceIDs';
-    try {
-      final response = await http.post(
-        Uri.parse(endpoint),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({'placeIDs': placeIDs}),
-      );
+  //   String endpoint = '$rootUrl/restaurantsByPlaceIDs';
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(endpoint),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: json.encode({'placeIDs': placeIDs}),
+  //     );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonData = json.decode(response.body);
+  //     if (response.statusCode == 200) {
+  //       final List<dynamic> jsonData = json.decode(response.body);
 
-        List<Restaurant> restaurants = jsonData.map((data) {
-          return Restaurant.fromJson(data);
-        }).toList();
+  //       List<Restaurant> restaurants = jsonData.map((data) {
+  //         return Restaurant.fromJson(data);
+  //       }).toList();
 
-        return restaurants;
-      } else {
-        throw Exception('Failed to search restaurants by place IDs');
-      }
-    } catch (e) {
-      throw Exception('Failed to search restaurants by place IDs: $e');
-    }
-  }
+  //       return restaurants;
+  //     } else {
+  //       throw Exception('Failed to search restaurants by place IDs');
+  //     }
+  //   } catch (e) {
+  //     throw Exception('Failed to search restaurants by place IDs: $e');
+  //   }
+  // }
 
   Future<List<Workspace>> searchWorkspacesByAliass(List<String> alias) async {
     if (rootUrl.isEmpty) {

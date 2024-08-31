@@ -2,6 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:yummap/call_endpoint_service.dart';
+import 'package:yummap/map_helper.dart';
+import 'package:yummap/restaurant.dart';
 import 'package:yummap/theme.dart';
 import 'package:yummap/workspace_options_modal.dart';
 import 'filter_options_modal.dart';
@@ -17,7 +20,7 @@ class FilterBar extends StatefulWidget implements PreferredSizeWidget {
   }) : super(key: key);
 
   @override
-  _FilterBarState createState() => _FilterBarState();
+  FilterBarState createState() => FilterBarState();
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -26,21 +29,21 @@ class FilterBar extends StatefulWidget implements PreferredSizeWidget {
 
   static void toggleFollowedAccountsFilter() {
     showFollowedAccounts.value = !showFollowedAccounts.value;
-    _FilterBarState()._updateSelectedThings();
+    FilterBarState()._updateSelectedThings();
   }
 
   static void showAccounts() {
     showFollowedAccounts.value = true;
-    _FilterBarState()._updateSelectedThings();
+    FilterBarState()._updateSelectedThings();
   }
 
   static void hideAccounts() {
     showFollowedAccounts.value = false;
-    _FilterBarState()._updateSelectedThings();
+    FilterBarState()._updateSelectedThings();
   }
 }
 
-class _FilterBarState extends State<FilterBar> {
+class FilterBarState extends State<FilterBar> {
   List<int> selectedTagIds = [];
   List<String> aliasList = [];
 
@@ -72,6 +75,12 @@ class _FilterBarState extends State<FilterBar> {
     });
   }
 
+  Future<List<Restaurant>> generalFilter() async{
+   List<Restaurant> newRestoList =  await CallEndpointService().getRestaurantsByTagsAndWorkspaces(widget.selectedTagIdsNotifier.value, widget.selectedWorkspacesNotifier.value);
+    MarkerManager.createFull(MarkerManager.context, newRestoList);
+    return newRestoList;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -81,56 +90,26 @@ class _FilterBarState extends State<FilterBar> {
         child: Row(
           children: [
             const SizedBox(width: 10),
-            //ANCIEN BOUTON FILTRE
-            // IconButton(
-            //   onPressed: () {
-            //     showModalBottomSheet<void>(
-            //       context: context,
-            //       builder: (BuildContext context) {
-            //         return FilterOptionsModal(
-            //           initialSelectedTagIds: selectedTagIds,
-            //           onApply: (selectedIds) {
-            //             setState(() {
-            //               selectedTagIds = selectedIds;
-            //             });
-            //           },
-            //         );
-            //       },
-            //     );
-            //   },
-            //   icon: Container(
-            //     decoration: BoxDecoration(
-            //       shape: BoxShape.circle,
-            //       color: AppColors.orangeButton,
-            //     ),
-            //     padding: const EdgeInsets.all(8),
-            //     child: const Icon(
-            //       Icons.filter_list,
-            //       color: Colors.white,
-            //       size: 25,
-            //     ),
-            //   ),
-            // ),
-            //Nouvel icon de filtre pas un bouton
             Container(
-              width: MediaQuery.of(context).size.width * (8/100), // 5% de l'espace horizontal
+              width: MediaQuery.of(context).size.width * (8 / 100), // 8% de l'espace horizontal
               child: FractionallySizedBox(
                 alignment: Alignment.center,
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.orangeButton,
+                    color: AppColors.orangeButton, // Fond orange
                   ),
-                  padding: const EdgeInsets.all(5),
+                  padding: const EdgeInsets.all(5), // Un peu plus d'espace autour de l'icône
                   child: const Icon(
                     Icons.filter_list,
                     color: Colors.white,
-                    size: 25,
+                    size: 25, // Augmenter légèrement la taille de l'icône pour plus de visibilité
                   ),
                 ),
               ),
             ),
-            SizedBox(
+
+            const SizedBox(
               width: 20,
             ),
             GestureDetector(
@@ -146,6 +125,7 @@ class _FilterBarState extends State<FilterBar> {
                           widget.selectedTagIdsNotifier.value = selectedIds;
                         });
                       },
+                      parentState: this,
                     );
                   },
                 );
@@ -184,6 +164,7 @@ class _FilterBarState extends State<FilterBar> {
                                       selectedIds;
                                 });
                               },
+                              parentState: this,
                             );
                           },
                         );

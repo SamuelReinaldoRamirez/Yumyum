@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:yummap/call_endpoint_service.dart';
-import 'package:yummap/map_helper.dart';
+import 'package:yummap/filter_bar.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/tag.dart';
 import 'package:yummap/theme.dart';
@@ -12,11 +12,13 @@ import 'restaurant.dart';
 class FilterOptionsModal extends StatefulWidget {
   final List<int> initialSelectedTagIds;
   final ValueChanged<List<int>> onApply;
+  final FilterBarState parentState;
 
   const FilterOptionsModal({
     Key? key,
     required this.initialSelectedTagIds,
     required this.onApply,
+    required this.parentState,
   }) : super(key: key);
 
   @override
@@ -30,7 +32,6 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
   @override
   void initState() {
     super.initState();
-    //possible incohérence i on a des tags qui sont supprimés en bdd apres la premiere selection et avant de retourner sur la page de selection des filtres
     selectedTagIds = List.from(widget.initialSelectedTagIds);
     _fetchTagList();
   }
@@ -51,14 +52,12 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
           MixpanelService.instance.track('FilterTagSearch', properties: {
             'filter_ids': selectedTagIds,
           });
-
-          List<Restaurant> newRestaurants =
-              await CallEndpointService().getRestaurantsByTags(selectedTagIds);
-          if (newRestaurants.isEmpty) {
+           List<Restaurant> newRestaurants = await widget.parentState.generalFilter();
+           if (newRestaurants.isEmpty) {
             Navigator.of(context).pop(); // Ferme le BottomSheet
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text("Aucun résultat trouvé avec ces filtres"),
+                content: const Text("Aucun résultat trouvé avec ces filtres ou combinaison de filtres"),
                 duration: const Duration(seconds: 3),
                 action: SnackBarAction(
                   label: 'OK',
@@ -68,10 +67,8 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
                 ),
               ),
             );
-          } else {
-            //print(newRestaurants);
-            MarkerManager.createFull(context, newRestaurants);
-            Navigator.of(context).pop(); // Ferme le BottomSheet
+          }else{
+            Navigator.of(context).pop();
           }
         },
         style: AppButtonStyles.elevatedButtonStyle,
@@ -92,11 +89,8 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        widget.onApply(selectedTagIds);
-        return true;
-      },
+    return PopScope(
+      canPop: handleBackNavigation(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -143,4 +137,14 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
       ),
     );
   }
+
+  bool handleBackNavigation() {
+    //à ne pas supprimer : ici on définit ce qu'il se passe quand on clique en dehors du bottomsheet
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   // AlertDialog(semanticLabel: "selection perdue");
+    // });
+    return true; // Retourne true pour permettre le pop, false pour l'empêcher
+  }
+
+
 }

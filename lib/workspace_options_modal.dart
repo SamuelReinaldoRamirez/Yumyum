@@ -3,21 +3,24 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yummap/call_endpoint_service.dart';
+import 'package:yummap/filter_bar.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/theme.dart';
 import 'package:yummap/workspace.dart';
-
 import 'restaurant.dart';
 
 class WorkspaceOptionsModal extends StatefulWidget {
   final List<int> initialSelectedWorkspaces;
   final ValueChanged<List<int>> onApply;
+  final FilterBarState parentState;
 
   const WorkspaceOptionsModal(
       {Key? key,
       required this.onApply,
-      required this.initialSelectedWorkspaces})
+      required this.initialSelectedWorkspaces,
+      required this.parentState,
+})
       : super(key: key);
 
   @override
@@ -26,7 +29,6 @@ class WorkspaceOptionsModal extends StatefulWidget {
 
 class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
   List<int> selectedTagIds = [];
-  List<List<String>> selectedPlaceIDsList = [];
   List<Workspace> workspaceList = [];
 
   @override
@@ -38,17 +40,6 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
 
   Future<void> _initializeData() async {
     await _fetchWorkspaceList();
-    await _populateSelectedPlaceIDsList();
-  }
-
-  Future<void> _populateSelectedPlaceIDsList() async {
-    List<Workspace> workspaceSelected =
-        workspaceList.where((obj) => selectedTagIds.contains(obj.id)).toList();
-    List<List<String>> returnedPaceIdsList =
-        workspaceSelected.map<List<String>>((obj) => obj.placeIds).toList();
-    setState(() {
-      selectedPlaceIDsList = returnedPaceIdsList;
-    });
   }
 
   Future<void> _fetchWorkspaceList() async {
@@ -61,25 +52,12 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
     });
   }
 
-  void _handleWorkspaceSelection(List<List<String>> placeIdsList) async {
-    // Récupérer les restaurants à partir des placeId
-    List<String> placeIds = [];
-    for (List<String> placeIDS in placeIdsList) {
-      for (String placeId in placeIDS) {
-        if (!placeIds.contains(placeId)) {
-          placeIds.add(placeId);
-        }
-      }
-    }
-    List<Restaurant> restaurants =
-        await CallEndpointService().searchRestaurantsByPlaceIDs(placeIds);
-    if (restaurants.isNotEmpty) {
-      // Afficher les restaurants sur la carte
-      MarkerManager.createFull(MarkerManager.context, restaurants);
-    } else {
+  void _handleWorkspaceSelection() async {
+    List<Restaurant> restaurants = await widget.parentState.generalFilter();
+    if (restaurants.isEmpty) {
       ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
         const SnackBar(
-          content: Text('Aucun restaurant trouvé pour ce workspace'),
+          content: Text('Aucun restaurant trouvé pour ce workspace ou combinaison de filtres'),
         ),
       );
     }
@@ -94,7 +72,7 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
           MixpanelService.instance.track('FilterWorkspaceSearch', properties: {
             'filter_ids': selectedTagIds,
           });
-          _handleWorkspaceSelection(selectedPlaceIDsList);
+          _handleWorkspaceSelection();
           Navigator.of(context).pop();
         },
         style: AppButtonStyles.elevatedButtonStyle,
@@ -115,63 +93,61 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildTitle(context),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: workspaceList.length,
-                  itemBuilder: (context, index) {
-                    final workspace = workspaceList[index];
-                    return CheckboxListTile(
-                      title: Text(
-                        workspace.name,
-                        style: AppTextStyles.paragraphDarkStyle,
-                      ),
-                      value: selectedTagIds.contains(workspace.id),
-                      checkColor: Colors.white,
-                      activeColor: AppColors.greenishGrey,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          if (value != null && value) {
-                            selectedTagIds.add(workspace.id);
-                            print("added ");
-                            print(workspace.restaurants_placeId);
-                            print("to");
-                            print(selectedPlaceIDsList);
-                            selectedPlaceIDsList
-                                .add(workspace.restaurants_placeId);
-                            print(selectedPlaceIDsList);
-                          } else {
-                            selectedTagIds.remove(workspace.id);
-                            print("removed ");
-                            print(workspace.restaurants_placeId);
-                            print("to");
-                            print(selectedPlaceIDsList);
-                            selectedPlaceIDsList
-                                .remove(workspace.restaurants_placeId);
-                            print(selectedPlaceIDsList);
-                          }
-                        });
-                      },
-                    );
-                  },
-                ),
-              ],
+    return PopScope(
+      canPop: handleBackNavigation(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildTitle(context),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: workspaceList.length,
+                    itemBuilder: (context, index) {
+                      final workspace = workspaceList[index];
+                      return CheckboxListTile(
+                        title: Text(
+                          workspace.name,
+                          style: AppTextStyles.paragraphDarkStyle,
+                        ),
+                        value: selectedTagIds.contains(workspace.id),
+                        checkColor: Colors.white,
+                        activeColor: AppColors.greenishGrey,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            if (value != null && value) {
+                              selectedTagIds.add(workspace.id);
+                            } else {
+                              selectedTagIds.remove(workspace.id);
+                            }
+                          });
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        _buildApplyButton(context),
-        const SizedBox(height: 10),
-      ],
+          _buildApplyButton(context),
+          const SizedBox(height: 10),
+        ],
+      ),
     );
   }
+
+  bool handleBackNavigation() {
+    //à ne pas supprimer car le corps de la méthode permet de définir le comportement en cas de clique en dehors du bottomsheet pour le fermer.
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   // widget.onApply(selectedTagIds);
+    // });
+    return true; // Retourne true pour permettre le pop, false pour l'empêcher
+  }
+
 }

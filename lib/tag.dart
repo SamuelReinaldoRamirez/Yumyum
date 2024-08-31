@@ -1,5 +1,3 @@
-import 'package:logger/logger.dart';
-
 class Tag {
  
   final int id;
@@ -14,9 +12,6 @@ class Tag {
   });
 
   factory Tag.fromJson(Map<String, dynamic> json) {
-    final logger = Logger();
-    logger.e(json['tag']);
-
     return Tag(
       id: json['id'] ?? 0,
       tag: json['tag'] ?? '',

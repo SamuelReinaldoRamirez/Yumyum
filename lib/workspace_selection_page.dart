@@ -224,11 +224,7 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                   children: [
                     TextButton(
                       onPressed: () async {
-                        List<String> placeIds =
-                            widget.workspace.restaurants_placeId;
-                        List<Restaurant> restaurants = await CallEndpointService()
-                            .searchRestaurantsByPlaceIDs(placeIds);
-
+                        List<Restaurant> restaurants = await CallEndpointService().getRestaurantsByTagsAndWorkspaces([], [widget.workspace.id]);
                         if (restaurants.isNotEmpty) {
                           // Afficher les restaurants sur la carte
                           MarkerManager.createFull(
