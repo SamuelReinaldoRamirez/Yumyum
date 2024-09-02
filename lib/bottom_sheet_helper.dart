@@ -70,11 +70,26 @@ class BottomSheetHelper {
                       ), // Deuxième colonne avec champ texte
                     ),
 
+                    // FloatingActionButton(
+                    //   onPressed: () {
+                    //     _navigateToTags(context, restaurant);
+                    //   },
+                    //   backgroundColor: const Color(0xFF95A472),
+                    //   child: const Icon(
+                    //     Icons.info_outline,
+                    //     color: Colors.white, // Couleur de l'icône en blanc
+                    //     size: 30, // Ajuste la taille de l'icône si nécessaire
+                    //   ),
+                    // ),
+
                     FloatingActionButton(
                       onPressed: () {
                         _navigateToTags(context, restaurant);
                       },
                       backgroundColor: const Color(0xFF95A472),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50), // Définit le bouton comme rond
+                      ),
                       child: const Icon(
                         Icons.info_outline,
                         color: Colors.white, // Couleur de l'icône en blanc
