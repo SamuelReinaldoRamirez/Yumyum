@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
 import 'package:yummap/call_endpoint_service.dart';
+import 'package:yummap/filter_bar.dart';
+import 'package:yummap/filter_options_modal.dart';
 import 'package:yummap/global.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/mixpanel_service.dart';
@@ -30,18 +32,17 @@ class SearchBar extends StatefulWidget implements PreferredSizeWidget {
   }) : super(key: key);
 
   @override
-  _SearchBarState createState() => _SearchBarState();
+  SearchBarState createState() => SearchBarState();
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
-class _SearchBarState extends State<SearchBar> {
+class SearchBarState extends State<SearchBar> {
   final TextEditingController _searchController = TextEditingController();
   static const double shakeThresholdGravity = 2.7;
   static const int shakeSlopTimeMs = 500;
   int lastShakeTimestamp = 0;
-  // static bool _filterIsOn = false;
 
 
 @override
@@ -85,58 +86,180 @@ class _SearchBarState extends State<SearchBar> {
         MarkerManager.context, widget.restaurantList[randomIndex]);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      title: TextField(
-        controller: _searchController,
-        onSubmitted: (value) {
-          _handleSubmitted(value);
-        },
-        style: AppTextStyles.paragraphDarkStyle,
-        decoration: InputDecoration(
-          hintText: 'Rechercher dans Yummap',
-          hintStyle: AppTextStyles.hintTextDarkStyle,
-          border: InputBorder.none,
-          prefixIcon: const Icon(
-            Icons.search,
-            color: AppColors.greenishGrey,
-          ),
-          suffixIcon: IconButton(
-            // icon: const Icon(
-            //   Icons.clear,
-            //   // color: AppColors.greenishGrey,
-            //   color: Colors.blueAccent,
-            // ),
-            icon: Container(
-              decoration: filterIsOn.value
-                ? BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.orange,
-                      width: 2.0,
-                    ),
-                  )
-                : null, // Pas de bordure si non pressé
-              child: Icon(
-                Icons.clear,
-                color: AppColors.greenishGrey,
-              ),
-              padding: EdgeInsets.all(4.0), // Espace entre l'icône et la bordure
-            ),
-            onPressed: () async {
-              setState(() {
-                widget.selectedWorkspacesNotifier.value = [];
-                widget.selectedTagIdsNotifier.value = [];
-              });
-              _clearSearch(context);
-              MarkerManager.resetMarkers();
-              filterIsOn.value = false;
-            },
+
+  OverlayEntry? _overlayEntry;
+  final GlobalKey _buttonKey = GlobalKey();
+  // ValueNotifier<bool> showWorCircleFilterInSearchBar 
+  // = ValueNotifier<bool>(true); 
+  // = ValueNotifier<bool>(showWorkspaceOptionModalBool && _overlayEntry != null); 
+  //rendre non visible ET NON CLICKABLE ssi 1) on vient de le cliquer et on est abonné à des wkspaces
+  bool showWorkspaceOptionModalBool = hasSubscription.value;
+
+  void _showOverlay(BuildContext context) {
+    final renderBox = _buttonKey.currentContext!.findRenderObject() as RenderBox;
+    final position = renderBox.localToGlobal(Offset.zero);
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        left: position.dx,
+        top: position.dy + renderBox.size.height,
+        width: MediaQuery.of(context).size.width, // Vous pouvez ajuster la largeur ici
+        child: Material(
+          elevation: 1.0,
+          child: Container(
+            color: Colors.white10, // Couleur de fond du widget de filtre
+            // color: Colors.grey[200], // Couleur de fond du widget de filtre
+            padding: EdgeInsets.all(10),
+            child: FilterBar(
+              selectedTagIdsNotifier: selectedTagIdsNotifier,
+              selectedWorkspacesNotifier: selectedWorkspacesNotifier,
+            ), // Remplacez ceci par votre widget
           ),
         ),
       ),
     );
+
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      leading: InkWell(
+        key: _buttonKey,
+        // onTap: () {
+        onTap: !(showWorCircleFilterInSearchBar.value)
+                ? null
+                : () {
+          //si on n'est pas abonné, on veut juste ouvrir la bottomsheet des filtres
+          if(!showWorkspaceOptionModalBool){
+            //show bottomsheetfiltre
+            showModalBottomSheet<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return FilterOptionsModal(
+                      initialSelectedTagIds:
+                          widget.selectedTagIdsNotifier.value,
+                      onApply: (selectedIds) {
+                        setState(() {
+                          widget.selectedTagIdsNotifier.value = selectedIds;
+                        });
+                      },
+                      parentState: FilterBarState(),
+                    );
+                  },
+                );
+          }else{
+            if (_overlayEntry == null) {
+              _showOverlay(context);
+              // showWorCircleFilterInSearchBar.value = !showWorCircleFilterInSearchBar.value;          
+            } 
+            // else {
+            //   removeOverlay();
+            //   // showWorCircleFilterInSearchBar.value = !showWorCircleFilterInSearchBar.value;          
+            // }
+          }
+        },
+        borderRadius: BorderRadius.circular(50), // Assurez-vous que l'effet d'onde soit circulaire
+        child: 
+
+
+        ValueListenableBuilder<bool>(
+              valueListenable: showWorCircleFilterInSearchBar,
+              builder: (context, show, child) {
+                return Visibility(
+                  visible: show,
+                  child:
+
+
+        Container(
+          width: MediaQuery.of(context).size.width * (8 / 100), // Largeur du bouton
+          child: Center(
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.orangeButton, // Fond orange
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2), // Couleur de l'ombre
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: Offset(0, 2), // Décalage de l'ombre
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(4), // Réduire l'espace autour de l'icône
+              child: const Icon(
+                Icons.filter_list,
+                color: Colors.white,
+                size: 25, // Taille de l'icône
+              ),
+            ),
+          ),
+        ),
+
+
+                );
+                },
+                ),
+
+
+      ),
+  title: TextField(
+    controller: _searchController,
+    onSubmitted: (value) {
+      _handleSubmitted(value);
+    },
+    style: AppTextStyles.paragraphDarkStyle,
+    decoration: InputDecoration(
+      hintText: 'Rechercher dans Yummap',
+      hintStyle: AppTextStyles.hintTextDarkStyle,
+      border: InputBorder.none,
+      prefixIcon: const Icon(
+        Icons.search,
+        color: AppColors.greenishGrey,
+      ),
+      suffixIcon: IconButton(
+        icon: Container(
+          decoration: filterIsOn.value
+              ? BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.orange,
+                    width: 2.0,
+                  ),
+                )
+              : null,
+          child: Icon(
+            Icons.clear,
+            color: AppColors.greenishGrey,
+          ),
+          padding: EdgeInsets.all(4.0),
+        ),
+        onPressed: () async {
+          setState(() {
+            // widget.selectedWorkspacesNotifier.value = [];
+            // widget.selectedTagIdsNotifier.value = [];
+            selectedWorkspacesNotifier.value = [];
+            selectedTagIdsNotifier.value = [];
+          });
+          _clearSearch(context);
+          MarkerManager.resetMarkers();
+          filterIsOn.value = false;
+        },
+      ),
+    ),
+  ),
+  actions: [
+    // Si vous souhaitez ajouter d'autres actions à droite, vous pouvez le faire ici.
+  ],
+);
+
   }
 
   Future<void> _handleSubmitted(String value) async {
@@ -225,6 +348,7 @@ class _SearchBarState extends State<SearchBar> {
   void _handleWorkspaceSelection(Workspace workspace) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> aliasList = prefs.getStringList('workspaceAliases') ?? [];
+    print("CETTE METHODE SERT ENCORE A QQ CH??");
 
     // Afficher la liste mise à jour des alias
     // _showAliasAlert(context, aliasList, 'After setting');

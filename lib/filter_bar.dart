@@ -6,6 +6,7 @@ import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/global.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/restaurant.dart';
+import 'package:yummap/search_bar.dart';
 import 'package:yummap/theme.dart';
 import 'package:yummap/workspace_options_modal.dart';
 import 'filter_options_modal.dart';
@@ -47,6 +48,7 @@ class FilterBar extends StatefulWidget implements PreferredSizeWidget {
 class FilterBarState extends State<FilterBar> {
   List<int> selectedTagIds = [];
   List<String> aliasList = [];
+    bool _isBottomSheetOpen = false;
 
   @override
   void initState() {
@@ -54,12 +56,14 @@ class FilterBarState extends State<FilterBar> {
     _lookPref();
     widget.selectedTagIdsNotifier.addListener(_updateSelectedThings);
     widget.selectedWorkspacesNotifier.addListener(_updateSelectedThings);
+    showWorCircleFilterInSearchBar.value = false;
   }
 
   @override
   void dispose() {
     widget.selectedTagIdsNotifier.removeListener(_updateSelectedThings);
     widget.selectedWorkspacesNotifier.removeListener(_updateSelectedThings);
+    showWorCircleFilterInSearchBar.value = true; 
     super.dispose();
   }
 
@@ -81,11 +85,6 @@ class FilterBarState extends State<FilterBar> {
     List<int> workspaceIds = widget.selectedWorkspacesNotifier.value;
     List<Restaurant> newRestoList =  await CallEndpointService().getRestaurantsByTagsAndWorkspaces(filterTags, workspaceIds);
     MarkerManager.createFull(MarkerManager.context, newRestoList);
-    print("workspaceIds == [] && filterTags == []");
-    print(workspaceIds);
-    print(workspaceIds == []);
-    print(filterTags);
-    print(filterTags == []);
     if(workspaceIds.isEmpty && filterTags.isEmpty){
       filterIsOn.value = false;
     }else{
@@ -96,37 +95,94 @@ class FilterBarState extends State<FilterBar> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return 
+    //  ColorFiltered(
+    //         colorFilter: _isBottomSheetOpen
+    //             ? ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.darken)
+    //             : ColorFilter.mode(Colors.transparent, BlendMode.darken),
+    //         child:
+            SafeArea(
       top: false, // Ne pas respecter la marge en haut
       bottom: false,
       child: Container(
         child: Row(
           children: [
             const SizedBox(width: 10),
-            Container(
-              width: MediaQuery.of(context).size.width * (8 / 100), // 8% de l'espace horizontal
-              child: FractionallySizedBox(
-                alignment: Alignment.center,
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.orangeButton, // Fond orange
+
+
+
+
+            // Container(
+            //   width: MediaQuery.of(context).size.width * (8 / 100), // 8% de l'espace horizontal
+            //   child: FractionallySizedBox(
+            //     alignment: Alignment.center,
+            //     child: Container(
+            //       decoration: BoxDecoration(
+            //         shape: BoxShape.circle,
+            //         color: AppColors.orangeButton, // Fond orange
+            //       ),
+            //       padding: const EdgeInsets.all(5), // Un peu plus d'espace autour de l'icône
+            //       child: const Icon(
+            //         Icons.filter_list,
+            //         color: Colors.white,
+            //         size: 25, // Augmenter légèrement la taille de l'icône pour plus de visibilité
+            //       ),
+            //     ),
+            //   ),
+            // ),
+
+            InkWell(
+        onTap: () {
+          print("REMOVE OVERLAY");
+          SearchBarState().removeOverlay();
+        },
+        borderRadius: BorderRadius.circular(50), // Assurez-vous que l'effet d'onde soit circulaire
+        child: 
+
+        Container(
+          width: MediaQuery.of(context).size.width * (8 / 100), // Largeur du bouton
+          child: Center(
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.orangeButton, // Fond orange
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2), // Couleur de l'ombre
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: Offset(0, 2), // Décalage de l'ombre
                   ),
-                  padding: const EdgeInsets.all(5), // Un peu plus d'espace autour de l'icône
-                  child: const Icon(
-                    Icons.filter_list,
-                    color: Colors.white,
-                    size: 25, // Augmenter légèrement la taille de l'icône pour plus de visibilité
-                  ),
-                ),
+                ],
+              ),
+              padding: const EdgeInsets.all(4), // Réduire l'espace autour de l'icône
+              child: const Icon(
+                Icons.filter_list,
+                color: Colors.white,
+                size: 25, // Taille de l'icône
               ),
             ),
+          ),
+        ),
+
+      ),
+
+
+
+
+
 
             const SizedBox(
               width: 20,
             ),
             GestureDetector(
-              onTap: () {
+              onTap: _isBottomSheetOpen
+                  ? null
+                  : () {
+                      setState(() {
+                        _isBottomSheetOpen = true;
+                      });
+
                 showModalBottomSheet<void>(
                   context: context,
                   builder: (BuildContext context) {
@@ -141,8 +197,12 @@ class FilterBarState extends State<FilterBar> {
                       parentState: this,
                     );
                   },
-                );
-              },
+                ).whenComplete(() {
+                        setState(() {
+                          _isBottomSheetOpen = false;
+                        });
+                      });
+                    },
               child: Material(
                 child: Container(
                   alignment: Alignment.center,
@@ -164,7 +224,13 @@ class FilterBarState extends State<FilterBar> {
                   visible: show,
                   child: Expanded(
                     child: GestureDetector(
-                      onTap: () {
+                      onTap: _isBottomSheetOpen
+                        ? null
+                        : () {
+                            setState(() {
+                              _isBottomSheetOpen = true;
+                            });
+
                         showModalBottomSheet<void>(
                           context: context,
                           builder: (BuildContext context) {
@@ -180,8 +246,12 @@ class FilterBarState extends State<FilterBar> {
                               parentState: this,
                             );
                           },
-                        );
-                      },
+                        ).whenComplete(() {
+                        setState(() {
+                          _isBottomSheetOpen = false;
+                        });
+                      });
+                    },
                       child: Material(
                         child: Container(
                           alignment: Alignment.center,
@@ -203,6 +273,8 @@ class FilterBarState extends State<FilterBar> {
           ],
         ),
       ),
+    // ),
     );
   }
 }
+

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:yummap/filter_bar.dart';
+import 'package:yummap/global.dart';
 import 'package:yummap/map_page.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/restaurant.dart';
@@ -18,6 +19,7 @@ void main() async {
 
   List<Restaurant> restaurantList =
       (await CallEndpointService().getRestaurantsFromXanos()).cast<Restaurant>();
+  await initializeGlobals();
   runApp(MyApp(restaurantList: restaurantList));
 }
 
@@ -93,13 +95,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     selectedWorkspacesNotifier: selectedWorkspacesNotifier,
                   ),
                 ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.06,
-                  child: FilterBar(
-                    selectedTagIdsNotifier: selectedTagIdsNotifier,
-                    selectedWorkspacesNotifier: selectedWorkspacesNotifier,
-                  ),
-                ),
+                // SizedBox(
+                //   height: MediaQuery.of(context).size.height * 0.06,
+                //   child: FilterBar(
+                //     selectedTagIdsNotifier: selectedTagIdsNotifier,
+                //     selectedWorkspacesNotifier: selectedWorkspacesNotifier,
+                //   ),
+                // ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height *
                       0.84, // 90% de la hauteur de l'écran
