@@ -109,18 +109,16 @@ class _SearchBarState extends State<SearchBar> {
             //   color: Colors.blueAccent,
             // ),
             icon: Container(
-              decoration: filterIsOn.value
-                ? BoxDecoration(
+              decoration: filterIsOn.value ?
+                BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.orange,
-                      width: 2.0,
-                    ),
+                    color: AppColors.orangeButton, // Fond orange
                   )
                 : null, // Pas de bordure si non pressé
               child: Icon(
                 Icons.clear,
-                color: AppColors.greenishGrey,
+                color: filterIsOn.value
+                ? Colors.white : AppColors.greenishGrey,
               ),
               padding: EdgeInsets.all(4.0), // Espace entre l'icône et la bordure
             ),
