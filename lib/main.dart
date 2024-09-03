@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:yummap/filter_bar.dart';
+import 'package:yummap/global.dart';
 import 'package:yummap/map_page.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/restaurant.dart';
@@ -32,10 +33,10 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late Mixpanel _mixpanel;
-  ValueNotifier<List<int>> selectedTagIdsNotifier =
-      ValueNotifier<List<int>>([]);
-  ValueNotifier<List<int>> selectedWorkspacesNotifier =
-      ValueNotifier<List<int>>([]);
+  // ValueNotifier<List<int>> selectedTagIdsNotifier =
+  //     ValueNotifier<List<int>>([]);
+  // ValueNotifier<List<int>> selectedWorkspacesNotifier =
+  //     ValueNotifier<List<int>>([]);
 
   @override
   void initState() {
@@ -85,17 +86,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             child: Column(
               children: [
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.10,
+                  height: MediaQuery.of(context).size.height * 0.155,
                   child: CustomSearchBar.SearchBar(
                     onSearchChanged: (value) {},
                     restaurantList: widget.restaurantList,
-                    selectedTagIdsNotifier: selectedTagIdsNotifier,
-                    selectedWorkspacesNotifier: selectedWorkspacesNotifier,
-                  ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.06,
-                  child: FilterBar(
                     selectedTagIdsNotifier: selectedTagIdsNotifier,
                     selectedWorkspacesNotifier: selectedWorkspacesNotifier,
                   ),
