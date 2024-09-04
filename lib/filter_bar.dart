@@ -77,34 +77,11 @@ class FilterBarState extends State<FilterBar> {
     });
   }
 
-  // Future<List<Restaurant>> generalFilter() async{
-  //   List<int> filterTags = widget.selectedTagIdsNotifier.value;
-  //   List<int> workspaceIds = widget.selectedWorkspacesNotifier.value;
-  //   List<Restaurant> newRestoList =  await CallEndpointService().getRestaurantsByTagsAndWorkspaces(filterTags, workspaceIds);
-  //   MarkerManager.createFull(MarkerManager.context, newRestoList);
-  //   print("workspaceIds == [] && filterTags == []");
-  //   print(workspaceIds);
-  //   print(workspaceIds == []);
-  //   print(filterTags);
-  //   print(filterTags == []);
-  //   if(workspaceIds.isEmpty && filterTags.isEmpty){
-  //     filterIsOn.value = false;
-  //   }else{
-  //     filterIsOn.value = true;
-  //   }
-  //   return newRestoList;
-  // }
-
   static Future<List<Restaurant>> generalFilter() async{
     List<int> filterTags = selectedTagIdsNotifier.value;
     List<int> workspaceIds = selectedWorkspacesNotifier.value;
     List<Restaurant> newRestoList =  await CallEndpointService().getRestaurantsByTagsAndWorkspaces(filterTags, workspaceIds);
     MarkerManager.createFull(MarkerManager.context, newRestoList);
-    print("workspaceIds == [] && filterTags == []");
-    print(workspaceIds);
-    print(workspaceIds == []);
-    print(filterTags);
-    print(filterTags == []);
     if(workspaceIds.isEmpty && filterTags.isEmpty){
       filterIsOn.value = false;
     }else{
