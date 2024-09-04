@@ -9,6 +9,7 @@ import 'package:yummap/map_helper.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/theme.dart';
+import 'package:yummap/widgetUtils.dart';
 import 'package:yummap/workspace.dart';
 import 'package:yummap/workspace_selection_page.dart';
 import 'package:latlong2/latlong.dart' as lat2;
@@ -88,31 +89,92 @@ class _SearchBarState extends State<SearchBar> {
 
 
 //pas mal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// @override
+// Widget build(BuildContext context) {
+//   return Column(
+//     mainAxisSize: MainAxisSize.min, // Réduit l'espace vertical
+//     children: [
+//       AppBar(
+//         titleSpacing: 20.0, // Supprime l'espacement autour du titre
+//         toolbarHeight: 40.0,
+//         leading: _boutonFiltreOrange(), // Réduit la hauteur de la barre d'applications
+//         title: _buildSearchBar(),
+//       ),
+//       // Condition pour afficher le Divider et la FilterBar ensemble
+//       if (hasSubscription.value) ...[
+//         Divider(
+//           height: 0.5, // Réduit l'espace vertical autour du Divider
+//           thickness: 0.5,
+//           color: Colors.grey,
+//         ),
+//         SizedBox(
+//           height: MediaQuery.of(context).size.height * 0.06,
+//           child: FilterBar(
+//             selectedTagIdsNotifier: selectedTagIdsNotifier,
+//             selectedWorkspacesNotifier: selectedWorkspacesNotifier,
+//           ),
+//         ),
+//       ],
+//     ],
+//   );
+// }
+
 @override
 Widget build(BuildContext context) {
   return Column(
     mainAxisSize: MainAxisSize.min, // Réduit l'espace vertical
     children: [
       AppBar(
-        titleSpacing: 40.0, // Supprime l'espacement autour du titre
-        toolbarHeight: 40.0, // Réduit la hauteur de la barre d'applications
+        titleSpacing: 20.0, // Supprime l'espacement autour du titre
+        toolbarHeight: 40.0,
+        leading: boutonFiltreOrangeSearchBar(context, this), // Réduit la hauteur de la barre d'applications
         title: _buildSearchBar(),
       ),
-      Divider(
-        height: 0.5, // Réduit l'espace vertical autour du Divider
-        thickness: 0.5,
-        color: Colors.grey,
-      ),
-      SizedBox(
-        height: MediaQuery.of(context).size.height * 0.06,
-        child: FilterBar(
-          selectedTagIdsNotifier: selectedTagIdsNotifier,
-          selectedWorkspacesNotifier: selectedWorkspacesNotifier,
-        ),
+      // Condition pour afficher le Divider et la FilterBar ensemble
+      ValueListenableBuilder<bool>(
+        valueListenable: isFilterOpen,
+        builder: (context, filterIsOpen, child) {
+          if (!filterIsOpen) {
+            return Container(); // N'affiche rien si hasSubscription est vrai
+          } else {
+            return 
+
+ValueListenableBuilder<bool>(
+        valueListenable: hasSubscription,
+        builder: (context, subscriptions, child) {
+          if (!subscriptions) {
+            return Container(); // N'affiche rien si hasSubscription est vrai
+          } else {
+            return
+            Column(
+              children: [
+                Divider(
+                  height: 0.5, // Réduit l'espace vertical autour du Divider
+                  thickness: 0.5,
+                  color: Colors.grey,
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.06,
+                  child: FilterBar(
+                    selectedTagIdsNotifier: selectedTagIdsNotifier,
+                    selectedWorkspacesNotifier: selectedWorkspacesNotifier,
+                  ),
+                ),
+              ],
+            );
+          }
+        }
+);
+
+
+
+          }
+        },
       ),
     ],
   );
 }
+
 
 //pasmal !!!!!!!!!!!!!
 Widget _buildSearchBar() {

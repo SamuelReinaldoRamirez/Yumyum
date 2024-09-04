@@ -99,6 +99,9 @@ class FilterBarState extends State<FilterBar> {
     return SafeArea(
       top: false, // Ne pas respecter la marge en haut
       bottom: false,
+      aaaaa
+      //il faut quand quand on clique sur ce bouton ca ferme la filterBar et ca fasse reapparaitre le bouton orange de la searchBar
+      //il faut utiliser le bouton filtreorange de widgetUtils au lieu de définir un container etc
       child: Container(
         child: Row(
           children: [
