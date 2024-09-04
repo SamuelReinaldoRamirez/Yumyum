@@ -88,37 +88,6 @@ class _SearchBarState extends State<SearchBar> {
   }
 
 
-//pas mal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// @override
-// Widget build(BuildContext context) {
-//   return Column(
-//     mainAxisSize: MainAxisSize.min, // Réduit l'espace vertical
-//     children: [
-//       AppBar(
-//         titleSpacing: 20.0, // Supprime l'espacement autour du titre
-//         toolbarHeight: 40.0,
-//         leading: _boutonFiltreOrange(), // Réduit la hauteur de la barre d'applications
-//         title: _buildSearchBar(),
-//       ),
-//       // Condition pour afficher le Divider et la FilterBar ensemble
-//       if (hasSubscription.value) ...[
-//         Divider(
-//           height: 0.5, // Réduit l'espace vertical autour du Divider
-//           thickness: 0.5,
-//           color: Colors.grey,
-//         ),
-//         SizedBox(
-//           height: MediaQuery.of(context).size.height * 0.06,
-//           child: FilterBar(
-//             selectedTagIdsNotifier: selectedTagIdsNotifier,
-//             selectedWorkspacesNotifier: selectedWorkspacesNotifier,
-//           ),
-//         ),
-//       ],
-//     ],
-//   );
-// }
-
 @override
 Widget build(BuildContext context) {
   return Column(
@@ -127,7 +96,14 @@ Widget build(BuildContext context) {
       AppBar(
         titleSpacing: 20.0, // Supprime l'espacement autour du titre
         toolbarHeight: 40.0,
-        leading: boutonFiltreOrangeSearchBar(context, this), // Réduit la hauteur de la barre d'applications
+        leading: boutonFiltreOrangeSearchBar(
+          context, 
+          (List<int> selectedIds) {
+            setState(() {
+              widget.selectedTagIdsNotifier.value = selectedIds;
+            });
+          },
+        ), // Réduit la hauteur de la barre d'applications
         title: _buildSearchBar(),
       ),
       // Condition pour afficher le Divider et la FilterBar ensemble
@@ -176,7 +152,6 @@ ValueListenableBuilder<bool>(
 }
 
 
-//pasmal !!!!!!!!!!!!!
 Widget _buildSearchBar() {
   return TextField(
     controller: _searchController,
@@ -222,8 +197,6 @@ Widget _buildSearchBar() {
     ),
   );
 }
-
-
 
   Future<void> _handleSubmitted(String value) async {
     MixpanelService.instance.track('TextSearch', properties: {

@@ -13,13 +13,13 @@ import 'restaurant.dart';
 class WorkspaceOptionsModal extends StatefulWidget {
   final List<int> initialSelectedWorkspaces;
   final ValueChanged<List<int>> onApply;
-  final FilterBarState parentState;
+  // final FilterBarState parentState;
 
   const WorkspaceOptionsModal(
       {Key? key,
       required this.onApply,
       required this.initialSelectedWorkspaces,
-      required this.parentState,
+      // required this.parentState,
 })
       : super(key: key);
 
@@ -53,7 +53,8 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
   }
 
   void _handleWorkspaceSelection() async {
-    List<Restaurant> restaurants = await widget.parentState.generalFilter();
+    // List<Restaurant> restaurants = await widget.parentState.generalFilter();
+    List<Restaurant> restaurants = await FilterBarState.generalFilter();
     if (restaurants.isEmpty) {
       ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
         const SnackBar(

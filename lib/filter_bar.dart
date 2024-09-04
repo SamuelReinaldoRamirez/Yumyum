@@ -7,6 +7,7 @@ import 'package:yummap/global.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/theme.dart';
+import 'package:yummap/widgetUtils.dart';
 import 'package:yummap/workspace_options_modal.dart';
 import 'filter_options_modal.dart';
 
@@ -76,9 +77,27 @@ class FilterBarState extends State<FilterBar> {
     });
   }
 
-  Future<List<Restaurant>> generalFilter() async{
-    List<int> filterTags = widget.selectedTagIdsNotifier.value;
-    List<int> workspaceIds = widget.selectedWorkspacesNotifier.value;
+  // Future<List<Restaurant>> generalFilter() async{
+  //   List<int> filterTags = widget.selectedTagIdsNotifier.value;
+  //   List<int> workspaceIds = widget.selectedWorkspacesNotifier.value;
+  //   List<Restaurant> newRestoList =  await CallEndpointService().getRestaurantsByTagsAndWorkspaces(filterTags, workspaceIds);
+  //   MarkerManager.createFull(MarkerManager.context, newRestoList);
+  //   print("workspaceIds == [] && filterTags == []");
+  //   print(workspaceIds);
+  //   print(workspaceIds == []);
+  //   print(filterTags);
+  //   print(filterTags == []);
+  //   if(workspaceIds.isEmpty && filterTags.isEmpty){
+  //     filterIsOn.value = false;
+  //   }else{
+  //     filterIsOn.value = true;
+  //   }
+  //   return newRestoList;
+  // }
+
+  static Future<List<Restaurant>> generalFilter() async{
+    List<int> filterTags = selectedTagIdsNotifier.value;
+    List<int> workspaceIds = selectedWorkspacesNotifier.value;
     List<Restaurant> newRestoList =  await CallEndpointService().getRestaurantsByTagsAndWorkspaces(filterTags, workspaceIds);
     MarkerManager.createFull(MarkerManager.context, newRestoList);
     print("workspaceIds == [] && filterTags == []");
@@ -99,32 +118,11 @@ class FilterBarState extends State<FilterBar> {
     return SafeArea(
       top: false, // Ne pas respecter la marge en haut
       bottom: false,
-      aaaaa
-      //il faut quand quand on clique sur ce bouton ca ferme la filterBar et ca fasse reapparaitre le bouton orange de la searchBar
-      //il faut utiliser le bouton filtreorange de widgetUtils au lieu de définir un container etc
       child: Container(
         child: Row(
           children: [
             const SizedBox(width: 10),
-            Container(
-              width: MediaQuery.of(context).size.width * (8 / 100), // 8% de l'espace horizontal
-              child: FractionallySizedBox(
-                alignment: Alignment.center,
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.orangeButton, // Fond orange
-                  ),
-                  padding: const EdgeInsets.all(5), // Un peu plus d'espace autour de l'icône
-                  child: const Icon(
-                    Icons.filter_list,
-                    color: Colors.white,
-                    size: 25, // Augmenter légèrement la taille de l'icône pour plus de visibilité
-                  ),
-                ),
-              ),
-            ),
-
+            boutonFiltreOrangeFilterhBar(context),
             const SizedBox(
               width: 20,
             ),
@@ -141,7 +139,7 @@ class FilterBarState extends State<FilterBar> {
                           widget.selectedTagIdsNotifier.value = selectedIds;
                         });
                       },
-                      parentState: this,
+                      // parentState: this,
                     );
                   },
                 );
@@ -180,7 +178,7 @@ class FilterBarState extends State<FilterBar> {
                                       selectedIds;
                                 });
                               },
-                              parentState: this,
+                              // parentState: this,
                             );
                           },
                         );

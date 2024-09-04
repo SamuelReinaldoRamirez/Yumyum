@@ -79,7 +79,21 @@ import 'package:yummap/theme.dart';
 //   );
 // }
 
-Widget boutonFiltreOrangeSearchBar(context, widget){ //quel est le type de context?? il faut le preciser
+
+void openFilter(BuildContext context, Function(List<int>) onApply) {
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return FilterOptionsModal(
+        initialSelectedTagIds: selectedTagIdsNotifier.value,
+        onApply: onApply, // Passer un callback pour setState ici
+        // parentState: FilterBarState(),
+      );
+    },
+  );
+}
+
+Widget boutonFiltreOrangeSearchBar(context, onApply){ //quel est le type de context?? il faut le preciser
   final ValueNotifier<bool> isPressedNotifier = ValueNotifier(false);
   // bool isDisabled = false;  //à décaler dans la searchbar pour controler l'apparition de la filterbar ou non
   bool isDisabled = isFilterOpen.value;
@@ -101,35 +115,13 @@ Widget boutonFiltreOrangeSearchBar(context, widget){ //quel est le type de conte
               print("avantswitch : ");
               print(isFilterOpen.value);
               //test : 
-              isFilterOpen.value = !isFilterOpen.value;
-              updateVisibility();
               if(!hasSubscription.value){
                 print("openFilters");
-                aaaaa
-                //il faut reussir à ouvrir la fenetre des filtres et qu'elle soit fonctionnelle
-
-                // showModalBottomSheet<void>(
-                //   context: context,
-                //   builder: (BuildContext context) {
-                //     return FilterOptionsModal(
-                //       initialSelectedTagIds:
-                //           selectedTagIdsNotifier.value,
-                //       onApply: (selectedIds) {
-                //         aaaaa 
-                //         //il faut reussir à bien appeler le filtrage quand on ne suit aucun compte
-                //         //probleme sur à qui setSate
-                //         widget.setState(() {
-                //           selectedTagIdsNotifier.value = selectedIds;
-                //         });
-                //       },
-                //       //probleme sur qui passer pour que quand on fait appliquer les filtres, ca applique vraiment
-                //       parentState: FilterBarState(),
-                //     );
-                //   },
-                // );
+                openFilter(context, onApply);
               }else{
                 print("openFiltersAndWorkspaces");
-                // isDisabled = true;
+                isFilterOpen.value = !isFilterOpen.value;
+                updateVisibility();
               }
             },
        onTapCancel: () {
@@ -211,7 +203,7 @@ Widget boutonFiltreOrangeFilterhBar(context){ //quel est le type de context?? il
                           selectedTagIdsNotifier.value = selectedIds;
                         });
                       },
-                      parentState: FilterBarState(),
+                      // parentState: FilterBarState(),
                     );
                   },
                 );
