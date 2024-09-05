@@ -12,13 +12,13 @@ import 'restaurant.dart';
 class FilterOptionsModal extends StatefulWidget {
   final List<int> initialSelectedTagIds;
   final ValueChanged<List<int>> onApply;
-  final FilterBarState parentState;
+  // final FilterBarState parentState;
 
   const FilterOptionsModal({
     Key? key,
     required this.initialSelectedTagIds,
     required this.onApply,
-    required this.parentState,
+    // required this.parentState,
   }) : super(key: key);
 
   @override
@@ -52,7 +52,8 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
           MixpanelService.instance.track('FilterTagSearch', properties: {
             'filter_ids': selectedTagIds,
           });
-           List<Restaurant> newRestaurants = await widget.parentState.generalFilter();
+          //  List<Restaurant> newRestaurants = await widget.parentState.generalFilter();
+          List<Restaurant> newRestaurants = await FilterBarState.generalFilter();
            if (newRestaurants.isEmpty) {
             Navigator.of(context).pop(); // Ferme le BottomSheet
             ScaffoldMessenger.of(context).showSnackBar(

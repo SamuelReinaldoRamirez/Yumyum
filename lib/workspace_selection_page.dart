@@ -163,9 +163,18 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
   }
 
   void _updatePreferences() {
+     // Obtenez la Future en dehors de setState
+    final futureAliasList = _getPreferences();
+    
+    // Appelez setState pour mettre à jour _aliasListFuture
     setState(() {
-      _aliasListFuture = _getPreferences();
+      _aliasListFuture = futureAliasList;
     });
+    futureAliasList.then((aliasList) {
+      hasSubscription.value = aliasList.isNotEmpty;
+      updateVisibility();
+    });
+    
   }
 
   @override

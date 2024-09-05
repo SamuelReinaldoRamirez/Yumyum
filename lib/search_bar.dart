@@ -3,11 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
 import 'package:yummap/call_endpoint_service.dart';
+import 'package:yummap/filter_bar.dart';
 import 'package:yummap/global.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/theme.dart';
+import 'package:yummap/widgetUtils.dart';
 import 'package:yummap/workspace.dart';
 import 'package:yummap/workspace_selection_page.dart';
 import 'package:latlong2/latlong.dart' as lat2;
@@ -85,57 +87,116 @@ class _SearchBarState extends State<SearchBar> {
         MarkerManager.context, widget.restaurantList[randomIndex]);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      title: TextField(
-        controller: _searchController,
-        onSubmitted: (value) {
-          _handleSubmitted(value);
-        },
-        style: AppTextStyles.paragraphDarkStyle,
-        decoration: InputDecoration(
-          hintText: 'Rechercher dans Yummap',
-          hintStyle: AppTextStyles.hintTextDarkStyle,
-          border: InputBorder.none,
-          prefixIcon: const Icon(
-            Icons.search,
-            color: AppColors.greenishGrey,
-          ),
-          suffixIcon: IconButton(
-            // icon: const Icon(
-            //   Icons.clear,
-            //   // color: AppColors.greenishGrey,
-            //   color: Colors.blueAccent,
-            // ),
-            icon: Container(
-              decoration: filterIsOn.value ?
-                BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.orangeButton, // Fond orange
-                  )
-                : null, // Pas de bordure si non pressé
-              child: Icon(
-                Icons.clear,
-                color: filterIsOn.value
-                ? Colors.white : AppColors.greenishGrey,
-              ),
-              padding: EdgeInsets.all(4.0), // Espace entre l'icône et la bordure
-            ),
-            onPressed: () async {
-              setState(() {
-                widget.selectedWorkspacesNotifier.value = [];
-                widget.selectedTagIdsNotifier.value = [];
-              });
-              _clearSearch(context);
-              MarkerManager.resetMarkers();
-              filterIsOn.value = false;
-            },
-          ),
-        ),
+
+@override
+Widget build(BuildContext context) {
+  return Column(
+    mainAxisSize: MainAxisSize.min, // Réduit l'espace vertical
+    children: [
+      AppBar(
+        titleSpacing: 20.0, // Supprime l'espacement autour du titre
+        toolbarHeight: 40.0,
+        leading: boutonFiltreOrangeSearchBar(
+          context, 
+          (List<int> selectedIds) {
+            setState(() {
+              widget.selectedTagIdsNotifier.value = selectedIds;
+            });
+          },
+        ), // Réduit la hauteur de la barre d'applications
+        title: _buildSearchBar(),
       ),
-    );
-  }
+      // Condition pour afficher le Divider et la FilterBar ensemble
+      ValueListenableBuilder<bool>(
+        valueListenable: isFilterOpen,
+        builder: (context, filterIsOpen, child) {
+          if (!filterIsOpen) {
+            return Container(); // N'affiche rien si hasSubscription est vrai
+          } else {
+            return 
+
+ValueListenableBuilder<bool>(
+        valueListenable: hasSubscription,
+        builder: (context, subscriptions, child) {
+          if (!subscriptions) {
+            return Container(); // N'affiche rien si hasSubscription est vrai
+          } else {
+            return
+            Column(
+              children: [
+                Divider(
+                  height: 0.5, // Réduit l'espace vertical autour du Divider
+                  thickness: 0.5,
+                  color: Colors.grey,
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.06,
+                  child: FilterBar(
+                    selectedTagIdsNotifier: selectedTagIdsNotifier,
+                    selectedWorkspacesNotifier: selectedWorkspacesNotifier,
+                  ),
+                ),
+              ],
+            );
+          }
+        }
+);
+
+
+
+          }
+        },
+      ),
+    ],
+  );
+}
+
+
+Widget _buildSearchBar() {
+  return TextField(
+    controller: _searchController,
+    onSubmitted: (value) {
+      _handleSubmitted(value);
+    },
+    style: AppTextStyles.paragraphDarkStyle,
+    decoration: InputDecoration(
+      contentPadding: EdgeInsets.symmetric(vertical: 12.0), // Ajustement pour un meilleur alignement vertical
+      hintText: 'Rechercher dans Yummap',
+      hintStyle: AppTextStyles.hintTextDarkStyle,
+      border: InputBorder.none,
+      prefixIcon: const Icon(
+        Icons.search,
+        color: AppColors.greenishGrey,
+        size: 24.0, // Taille ajustée pour correspondre à celle du suffixIcon
+      ),
+      suffixIcon: IconButton(
+        icon: Container(
+          decoration: filterIsOn.value
+              ? BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.orangeButton,
+                )
+              : null,
+          child: Icon(
+            Icons.clear,
+            color: filterIsOn.value ? Colors.white : AppColors.greenishGrey,
+            size: 24.0, // Taille ajustée pour correspondre à celle du prefixIcon
+          ),
+          padding: EdgeInsets.all(8.0), // Ajustement du padding pour correspondre à l'icône
+        ),
+        onPressed: () async {
+          setState(() {
+            widget.selectedWorkspacesNotifier.value = [];
+            widget.selectedTagIdsNotifier.value = [];
+          });
+          _clearSearch(context);
+          MarkerManager.resetMarkers();
+          filterIsOn.value = false;
+        },
+      ),
+    ),
+  );
+}
 
   Future<void> _handleSubmitted(String value) async {
     MixpanelService.instance.track('TextSearch', properties: {

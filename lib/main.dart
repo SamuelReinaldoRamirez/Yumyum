@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:yummap/filter_bar.dart';
+import 'package:yummap/global.dart';
 import 'package:yummap/map_page.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/restaurant.dart';
@@ -18,6 +19,9 @@ void main() async {
 
   List<Restaurant> restaurantList =
       (await CallEndpointService().getRestaurantsFromXanos()).cast<Restaurant>();
+  await initializeGlobals();
+  print("HAS SUBSCRIPTION");
+  print(hasSubscription.value);
   runApp(MyApp(restaurantList: restaurantList));
 }
 
@@ -32,10 +36,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late Mixpanel _mixpanel;
-  ValueNotifier<List<int>> selectedTagIdsNotifier =
-      ValueNotifier<List<int>>([]);
-  ValueNotifier<List<int>> selectedWorkspacesNotifier =
-      ValueNotifier<List<int>>([]);
 
   @override
   void initState() {
@@ -84,22 +84,46 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             alignment: Alignment.topCenter,
             child: Column(
               children: [
+
+    //             ValueListenableBuilder<bool>(
+    //   valueListenable: SubscriptionManager.hasSubscription,
+    //   builder: (context, hasSubscriptionValue, child) {
+    //     return SizedBox(
+    //       height: hasSubscriptionValue
+    //           ? MediaQuery.of(context).size.height * 0.155
+    //           : MediaQuery.of(context).size.height * 0.095,
+    //       child: CustomSearchBar.SearchBar(
+    //         // Vos paramètres ici
+    //       ),
+    //     );
+    //   },
+    // );
+
+
+      // print("IN MAIN -----------------------------");
+      //   print("hasSubscriptionValue");
+      //   print(hasSubscriptionValue);
+      //   print("isFilterOpen");
+      //   print(isFilterOpen.value);
+
+ValueListenableBuilder<bool>(
+      valueListenable: isFilterVisibleForMain,
+      builder: (context, isFilterVisibleForMainValue, child) {
+//coms
+        return
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.10,
+                  height: isFilterVisibleForMainValue
+                      ? MediaQuery.of(context).size.height * 0.155
+                      : MediaQuery.of(context).size.height * 0.1,
                   child: CustomSearchBar.SearchBar(
                     onSearchChanged: (value) {},
                     restaurantList: widget.restaurantList,
                     selectedTagIdsNotifier: selectedTagIdsNotifier,
                     selectedWorkspacesNotifier: selectedWorkspacesNotifier,
                   ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.06,
-                  child: FilterBar(
-                    selectedTagIdsNotifier: selectedTagIdsNotifier,
-                    selectedWorkspacesNotifier: selectedWorkspacesNotifier,
-                  ),
-                ),
+                );
+      }
+),
                 SizedBox(
                   height: MediaQuery.of(context).size.height *
                       0.84, // 90% de la hauteur de l'écran
