@@ -1,9 +1,7 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 
 class HorairesRestaurant extends StatefulWidget {
-  final List<List<String>> schedule;
+  final Map<String, List<String>> schedule;
 
   const HorairesRestaurant({Key? key, required this.schedule})
       : super(key: key);
@@ -13,19 +11,19 @@ class HorairesRestaurant extends StatefulWidget {
 }
 
 class _HorairesRestaurantState extends State<HorairesRestaurant> {
-  late int _selectedDayIndex; // Index du jour sélectionné
+  late String _selectedDay;
 
   @override
   void initState() {
     super.initState();
-    // Récupérer l'index du jour actuel
-    _selectedDayIndex = DateTime.now().weekday - 1;
+    _selectedDay = _getDayOfWeek(DateTime.now().weekday);
   }
 
   @override
   Widget build(BuildContext context) {
-    bool allDaysEmpty = widget.schedule.every((element) => element.isEmpty);
-    bool selectedDayEmpty = widget.schedule[_selectedDayIndex].isEmpty;
+    bool allDaysEmpty =
+        widget.schedule.values.every((element) => element.isEmpty);
+    bool selectedDayEmpty = widget.schedule[_selectedDay]?.isEmpty ?? true;
 
     return Scaffold(
       body: Column(
@@ -38,25 +36,14 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
               children: List.generate(
                 7,
                 (index) {
-                  DateTime currentDate = DateTime.now();
-                  int jourDeLaSemaine = currentDate
-                      .weekday; // Obtenir le jour de la semaine (1 pour lundi, 2 pour mardi, ..., 7 pour dimanche)
-                  int ajustement = jourDeLaSemaine == DateTime.monday
-                      ? 0
-                      : jourDeLaSemaine - 1;
-                  currentDate.add(Duration(
-                      days: index +
-                          1 -
-                          ajustement)); // Ajouter 1 - ajustement pour décaler les jours
-                  String dayName = _getDayOfWeek((DateTime.monday + index - 1) %
-                      7); // Utiliser DateTime.monday comme premier jour
-
-                  bool isSelected = _selectedDayIndex == index;
+                  String dayName =
+                      _getDayOfWeek((DateTime.monday + index - 1) % 7 + 1);
+                  bool isSelected = _selectedDay == dayName;
 
                   return InkWell(
                     onTap: () {
                       setState(() {
-                        _selectedDayIndex = index;
+                        _selectedDay = dayName;
                       });
                     },
                     child: Column(
@@ -70,7 +57,8 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           child: Text(
-                            dayName,
+                            dayName.substring(
+                                0, 3), // Utilisation des 3 premières lettres
                             style: TextStyle(
                               color: isSelected
                                   ? Colors.white
@@ -86,7 +74,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
               ),
             ),
           ),
-          const SizedBox(height: 1.0),
+          const SizedBox(height: 8.0),
           LayoutBuilder(
             builder: (context, constraints) {
               return SizedBox(
@@ -96,8 +84,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                     Container(
                       decoration: BoxDecoration(
                         color: const Color(0xFF646165),
-                        borderRadius: BorderRadius.circular(
-                            5.0), // Ajout des bords arrondis
+                        borderRadius: BorderRadius.circular(5.0),
                       ),
                     ),
                     if (allDaysEmpty || selectedDayEmpty)
@@ -124,19 +111,26 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
     );
   }
 
-  // Fonction utilitaire pour obtenir le nom du jour de la semaine en fonction de l'index
   String _getDayOfWeek(int index) {
-    return ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'][index];
+    if (index < 1 || index > 7) {
+      return 'Monday';
+    }
+    return [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ][index - 1];
   }
 
-  // Construction du carré d'heures d'ouverture
   Widget _buildOpeningHoursBox(double containerWidth) {
-    List<String> times = widget.schedule[_selectedDayIndex];
-    //logger.e(times);
+    List<String> times = widget.schedule[_selectedDay] ?? [];
     times.sort((a, b) {
-      // Trier par heure de début
-      var startTimeA = a.split(' - ')[0];
-      var startTimeB = b.split(' - ')[0];
+      var startTimeA = a.split(' – ')[0];
+      var startTimeB = b.split(' – ')[0];
       return _convertToMinutes(startTimeA)
           .compareTo(_convertToMinutes(startTimeB));
     });
@@ -145,30 +139,69 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
     List<Widget> openingHourTexts = [];
 
     for (String time in times) {
+      // Remplacer le tiret long par le tiret simple
+      time = time.replaceAll(' – ', ' - ');
+
       List<String> parts = time.split(' - ');
-      double startTime = _convertToMinutes(parts[0]).toDouble();
-      double endTime = _convertToMinutes(parts[1]).toDouble();
-      double startPercentage = (startTime / (24 * 60)) * 100;
-      double endPercentage = (endTime / (24 * 60)) * 100;
-      double widthPercentage = (endPercentage - startPercentage);
+      if (parts.length != 2) continue;
 
-      openingHourBoxes.add(
-        Positioned(
-          left: startPercentage * containerWidth / 100,
-          child: Container(
-            width: widthPercentage * containerWidth / 100,
-            height: 50.0,
-            color: const Color(0xFF95A472),
-          ),
+      String startTimeString = parts[0].trim();
+      String endTimeString = parts[1].trim();
+
+      try {
+        double startTime = _convertToMinutes(startTimeString).toDouble();
+        double endTime = _convertToMinutes(endTimeString).toDouble();
+
+        if (endTime < startTime) {
+          // Cas où l'heure de fin est après minuit
+          _addHourSegment(startTime, 1440, startTimeString, '11:59 PM',
+              containerWidth, openingHourBoxes, openingHourTexts);
+          _addHourSegment(0, endTime, '12:00 AM', endTimeString, containerWidth,
+              openingHourBoxes, openingHourTexts);
+        } else {
+          // Cas normal
+          _addHourSegment(startTime, endTime, startTimeString, endTimeString,
+              containerWidth, openingHourBoxes, openingHourTexts);
+        }
+      } catch (e) {
+        print('Erreur de conversion: $e');
+      }
+    }
+    return Stack(
+      children: openingHourBoxes + openingHourTexts,
+    );
+  }
+
+  void _addHourSegment(
+      double startTime,
+      double endTime,
+      String startTimeLabel,
+      String endTimeLabel,
+      double containerWidth,
+      List<Widget> boxes,
+      List<Widget> labels) {
+    double startPercentage = (startTime / (24 * 60)) * 100;
+    double endPercentage = (endTime / (24 * 60)) * 100;
+    double widthPercentage = endPercentage - startPercentage;
+
+    boxes.add(
+      Positioned(
+        left: startPercentage * containerWidth / 100,
+        child: Container(
+          width: widthPercentage * containerWidth / 100,
+          height: 50.0,
+          color: const Color(0xFF95A472),
         ),
-      );
+      ),
+    );
 
-      openingHourTexts.add(
+    if (startTimeLabel != '11:59 PM' && startTimeLabel != '12:00 AM') {
+      labels.add(
         Positioned(
           left: (startPercentage / 100) * containerWidth - 15,
           bottom: 30,
           child: Text(
-            parts[0],
+            startTimeLabel,
             style: const TextStyle(
               fontSize: 13,
               color: Colors.white,
@@ -177,13 +210,16 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
           ),
         ),
       );
-      openingHourTexts.add(
+    }
+
+    if (endTimeLabel != '11:59 PM' && endTimeLabel != '12:00 AM') {
+      labels.add(
         Positioned(
           left:
               ((startPercentage + widthPercentage) / 100) * containerWidth - 15,
           bottom: 3,
           child: Text(
-            parts[1],
+            endTimeLabel,
             style: const TextStyle(
               fontSize: 13,
               color: Color(0xFFFFFF00),
@@ -193,16 +229,26 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
         ),
       );
     }
-    return Stack(
-      children: openingHourBoxes + openingHourTexts,
-    );
   }
 
-  // Fonction utilitaire pour convertir l'heure au format hh:mm en minutes
   int _convertToMinutes(String time) {
-    var parts = time.split(':');
-    var hours = int.parse(parts[0]);
-    var minutes = int.parse(parts[1]);
-    return hours * 60 + minutes;
+    try {
+      var parts = time.split(' ');
+      var timeParts = parts[0].split(':');
+      var hours = int.parse(timeParts[0]);
+      var minutes = int.parse(timeParts[1]);
+      var period = parts[1];
+
+      if (period == 'PM' && hours != 12) {
+        hours += 12;
+      } else if (period == 'AM' && hours == 12) {
+        hours = 0;
+      }
+
+      return hours * 60 + minutes;
+    } catch (e) {
+      print('Erreur de conversion: $e');
+      return 0; // Valeur par défaut en cas d'erreur
+    }
   }
 }

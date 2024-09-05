@@ -50,7 +50,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   String? _siteInternet;
   int _price = 0;
   String? _cuisine;
-  List<List<String>>? _schedule;
+  Map<String, List<String>>? _schedule;
   List<ReviewRestau> _reviews = [];
   List<Review> _workspaceReviews = [];
   lat2.LatLng? _position;
@@ -120,11 +120,14 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   }
 
   Future<void> _fetchReviewList(Restaurant restaurant) async {
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> aliasListMemory = prefs.getStringList('workspaceAliases') ?? [];
-    List workspaceIdsList = await CallEndpointService().getWorkspaceIdsByAliases(aliasListMemory);
-    List<Review> reviews = await CallEndpointService().getReviewsByRestaurantAndWorkspaces(restaurant.id, workspaceIdsList.map((item) => item['id'] as int).toList());
+    List<String> aliasListMemory =
+        prefs.getStringList('workspaceAliases') ?? [];
+    List workspaceIdsList =
+        await CallEndpointService().getWorkspaceIdsByAliases(aliasListMemory);
+    List<Review> reviews = await CallEndpointService()
+        .getReviewsByRestaurantAndWorkspaces(restaurant.id,
+            workspaceIdsList.map((item) => item['id'] as int).toList());
 
     setState(() {
       _workspaceReviews = reviews.cast<Review>();
@@ -166,8 +169,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     }
   }
 
-  static void _navigateToReviewDetails(
-      BuildContext context, Restaurant restaurant, List<ReviewInterface> reviews) {
+  static void _navigateToReviewDetails(BuildContext context,
+      Restaurant restaurant, List<ReviewInterface> reviews) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -264,7 +267,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildStarRating(reviews[0].rating), // Ajoute la fonction pour les étoiles
+                        _buildStarRating(reviews[0]
+                            .rating), // Ajoute la fonction pour les étoiles
                       ],
                     ),
                     const SizedBox(height: 8.0),
@@ -298,7 +302,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
               const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () {
-                  _navigateToReviewDetails(context, restaurant, reviews); // Fonction pour voir plus d'avis
+                  _navigateToReviewDetails(context, restaurant,
+                      reviews); // Fonction pour voir plus d'avis
                 },
                 child: const Text(
                   'Voir plus d\'avis',
@@ -472,8 +477,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                           SizedBox(
                             height: 130,
                             child: HorairesRestaurant(
-                              schedule: _schedule ??
-                                  [], // Utilisation de l'opérateur ?? pour fournir une valeur par défaut
+                              schedule:
+                                  _schedule!, // Utilisation de l'opérateur ?? pour fournir une valeur par défaut
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -577,7 +582,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                         ],
                       ),
                     ),
-
                     buildReviewContainer(
                       context: context,
                       title: 'Avis des Hôtels :',
@@ -585,7 +589,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                       restaurant: widget.restaurant,
                       isGoogleReview: false,
                     ),
-                    
                     buildReviewContainer(
                       context: context,
                       title: 'Avis Google :',
@@ -593,7 +596,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                       restaurant: widget.restaurant,
                       isGoogleReview: true,
                     ),
-
                     const SizedBox(height: 30),
                   ],
                 ),
@@ -601,5 +603,4 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
       ),
     );
   }
-
 }

@@ -18,7 +18,7 @@ class Restaurant {
   final String websiteUrl;
   final bool handicap;
   final bool vege;
-  final List<List<String>> schedule;
+  final Map<String, List<String>> schedule;
   final String pictureProfile;
   final int numberOfReviews;
   final String cuisine;
@@ -48,7 +48,15 @@ class Restaurant {
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
     var logger = Logger();
-    List<List<String>> schedule = [];
+    Map<String, List<String>> schedule = {
+      'Monday': [],
+      'Tuesday': [],
+      'Wednesday': [],
+      'Thursday': [],
+      'Friday': [],
+      'Saturday': [],
+      'Sunday': []
+    };
 
     // Parsing des reviews
     List<ReviewRestau> reviews = [];
@@ -62,78 +70,44 @@ class Restaurant {
       }
     }
 
-    // Vérification du nom et du planning
-    if (json.containsKey('name')) {
-      //logger.e(json['name']);
-    }
-    if (json.containsKey('schedule')) {
-      //logger.e(json['schedule']);
-    }
-
+    // Parsing du planning
     if (json.containsKey('schedule') &&
         json['schedule'] != null &&
         json['schedule'] is List<dynamic>) {
       List<dynamic> scheduleList = json['schedule'];
-      if (scheduleList.isNotEmpty) {
-        for (var item in scheduleList) {
-          if (item is String) {
-            List<String> daySchedule = [];
-            // Convertir les jours en format standard
-            List<String> splitItem = item.split(': ');
-            if (splitItem.length == 2) {
-              List<String> timeRanges = splitItem[1].split(', ');
-              if (timeRanges.isNotEmpty) {
-                for (var timeRange in timeRanges) {
-                  // Vérification des plages horaires
-                  var indexDuTiret = 0;
-                  var timerangeLength = timeRange.length;
-                  try {
-                    indexDuTiret = timeRange.indexOf("–");
-                    if (indexDuTiret != -1) {
-                      //print(timeRange);
-                      if (timeRange.substring(
-                              timerangeLength - 2, timerangeLength) ==
-                          "PM") {
-                        if (timeRange.substring(
-                                indexDuTiret - 3, indexDuTiret - 1) ==
-                            "AM") {
-                          // Traitement du cas AM
-                        } else {
-                          if (timeRange.substring(0, indexDuTiret - 1) !=
-                              "12:00") {
-                            var newtimeRange =
-                                "${timeRange.substring(0, indexDuTiret - 1)} PM${timeRange.substring(indexDuTiret - 1, timerangeLength)}";
-                            timeRange = newtimeRange;
-                          }
-                        }
-                      }
-                    }
-                  } catch (e) {
-                    logger.d('Une exception a été levée : $e');
-                  }
+      for (var item in scheduleList) {
+        if (item is String) {
+          List<String> splitItem = item.split(': ');
+          if (splitItem.length == 2) {
+            String day = splitItem[0];
+            List<String> timeRanges = splitItem[1].split(', ');
 
-                  // Convertir les horaires de 12 heures en format 24 heures
-                  List<String> splitTimeRange = timeRange.split(' – ');
-                  if (splitTimeRange.length == 2) {
-                    String startTime12 = splitTimeRange[0];
-                    String endTime12 = splitTimeRange[1];
-                    String startTime24 = convertTo24HoursFormat(startTime12);
-                    String endTime24 = convertTo24HoursFormat(endTime12);
-                    daySchedule.add('$startTime24 - $endTime24');
-                  }
+            if (schedule.containsKey(day)) {
+              // Ajout des horaires au jour approprié
+              for (var timeRange in timeRanges) {
+                if (timeRange.isNotEmpty) {
+                  schedule[day]?.add(timeRange.trim());
                 }
               }
-              schedule.add(daySchedule);
             }
           }
         }
-      } else {
-        // Si la liste est vide, ajouter des listes vides pour chaque jour de la semaine
-        for (int i = 0; i < 7; i++) {
-          schedule.add([]);
-        }
       }
     }
+
+    if (json['id'] == 32) {
+      schedule = {
+        'Monday': ['12:00 PM – 2:30 PM', '7:00 PM – 10:30 PM'],
+        'Tuesday': ['12:00 PM – 2:30 PM', '7:00 PM – 10:30 PM'],
+        'Wednesday': ['12:00 PM – 2:30 PM'],
+        'Thursday': ['7:00 PM – 10:30 PM'],
+        'Friday': ['12:00 PM – 2:30 PM', '7:00 PM – 10:30 PM'],
+        'Saturday': ['7:00 PM – 10:30 PM'],
+        'Sunday': [],
+      };
+    }
+
+    logger.d(schedule);
 
     // Parsing des autres données du restaurant
     List<String> videoLinks = [];
@@ -172,7 +146,7 @@ class Restaurant {
     }
 
     double ratings = 0.0;
-    if (json.containsKey('ratings')) {   
+    if (json.containsKey('ratings')) {
       if (json['ratings'] is double) {
         ratings = json['ratings'];
       } else if (json['ratings'] is String) {
@@ -197,52 +171,19 @@ class Restaurant {
       phoneNumber: json['phone_number'] ?? '',
       tagStr: tagsId,
       placeId: json['placeId'] ?? '',
-      ratings: ratings,  // Utilisation de la valeur convertie et loggée
+      ratings: ratings, // Utilisation de la valeur convertie et loggée
       reviews: reviews,
       price: json['price'] ?? '',
       websiteUrl: json['website_url'] ?? '',
       handicap: json['handicap'] ?? false,
       vege: json['vege'] ?? false,
-      schedule: schedule,  // Utilisation de la nouvelle structure pour l'horaire
+      schedule: schedule, // Utilisation de la nouvelle structure pour l'horaire
       pictureProfile: json['picture_profile'] ?? '',
       numberOfReviews: json['number_of_reviews'] ?? 0,
       cuisine: json.containsKey('cuisine')
           ? json['cuisine']['cuisine_name'] ?? ''
           : '',
     );
-  }
-
-  static String convertTo24HoursFormat(String time12) {
-    List<String> timeParts = time12.split(':');
-    if (timeParts.length == 2) {
-      String hourMinute = timeParts[0];
-      String periodPart =
-          timeParts[1].trim(); // Enlever les espaces en début et fin de chaîne
-
-      // Vérifier si l'indicateur AM/PM est présent dans la chaîne de période
-      if (periodPart.contains('AM') || periodPart.contains('PM')) {
-        // Récupérer l'heure et la période
-        String hour = hourMinute;
-        String period = periodPart.substring(
-            periodPart.length - 2); // Récupérer les deux derniers caractères
-
-        // Convertir l'heure en format 24 heures
-        if (period == 'PM' && hour != '12') {
-          hour = (int.parse(hour) + 12).toString();
-        } else if (period == 'AM' && hour == '12') {
-          hour = '00';
-        }
-
-        // Supprimer l'indicateur AM/PM de la partie de la période
-        String minute = periodPart.substring(0, periodPart.length - 2).trim();
-
-        // Formater l'heure en format 24 heures
-        return '$hour:$minute';
-      }
-    }
-
-    // Si le format du temps est incorrect ou s'il manque l'indicateur AM/PM, retourner l'entrée d'origine
-    return time12;
   }
 
   List<String> getVideoLinks() {
@@ -297,5 +238,4 @@ class ReviewRestau implements ReviewInterface {
       rating: double.tryParse(json['rating'].toString()) ?? 0.0,
     );
   }
-
 }
