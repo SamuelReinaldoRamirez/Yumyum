@@ -1,5 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yummap/call_endpoint_service.dart';
@@ -124,9 +125,9 @@ class FilterBarState extends State<FilterBar> {
               child: Material(
                 child: Container(
                   alignment: Alignment.center,
-                  child: const Text(
-                    'Filtres',
-                    style: TextStyle(
+                  child: Text(
+                    'filters'.tr(),
+                    style: const TextStyle(
                       color: AppColors.darkGrey,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -163,9 +164,9 @@ class FilterBarState extends State<FilterBar> {
                       child: Material(
                         child: Container(
                           alignment: Alignment.center,
-                          child: const Text(
-                            'Comptes Suivis',
-                            style: TextStyle(
+                          child: Text(
+                            "followed workspaces".tr(),
+                            style: const TextStyle(
                               color: AppColors.darkGrey,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,

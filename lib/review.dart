@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:logger/logger.dart';
 import 'package:yummap/review_interface.dart';
 
@@ -32,7 +33,7 @@ class Review implements ReviewInterface {
   String get author => _workspaceName;
 
   @override
-  String get type => "des Hôtels";
+  String get type => "hotel reviews".tr();
 
   // Méthode pour créer une instance de Review à partir d'un JSON
   factory Review.fromJson(Map<String, dynamic> json) {
@@ -57,7 +58,7 @@ class Review implements ReviewInterface {
       user_id: json['user_id'] ?? 0,
       restaurants_id: json['restaurants_id'] ?? 0,
       workspace_id: json['workspace_id'] ?? 0,
-      workspaceName: json['_workspace']?['name'] ?? 'Workspace #${json['workspace_id']}',  // Récupération du nom du workspace depuis l'objet `_workspace`
+      workspaceName: json['_workspace']?['name'] ?? '${"Workspace".tr()} #${json['workspace_id']}',  // Récupération du nom du workspace depuis l'objet `_workspace`
     );
   }
   

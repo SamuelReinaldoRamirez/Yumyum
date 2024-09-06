@@ -1,5 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yummap/call_endpoint_service.dart';
@@ -56,7 +57,7 @@ class WorkspaceSelectionPage extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'Résultats',
+                    "results".tr(),
                     style: AppTextStyles.titleDarkStyle.copyWith(
                       color: Colors.white,
                     ), // Utilise le style de titre avec la couleur définie
@@ -72,14 +73,14 @@ class WorkspaceSelectionPage extends StatelessWidget {
         color: Colors.white, // Fond vert clair
         child: ListView(
           children: [
-            _buildSectionTitle(context, 'Profils publics'),
+            _buildSectionTitle(context, "public profiles".tr()),
             Column(
               children: workspaces
                   .map((workspace) => WorkspaceItem(workspace: workspace))
                   .toList(),
             ),
             if (restaurants != null && restaurants!.isNotEmpty)
-              _buildSectionTitle(context, 'Restaurants'),
+              _buildSectionTitle(context, "restaurants".tr()),
             ...(restaurants?.map((restaurant) =>
                     _buildRestaurantItem(context, restaurant)) ??
                 []),
@@ -186,7 +187,7 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
           return const CircularProgressIndicator(); // Ou un indicateur de chargement similaire
         }
         if (snapshot.hasError) {
-          return Text('Erreur: ${snapshot.error}');
+          return Text('${"error".tr()}: ${snapshot.error}');
         }
         List<String> aliasList = snapshot.data ?? [];
         bool isFollowing = aliasList.contains(widget.workspace.alias);
@@ -245,9 +246,9 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                         } else {
                           ScaffoldMessenger.of(MarkerManager.context)
                               .showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text(
-                                  'Aucun restaurant trouvé pour ce workspace'),
+                                  "no result found for workspace".tr()),
                             ),
                           );
                         }
@@ -266,8 +267,8 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                           ),
                         ),
                       ),
-                      child: const Text(
-                        'Voir',
+                      child: Text(
+                        "see".tr(),
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
@@ -298,9 +299,9 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                             ),
                           ),
                         ),
-                        child: const Text(
-                          'Suivre',
-                          style: TextStyle(color: AppColors.lightGreen),
+                        child: Text(
+                          "follow".tr(),
+                          style: const TextStyle(color: AppColors.lightGreen),
                         ),
                       ),
                     if (isFollowing)
@@ -334,9 +335,9 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                             ),
                           ),
                         ),
-                        child: const Text(
-                          'Désabonner',
-                          style: TextStyle(color: Colors.white),
+                        child: Text(
+                          "unfollow".tr(),
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ),
                   ],

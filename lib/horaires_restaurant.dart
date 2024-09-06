@@ -1,5 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class HorairesRestaurant extends StatefulWidget {
@@ -104,7 +105,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                       Positioned.fill(
                         child: Center(
                           child: Text(
-                            allDaysEmpty ? 'Horaires indisponibles' : 'Fermé',
+                            allDaysEmpty ? "unavailable times".tr() : "closed".tr(),
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -126,8 +127,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
 
   // Fonction utilitaire pour obtenir le nom du jour de la semaine en fonction de l'index
   String _getDayOfWeek(int index) {
-    return ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'][index];
-  }
+    return ["MondayShort".tr(), "TuesdayShort".tr(), "WednesdayShort".tr(), "ThursdayShort".tr(), "FridayShort".tr(), "SaturdayShort".tr(), "SundayShort".tr()][index];}
 
   // Construction du carré d'heures d'ouverture
   Widget _buildOpeningHoursBox(double containerWidth) {

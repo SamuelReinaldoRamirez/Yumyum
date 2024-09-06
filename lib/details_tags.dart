@@ -41,7 +41,7 @@ class _DetailsTagsState extends State<DetailsTags> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Détails des tags de ${restaurant.name}'),
+        title: Text('Détails des tags de ${restaurant.name} A TRADUIRE'),
       ),
       body: ListView.builder(
         itemCount: filteredTagsByType.length,

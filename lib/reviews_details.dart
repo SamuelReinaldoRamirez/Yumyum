@@ -100,6 +100,7 @@
 //   }
 // }
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/review_interface.dart';
@@ -153,7 +154,7 @@ class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_reviews.isNotEmpty ? 'Avis ${_reviews[0].type}' : 'Avis'),
+        title: Text(_reviews.isNotEmpty ? "${_reviews[0].type}".tr() : ""),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

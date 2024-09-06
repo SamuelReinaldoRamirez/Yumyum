@@ -1,4 +1,5 @@
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class TrackingStatusDialog {
@@ -29,9 +30,9 @@ class TrackingStatusDialog {
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Autoriser le suivi'),
-        content: const Text(
-          'Voulez-vous autoriser cette application à suivre votre activité pour des raisons publicitaires ?',
+        title: Text("authorize follow".tr()),
+        content: Text(
+          "authorize follow question".tr(),
         ),
         actions: [
           TextButton(
@@ -39,14 +40,14 @@ class TrackingStatusDialog {
               Navigator.pop(context);
               _requestSystemTrackingAuthorization();
             },
-            child: const Text('Autoriser'),
+            child: Text("authorize".tr()),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _handleTrackingDenied();
             },
-            child: const Text('Refuser'),
+            child: Text("refuse".tr()),
           ),
         ],
       ),

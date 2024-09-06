@@ -1,5 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restau_details.dart';
 import 'package:yummap/restaurant.dart';
@@ -70,18 +73,6 @@ class BottomSheetHelper {
                       ), // Deuxième colonne avec champ texte
                     ),
 
-                    // FloatingActionButton(
-                    //   onPressed: () {
-                    //     _navigateToTags(context, restaurant);
-                    //   },
-                    //   backgroundColor: const Color(0xFF95A472),
-                    //   child: const Icon(
-                    //     Icons.info_outline,
-                    //     color: Colors.white, // Couleur de l'icône en blanc
-                    //     size: 30, // Ajuste la taille de l'icône si nécessaire
-                    //   ),
-                    // ),
-
                     FloatingActionButton(
                       onPressed: () {
                         _navigateToTags(context, restaurant);
@@ -114,7 +105,7 @@ class BottomSheetHelper {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text("Y aller"),
+                          Text("go to restau".tr()),
                           const SizedBox(
                               width: 8), // Espacement entre l'icône et le texte
 
