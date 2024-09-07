@@ -1,5 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api, avoid_print
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -146,8 +147,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                 Navigator.of(context).pop();
               },
             ),
-            title: const Text(
-              'Yummap Navigator',
+            title: Text(
+              "Yummap Navigator".tr(),
               style: AppTextStyles.titleDarkStyle,
             ),
           ),
@@ -162,8 +163,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     } else {
       // Afficher un toast "Indisponible" si l'URL est vide
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Indisponible'),
+        SnackBar(
+          content: Text("unavailable".tr()),
         ),
       );
     }
@@ -305,20 +306,20 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                   _navigateToReviewDetails(context, restaurant,
                       reviews); // Fonction pour voir plus d'avis
                 },
-                child: const Text(
-                  'Voir plus d\'avis',
+                child: Text(
+                  "see more reviews".tr(),
                   style: AppTextStyles.paragraphDarkStyle,
                 ),
               ),
             ],
           ] else if (showUnavailableMessage) ...[
             // Affiche un message si les avis Google sont indisponibles
-            const Row(
+            Row(
               children: [
-                Icon(Icons.chat_outlined),
-                SizedBox(width: 10),
+                const Icon(Icons.chat_outlined),
+                const SizedBox(width: 10),
                 Text(
-                  'Avis Google indisponibles',
+                  "Google reviews unavailable".tr(),
                   style: AppTextStyles.paragraphDarkStyle,
                 ),
               ],
@@ -396,7 +397,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                   buildStarRating(double.parse(_noteMoyenne))),
                           const SizedBox(width: 5),
                           Text(
-                            '$_noteMoyenne ($_userRatingsTotal avis)',
+                            '$_noteMoyenne ($_userRatingsTotal ' + "reviews)".tr(),
                             style: AppTextStyles.paragraphDarkStyle,
                           ),
                         ],
@@ -408,8 +409,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Informations :',
+                          Text(
+                            "informations".tr() + " :",
                             style: AppTextStyles.titleDarkStyle,
                           ),
                           const SizedBox(height: 10),
@@ -436,7 +437,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                               const SizedBox(width: 5),
                               Text(
                                 _cuisine ??
-                                    'Cuisine non spécifiée', // Exemple de type de cuisine
+                                    "non precise cuisine".tr(), // Exemple de type de cuisine
                                 style: AppTextStyles.paragraphDarkStyle,
                               ),
                             ],
@@ -452,8 +453,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                               const SizedBox(width: 5),
                               Text(
                                 widget.restaurant.handicap
-                                    ? 'Adapté à la mobilité réduite'
-                                    : 'Non adapté à la mobilité réduite',
+                                    ? "handi adapted".tr()
+                                    : "no handi adapted".tr(),
                                 style: AppTextStyles.paragraphDarkStyle,
                               ),
                             ],
@@ -462,12 +463,12 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                           Visibility(
                             visible: widget.restaurant
                                 .vege, // Masquer le widget si vege est false
-                            child: const Row(
+                            child: Row(
                               children: [
-                                Icon(Icons.eco), // Afficher l'icône eco
-                                SizedBox(width: 5),
+                                const Icon(Icons.eco), // Afficher l'icône eco
+                                const SizedBox(width: 5),
                                 Text(
-                                  'Propose des plats végétariens',
+                                  "veggi dishes".tr(),
                                   style: AppTextStyles.paragraphDarkStyle,
                                 ),
                               ],
@@ -487,8 +488,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                               children: [
                                 ListTile(
                                   leading: const Icon(Icons.menu_book),
-                                  title: const Text(
-                                    'Menu',
+                                  title: Text(
+                                    "menu".tr(),
                                     style: AppTextStyles.paragraphDarkStyle,
                                   ),
                                   onTap: () {
@@ -501,20 +502,20 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                   title: Text(
                                     widget.restaurant.phoneNumber.isNotEmpty
                                         ? widget.restaurant.phoneNumber
-                                        : 'Indisponible',
+                                        : "unavailable".tr(),
                                     style: AppTextStyles.paragraphDarkStyle,
                                   ),
                                   onTap: () {
                                     if (widget
                                         .restaurant.phoneNumber.isNotEmpty) {
                                       launch(
-                                          'tel://${widget.restaurant.phoneNumber}');
+                                          "phone.short".tr() + '://${widget.restaurant.phoneNumber}');
                                     } else {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
-                                        const SnackBar(
+                                        SnackBar(
                                           content: Text(
-                                              'Numéro de téléphone non disponible'),
+                                              "no phone number".tr()),
                                         ),
                                       );
                                     }
@@ -531,9 +532,9 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                     Clipboard.setData(ClipboardData(
                                         text: widget.restaurant.address));
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content: Text(
-                                            'Adresse copiée dans le presse-papiers'),
+                                            "copied in press papier".tr()),
                                       ),
                                     );
                                   },
@@ -584,14 +585,14 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                     ),
                     buildReviewContainer(
                       context: context,
-                      title: 'Avis des Hôtels :',
+                      title: "${"hotel reviews".tr()} :",
                       reviews: _workspaceReviews,
                       restaurant: widget.restaurant,
                       isGoogleReview: false,
                     ),
                     buildReviewContainer(
                       context: context,
-                      title: 'Avis Google :',
+                      title: "${"google reviews".tr()} :",
                       reviews: _reviews,
                       restaurant: widget.restaurant,
                       isGoogleReview: true,

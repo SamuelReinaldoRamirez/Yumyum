@@ -1,5 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, avoid_print
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yummap/call_endpoint_service.dart';
@@ -57,8 +58,8 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
     List<Restaurant> restaurants = await FilterBarState.generalFilter();
     if (restaurants.isEmpty) {
       ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
-        const SnackBar(
-          content: Text('Aucun restaurant trouvé pour ce workspace ou combinaison de filtres'),
+        SnackBar(
+          content: Text("no resto found".tr()),
         ),
       );
     }
@@ -77,16 +78,16 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
           Navigator.of(context).pop();
         },
         style: AppButtonStyles.elevatedButtonStyle,
-        child: const Text('Appliquer'),
+        child: Text("apply".tr()),
       ),
     );
   }
 
   Widget _buildTitle(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
       child: Text(
-        'Comptes Suivis',
+        "followed workspaces".tr(),
         style: AppTextStyles.titleDarkStyle,
       ),
     );

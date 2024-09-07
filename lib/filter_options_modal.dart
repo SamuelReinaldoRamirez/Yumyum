@@ -1,5 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/filter_bar.dart';
@@ -58,10 +59,10 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
             Navigator.of(context).pop(); // Ferme le BottomSheet
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text("Aucun résultat trouvé avec ces filtres ou combinaison de filtres"),
+                content: Text("no result found for those filters".tr()),
                 duration: const Duration(seconds: 3),
                 action: SnackBarAction(
-                  label: 'OK',
+                  label: "OK".tr(),
                   onPressed: () {
                     // Action à effectuer lorsque l'utilisateur appuie sur le bouton OK
                   },
@@ -73,16 +74,16 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
           }
         },
         style: AppButtonStyles.elevatedButtonStyle,
-        child: const Text('Appliquer'),
+        child: Text("apply".tr()),
       ),
     );
   }
 
   Widget _buildTitle(BuildContext context) {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
       child: Text(
-        'Filtres',
+        "filters".tr(),
         style: AppTextStyles.titleDarkStyle,
       ),
     );

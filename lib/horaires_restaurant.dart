@@ -1,3 +1,9 @@
+// <<<<<<< HEAD
+// =======
+// ignore_for_file: library_private_types_in_public_api
+
+import 'package:easy_localization/easy_localization.dart';
+// >>>>>>> traduction
 import 'package:flutter/material.dart';
 
 class HorairesRestaurant extends StatefulWidget {
@@ -91,7 +97,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                       Positioned.fill(
                         child: Center(
                           child: Text(
-                            allDaysEmpty ? 'Horaires indisponibles' : 'Fermé',
+                            allDaysEmpty ? "unavailable times".tr() : "closed".tr(),
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -112,6 +118,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
   }
 
   String _getDayOfWeek(int index) {
+// <<<<<<< HEAD
     if (index < 1 || index > 7) {
       return 'Monday';
     }
@@ -125,6 +132,9 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
       'Sunday'
     ][index - 1];
   }
+// =======
+//     return ["MondayShort".tr(), "TuesdayShort".tr(), "WednesdayShort".tr(), "ThursdayShort".tr(), "FridayShort".tr(), "SaturdayShort".tr(), "SundayShort".tr()][index];}
+// >>>>>>> traduction
 
   Widget _buildOpeningHoursBox(double containerWidth) {
     List<String> times = widget.schedule[_selectedDay] ?? [];

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:logger/logger.dart';
 import 'package:yummap/review_interface.dart';
 
@@ -229,7 +230,7 @@ class ReviewRestau implements ReviewInterface {
   String get author => _author;
 
   @override
-  String get type => "Google";
+  String get type => "google reviews".tr();
 
   factory ReviewRestau.fromJson(Map<String, dynamic> json) {
     return ReviewRestau(

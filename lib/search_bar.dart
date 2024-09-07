@@ -1,5 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
 import 'package:yummap/call_endpoint_service.dart';
@@ -161,7 +162,9 @@ Widget _buildSearchBar() {
     style: AppTextStyles.paragraphDarkStyle,
     decoration: InputDecoration(
       contentPadding: EdgeInsets.symmetric(vertical: 12.0), // Ajustement pour un meilleur alignement vertical
-      hintText: 'Rechercher dans Yummap',
+      // hintText: 'Rechercher dans Yummap',
+      hintText: 'research.placeholder'.tr(),
+
       hintStyle: AppTextStyles.hintTextDarkStyle,
       border: InputBorder.none,
       prefixIcon: const Icon(
@@ -236,8 +239,8 @@ Widget _buildSearchBar() {
         MarkerManager.resetMarkers();
       } else {
         ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
-          const SnackBar(
-            content: Text('Aucun résultat trouvé'),
+          SnackBar(
+            content: Text("no result found".tr()),
           ),
         );
       }
@@ -270,7 +273,7 @@ Widget _buildSearchBar() {
           content: Text(aliasList.join(', ')),
           actions: <Widget>[
             TextButton(
-              child: const Text('OK'),
+              child: Text("OK".tr()),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -281,7 +284,7 @@ Widget _buildSearchBar() {
     );
   }
 
-  void _handleWorkspaceSelection(Workspace workspace) async {
+  void _handleWorkspaceSelection(Workspace workspace) async { //sert à rien
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> aliasList = prefs.getStringList('workspaceAliases') ?? [];
 
