@@ -151,32 +151,59 @@ Widget boutonFiltreOrangeFilterhBar(context){ //quel est le type de context?? il
           return Visibility(
           visible: !isDisabled, // Rend le bouton invisible si isDisabled est true
           child:
-              Container(
-                alignment: Alignment.center, // Centre le contenu du leading
-                child: Container(
-                  width: isPressed ? circleSize * 0.95 : circleSize, // Réduit légèrement le cercle lorsqu'il est pressé
-                height: isPressed ? circleSize * 0.95 : circleSize,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.orangeButton,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      spreadRadius: isPressed ? 0 : 1,
-                      blurRadius: isPressed ? 2 : 4,
-                      offset: isPressed ? Offset(0, 1) : Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Center( // Centre l'icône dans le cercle
-                  child: Icon(
-                    Icons.filter_list,
-                    color: Colors.white,
-                    size: iconSize, // Taille ajustée de l'icône pour s'adapter au cercle
-                  ),
-                ),
-                ),
-              ),
+          Container(
+  alignment: Alignment.center, // Centre le contenu du leading
+  child: Container(
+    width: isPressed ? circleSize * 0.95 : circleSize, // Réduit légèrement le cercle lorsqu'il est pressé
+    height: isPressed ? circleSize * 0.95 : circleSize,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: AppColors.orangeButton,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.2),
+          spreadRadius: isPressed ? 0 : 1,
+          blurRadius: isPressed ? 2 : 4,
+          offset: isPressed ? Offset(0, 1) : Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Center( // Centre l'icône dans le cercle
+      child: Icon(
+        Icons.arrow_back, // Remplace par l'icône de flèche
+        color: Colors.white,
+        size: iconSize, // Taille ajustée de l'icône pour s'adapter au cercle
+      ),
+    ),
+  ),
+),
+
+              // Container(
+              //   alignment: Alignment.center, // Centre le contenu du leading
+              //   child: Container(
+              //     width: isPressed ? circleSize * 0.95 : circleSize, // Réduit légèrement le cercle lorsqu'il est pressé
+              //   height: isPressed ? circleSize * 0.95 : circleSize,
+              //   decoration: BoxDecoration(
+              //     shape: BoxShape.circle,
+              //     color: AppColors.orangeButton,
+              //     boxShadow: [
+              //       BoxShadow(
+              //         color: Colors.black.withOpacity(0.2),
+              //         spreadRadius: isPressed ? 0 : 1,
+              //         blurRadius: isPressed ? 2 : 4,
+              //         offset: isPressed ? Offset(0, 1) : Offset(0, 2),
+              //       ),
+              //     ],
+              //   ),
+              //   child: Center( // Centre l'icône dans le cercle
+              //     child: Icon(
+              //       Icons.filter_list,
+              //       color: Colors.white,
+              //       size: iconSize, // Taille ajustée de l'icône pour s'adapter au cercle
+              //     ),
+              //   ),
+              //   ),
+              // ),
             );
         }
     ),

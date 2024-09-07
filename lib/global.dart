@@ -11,6 +11,7 @@ final ValueNotifier<bool> isFilterVisibleForMain = ValueNotifier(false);
 
 // Méthode pour mettre à jour isVisible
 void updateVisibility() {
+  isFilterOpen.value = hasSubscription.value ? isFilterOpen.value : false;
   isFilterVisibleForMain.value = hasSubscription.value && isFilterOpen.value;
 }
 

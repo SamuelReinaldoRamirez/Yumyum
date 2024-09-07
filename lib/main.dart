@@ -224,9 +224,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     );
                   },
                 ),
+                ValueListenableBuilder<bool>(
+                  valueListenable: isFilterVisibleForMain,
+                  builder: (context, isFilterVisibleForMainValue, child) {
+                    return 
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.84,
+                  // height: MediaQuery.of(context).size.height * 0.84,
+                  height: isFilterVisibleForMainValue
+                          ? MediaQuery.of(context).size.height * 0.845
+                          : MediaQuery.of(context).size.height * 0.9,
                   child: MapPage(restaurantList: widget.restaurantList),
+                );
+                  }
                 ),
               ],
             ),

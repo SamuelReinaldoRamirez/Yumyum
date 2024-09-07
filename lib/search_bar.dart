@@ -125,11 +125,11 @@ ValueListenableBuilder<bool>(
             return
             Column(
               children: [
-                Divider(
-                  height: 0.5, // Réduit l'espace vertical autour du Divider
-                  thickness: 0.5,
-                  color: Colors.grey,
-                ),
+                // Divider(
+                //   height: 0.5, // Réduit l'espace vertical autour du Divider
+                //   thickness: 0.5,
+                //   color: Colors.grey,
+                // ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.06,
                   child: FilterBar(
