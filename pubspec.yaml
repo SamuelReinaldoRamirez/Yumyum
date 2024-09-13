@@ -94,6 +94,7 @@ dependencies:
   flutter_map: ^4.0.0
   latlng: any
   http: ^0.13.3
+  # http: ^1.2.2
   chewie: ^1.2.2
   video_player: ^2.4.2
   carousel_slider: ^4.0.0
@@ -116,6 +117,8 @@ dependencies:
   device_info_plus: ^10.1.0
   easy_localization: ^3.0.0
   flutter_webview_plugin: ^0.4.0
+  # simplytranslate: ^2.2.1
+  simplytranslate: ^1.2.2
 
 dev_dependencies:
   flutter_test:

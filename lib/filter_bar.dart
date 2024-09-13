@@ -105,25 +105,30 @@ Widget buildStyledButton({
       child: Container(
         alignment: Alignment.center,
         height: 55, // Hauteur des boutons
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.paleGreen,
-                AppColors.greenishGrey, // Couleur de fin du dégradé
-              // AppColors.orangeBG, // Couleur de début du dégradé
-              // AppColors.orangeButton, // Couleur de fin du dégradé
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(12), // Coins arrondis
-        ),
+        // decoration: BoxDecoration(
+        //   gradient: LinearGradient(
+        //     colors: [
+        //       AppColors.paleGreen,
+        //         AppColors.greenishGrey, // Couleur de fin du dégradé
+        //     ],
+        //     begin: Alignment.topLeft,
+        //     end: Alignment.bottomRight,
+        //   ),
+        //   borderRadius: BorderRadius.circular(12), // Coins arrondis
+        // ),
+
+
+        // decoration: BoxDecoration(
+        //   color: Colors.white, // Couleur de fond blanche
+        //   borderRadius: BorderRadius.circular(12), // Coins arrondis
+        // ),
+
         child: Text(
           label,
           style: const TextStyle(
-            color: Colors.white, // Texte en blanc
+            color: AppColors.greenishGrey, // Texte en blanc
             fontSize: 20,
-            fontWeight: FontWeight.bold,
+            // fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -139,251 +144,63 @@ Widget buildStyledButton({
       child: Container(
         child: Row(
           children: [
-//             const SizedBox(width: 10),
-// boutonFiltreOrangeFilterhBar(context),
-// const SizedBox(width: 20),
-// Expanded(
-//   child: GestureDetector(
-//     onTap: () {
-//       showModalBottomSheet<void>(
-//         context: context,
-//         builder: (BuildContext context) {
-//           return FilterOptionsModal(
-//             initialSelectedTagIds: widget.selectedTagIdsNotifier.value,
-//             onApply: (selectedIds) {
-//               setState(() {
-//                 widget.selectedTagIdsNotifier.value = selectedIds;
-//               });
-//             },
-//           );
-//         },
-//       );
-//     },
-//     child: Material(
-//       elevation: 6, // Augmentation de l'ombre pour un effet de profondeur
-//       borderRadius: BorderRadius.circular(12), // Coins arrondis plus marqués
-//       child: Container(
-//         alignment: Alignment.center,
-//         height: 55, // Hauteur légèrement augmentée
-//         decoration: BoxDecoration(
-//           gradient: LinearGradient(
-//             colors: [
-//               AppColors.orangeBG, // Couleur de début du dégradé
-//               AppColors.orangeButton, // Couleur de fin du dégradé
-//             ],
-//             begin: Alignment.topLeft,
-//             end: Alignment.bottomRight,
-//           ),
-//           borderRadius: BorderRadius.circular(12), // Coins arrondis
-//         ),
-//         child: Text(
-//           'filters'.tr(),
-//           style: const TextStyle(
-//             color: Colors.white, // Texte blanc pour contraster
-//             fontSize: 20,
-//             fontWeight: FontWeight.bold,
-//           ),
-//         ),
-//       ),
-//     ),
-//   ),
-// ),
-// const SizedBox(width: 10), // Espace entre les deux boutons
-// Expanded(
-//   child: ValueListenableBuilder<bool>(
-//     valueListenable: FilterBar.showFollowedAccounts,
-//     builder: (context, show, child) {
-//       return Visibility(
-//         visible: show,
-//         child: GestureDetector(
-//           onTap: () {
-//             showModalBottomSheet<void>(
-//               context: context,
-//               builder: (BuildContext context) {
-//                 return WorkspaceOptionsModal(
-//                   initialSelectedWorkspaces:
-//                       widget.selectedWorkspacesNotifier.value,
-//                   onApply: (selectedIds) {
-//                     setState(() {
-//                       widget.selectedWorkspacesNotifier.value = selectedIds;
-//                     });
-//                   },
-//                 );
-//               },
-//             );
-//           },
-//           child: Material(
-//             elevation: 6, // Augmentation de l'ombre pour un effet de profondeur
-//             borderRadius: BorderRadius.circular(12), // Coins arrondis plus marqués
-//             child: Container(
-//               alignment: Alignment.center,
-//               height: 55, // Hauteur légèrement augmentée
-//               decoration: BoxDecoration(
-//                 color: Colors.white, // Couleur de fond
-//                 borderRadius: BorderRadius.circular(12), // Coins arrondis
-//                 boxShadow: [
-//                   BoxShadow(
-//                     color: Colors.black.withOpacity(0.1), // Ombre légère
-//                     spreadRadius: 2,
-//                     blurRadius: 5,
-//                     offset: Offset(0, 3), // Ombre en bas
-//                   ),
-//                 ],
-//                 border: Border.all(color: AppColors.darkGrey), // Bordure
-//               ),
-//               child: Text(
-//                 "followed workspaces".tr(),
-//                 style: const TextStyle(
-//                   color: AppColors.darkGrey,
-//                   fontSize: 20,
-//                   fontWeight: FontWeight.bold,
-//                 ),
-//               ),
-//             ),
-//           ),
-//         ),
-//       );
-//     },
-//   ),
-// ),
 
-const SizedBox(width: 10),
-boutonFiltreOrangeFilterhBar(context),
-const SizedBox(width: 20),
-Expanded(
-  child: buildStyledButton(
-    context: context,
-    label: 'filters'.tr(),
-    onTap: () {
-      showModalBottomSheet<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return FilterOptionsModal(
-            initialSelectedTagIds: widget.selectedTagIdsNotifier.value,
-            onApply: (selectedIds) {
-              setState(() {
-                widget.selectedTagIdsNotifier.value = selectedIds;
-              });
-            },
-          );
-        },
-      );
-    },
-  ),
-),
-const SizedBox(width: 10), // Espace entre les deux boutons
-Expanded(
-  child: ValueListenableBuilder<bool>(
-    valueListenable: FilterBar.showFollowedAccounts,
-    builder: (context, show, child) {
-      return Visibility(
-        visible: show,
-        child: buildStyledButton(
-          context: context,
-          label: "followed workspaces".tr(),
-          onTap: () {
-            showModalBottomSheet<void>(
-              context: context,
-              builder: (BuildContext context) {
-                return WorkspaceOptionsModal(
-                  initialSelectedWorkspaces:
-                      widget.selectedWorkspacesNotifier.value,
-                  onApply: (selectedIds) {
-                    setState(() {
-                      widget.selectedWorkspacesNotifier.value = selectedIds;
-                    });
+              const SizedBox(width: 10),
+              boutonFiltreOrangeFilterhBar(context),
+              const SizedBox(width: 20),
+              Expanded(
+                child: buildStyledButton(
+                  context: context,
+                  label: 'filters'.tr(),
+                  onTap: () {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return FilterOptionsModal(
+                          initialSelectedTagIds: widget.selectedTagIdsNotifier.value,
+                          onApply: (selectedIds) {
+                            setState(() {
+                              widget.selectedTagIdsNotifier.value = selectedIds;
+                            });
+                          },
+                        );
+                      },
+                    );
                   },
-                );
-              },
-            );
-          },
-        ),
-      );
-    },
-  ),
-),
+                ),
+              ),
+              const SizedBox(width: 10), // Espace entre les deux boutons
+              Expanded(
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: FilterBar.showFollowedAccounts,
+                  builder: (context, show, child) {
+                    return Visibility(
+                      visible: show,
+                      child: buildStyledButton(
+                        context: context,
+                        label: "followed workspaces".tr(),
+                        onTap: () {
+                          showModalBottomSheet<void>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return WorkspaceOptionsModal(
+                                initialSelectedWorkspaces:
+                                    widget.selectedWorkspacesNotifier.value,
+                                onApply: (selectedIds) {
+                                  setState(() {
+                                    widget.selectedWorkspacesNotifier.value = selectedIds;
+                                  });
+                                },
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
 
-
-            // const SizedBox(width: 10),
-            // boutonFiltreOrangeFilterhBar(context),
-            // const SizedBox(
-            //   width: 20,
-            // ),
-            // GestureDetector(
-            //   onTap: () {
-            //     showModalBottomSheet<void>(
-            //       context: context,
-            //       builder: (BuildContext context) {
-            //         return FilterOptionsModal(
-            //           initialSelectedTagIds:
-            //               widget.selectedTagIdsNotifier.value,
-            //           onApply: (selectedIds) {
-            //             setState(() {
-            //               widget.selectedTagIdsNotifier.value = selectedIds;
-            //             });
-            //           },
-            //           // parentState: this,
-            //         );
-            //       },
-            //     );
-            //   },
-            //   child: Material(
-            //     child: Container(
-            //       alignment: Alignment.center,
-            //       child: Text(
-            //         'filters'.tr(),
-            //         style: const TextStyle(
-            //           color: AppColors.darkGrey,
-            //           fontSize: 20,
-            //           fontWeight: FontWeight.bold,
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // ValueListenableBuilder<bool>(
-            //   valueListenable: FilterBar.showFollowedAccounts,
-            //   builder: (context, show, child) {
-            //     return Visibility(
-            //       visible: show,
-            //       child: Expanded(
-            //         child: GestureDetector(
-            //           onTap: () {
-            //             showModalBottomSheet<void>(
-            //               context: context,
-            //               builder: (BuildContext context) {
-            //                 return WorkspaceOptionsModal(
-            //                   initialSelectedWorkspaces:
-            //                       widget.selectedWorkspacesNotifier.value,
-            //                   onApply: (selectedIds) {
-            //                     setState(() {
-            //                       widget.selectedWorkspacesNotifier.value =
-            //                           selectedIds;
-            //                     });
-            //                   },
-            //                   // parentState: this,
-            //                 );
-            //               },
-            //             );
-            //           },
-            //           child: Material(
-            //             child: Container(
-            //               alignment: Alignment.center,
-            //               child: Text(
-            //                 "followed workspaces".tr(),
-            //                 style: const TextStyle(
-            //                   color: AppColors.darkGrey,
-            //                   fontSize: 20,
-            //                   fontWeight: FontWeight.bold,
-            //                 ),
-            //               ),
-            //             ),
-            //           ),
-            //         ),
-            //       ),
-            //     );
-            //   },
-            // ),
           ],
         ),
       ),

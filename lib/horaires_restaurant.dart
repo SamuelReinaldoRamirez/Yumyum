@@ -63,8 +63,9 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           child: Text(
-                            dayName.substring(
-                                0, 3), // Utilisation des 3 premières lettres
+                            (dayName + "Short").tr(),
+                            // dayName.substring(
+                            //     0, 3), // Utilisation des 3 premières lettres
                             style: TextStyle(
                               color: isSelected
                                   ? Colors.white
@@ -131,6 +132,8 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
       'Saturday',
       'Sunday'
     ][index - 1];
+      // return ["MondayShort".tr(), "TuesdayShort".tr(), "WednesdayShort".tr(), "ThursdayShort".tr(), "FridayShort".tr(), "SaturdayShort".tr(), "SundayShort".tr()][index - 1];}
+
   }
 // =======
 //     return ["MondayShort".tr(), "TuesdayShort".tr(), "WednesdayShort".tr(), "ThursdayShort".tr(), "FridayShort".tr(), "SaturdayShort".tr(), "SundayShort".tr()][index];}

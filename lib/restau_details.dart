@@ -12,6 +12,7 @@ import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/review.dart';
 import 'package:yummap/review_interface.dart';
 import 'package:yummap/theme.dart';
+import 'package:yummap/translate_utils.dart';
 import 'restaurant.dart';
 import 'reviews_details.dart';
 import 'horaires_restaurant.dart';
@@ -44,6 +45,7 @@ class FractionalClipper extends CustomClipper<Rect> {
 }
 
 class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
+  static final CustomTranslate customTranslate = CustomTranslate(); // Ajout de l'instance
   String _photoReference = '';
   bool _isLoading = false;
   String _noteMoyenne = '';
@@ -273,14 +275,55 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                       ],
                     ),
                     const SizedBox(height: 8.0),
-                    Text(
-                      reviews[0].comment,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
+                    // Text(
+                    //   reviews[0].comment,
+                    //   style: const TextStyle(
+                    //     fontSize: 16,
+                    //     color: Colors.grey,
+                    //     fontFamily: 'Poppins',
+                    //   ),
+                    // ),
+
+                    context.locale.languageCode == "fr"
+                      ? Text(
+                          reviews[0].comment,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                            fontFamily: 'Poppins',
+                          ),
+                        )
+                      : FutureBuilder<String>(
+                          future: customTranslate.translate(
+                            reviews[0].comment,
+                            "fr",
+                            context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+                          ), // Utilisation de l'instance pour la traduction
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return LinearProgressIndicator(); // Affiche une barre de progression 2D pendant la traduction
+                            } else if (snapshot.hasError) {
+                              return Text(
+                                'Erreur de traduction: ${snapshot.error}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                  fontFamily: 'Poppins',
+                                ),
+                              );
+                            } else {
+                              return Text(
+                                snapshot.data ?? reviews[0].comment, // Affiche le texte traduit ou le commentaire d'origine si la traduction échoue
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                  fontFamily: 'Poppins',
+                                ),
+                              );
+                            }
+                          },
+                        ),
+
                     const SizedBox(height: 16.0),
                     Align(
                       alignment: Alignment.bottomRight,
@@ -430,18 +473,57 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                             ),
                           ),
                           const SizedBox(height: 5),
+                          // Row(
+                          //   children: [
+                          //     const Icon(
+                          //         Icons.local_dining), // Icône de la cuisine
+                          //     const SizedBox(width: 5),
+                          //     Text(
+                          //       _cuisine ??
+                          //           "non precise cuisine".tr(), // Exemple de type de cuisine
+                          //       style: AppTextStyles.paragraphDarkStyle,
+                          //     ),
+                          //   ],
+                          // ),
+
+
                           Row(
                             children: [
-                              const Icon(
-                                  Icons.local_dining), // Icône de la cuisine
+                              const Icon(Icons.local_dining), // Icône de la cuisine
                               const SizedBox(width: 5),
-                              Text(
-                                _cuisine ??
-                                    "non precise cuisine".tr(), // Exemple de type de cuisine
-                                style: AppTextStyles.paragraphDarkStyle,
-                              ),
+                              (_cuisine != null && _cuisine != "")
+                                  ? (context.locale.languageCode == "fr"
+                                      ? Text(
+                                          _cuisine!, // Affiche le texte d'origine si la langue est "fr"
+                                          style: AppTextStyles.paragraphDarkStyle,
+                                        )
+                                      : FutureBuilder<String>(
+                                          future: customTranslate.translate(
+                                            _cuisine!,
+                                            "fr", 
+                                            context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+                                          ), // Utilisation de l'instance pour la traduction
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState == ConnectionState.waiting) {
+                                              return CircularProgressIndicator(); // Affiche un indicateur de chargement pendant la traduction
+                                            } else if (snapshot.hasError) {
+                                              return Text('Erreur de traduction: ${snapshot.error}');
+                                            } else {
+                                              return Text(
+                                                snapshot.data ?? _cuisine!, // Affiche le texte traduit, ou le texte d'origine si la traduction échoue
+                                                style: AppTextStyles.paragraphDarkStyle,
+                                              );
+                                            }
+                                          },
+                                        ))
+                                  : Text(
+                                      "non precise cuisine".tr(), // Si _cuisine est null ou vide
+                                      style: AppTextStyles.paragraphDarkStyle,
+                                    ),
                             ],
                           ),
+
+
                           const SizedBox(height: 5),
                           Row(
                             children: [
@@ -524,10 +606,37 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                 const Divider(),
                                 ListTile(
                                   leading: const Icon(Icons.location_on),
-                                  title: Text(
-                                    widget.restaurant.address,
-                                    style: AppTextStyles.paragraphDarkStyle,
-                                  ),
+                                  // title: Text(
+                                  //   widget.restaurant.address,
+                                  //   style: AppTextStyles.paragraphDarkStyle,
+                                  // ),
+                                  title: context.locale.languageCode == "fr"
+                                    ? Text(
+                                        widget.restaurant.address,
+                                        style: AppTextStyles.paragraphDarkStyle,
+                                      )
+                                    : FutureBuilder<String>(
+                                        future: customTranslate.translate(
+                                          widget.restaurant.address,
+                                          "fr",
+                                          context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+                                        ), // Utilisation de l'instance pour la traduction
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState == ConnectionState.waiting) {
+                                            return LinearProgressIndicator(); // Affiche une barre de progression 2D pendant la traduction
+                                          } else if (snapshot.hasError) {
+                                            return Text(
+                                              'Erreur de traduction: ${snapshot.error}',
+                                              style: AppTextStyles.paragraphDarkStyle,
+                                            );
+                                          } else {
+                                            return Text(
+                                              snapshot.data ?? widget.restaurant.address, // Affiche le texte traduit, ou l'adresse d'origine si la traduction échoue
+                                              style: AppTextStyles.paragraphDarkStyle,
+                                            );
+                                          }
+                                        },
+                                      ),
                                   onTap: () {
                                     Clipboard.setData(ClipboardData(
                                         text: widget.restaurant.address));

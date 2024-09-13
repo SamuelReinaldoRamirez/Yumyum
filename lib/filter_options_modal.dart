@@ -7,6 +7,7 @@ import 'package:yummap/filter_bar.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/tag.dart';
 import 'package:yummap/theme.dart';
+import 'package:yummap/translate_utils.dart';
 
 import 'restaurant.dart';
 
@@ -29,6 +30,8 @@ class FilterOptionsModal extends StatefulWidget {
 class _FilterOptionsModalState extends State<FilterOptionsModal> {
   List<int> selectedTagIds = [];
   List<Tag> tagList = [];
+  static final CustomTranslate customTranslate = CustomTranslate(); // Ajout de l'instance
+
 
   @override
   void initState() {
@@ -110,10 +113,43 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
                     itemBuilder: (context, index) {
                       final tag = tagList[index];
                       return CheckboxListTile(
-                        title: Text(
-                          tag.tag,
-                          style: AppTextStyles.paragraphDarkStyle,
-                        ),
+                        // title: 
+                        // Text(
+                        //   tag.tag,
+                        //   style: AppTextStyles.paragraphDarkStyle,
+                        // ),
+
+
+                        title: context.locale.languageCode == "fr"
+                          ? Text(
+                              tag.tag, // Affiche le texte d'origine si la langue est "fr"
+                              style: AppTextStyles.paragraphDarkStyle,
+                            )
+                          : FutureBuilder<String>(
+                              future: customTranslate.translate(
+                                tag.tag,
+                                "fr", 
+                                context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode
+                              ), // Utilisation de l'instance pour la traduction
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const SizedBox(
+                                    width: 50, // Optionnel, pour donner une largeur fixe à la barre
+                                    child: LinearProgressIndicator(), // Affiche une barre de progression 2D
+                                  );
+                                  // return CircularProgressIndicator(); // Affiche un indicateur de chargement pendant la traduction
+                                } else if (snapshot.hasError) {
+                                  return Text('Erreur de traduction: ${snapshot.error}');
+                                } else {
+                                  return Text(
+                                    snapshot.data ?? tag.tag, // Affiche le texte traduit, ou le texte d'origine si la traduction échoue
+                                    style: AppTextStyles.paragraphDarkStyle,
+                                  );
+                                }
+                              },
+                            ),
+
+
                         value: selectedTagIds.contains(tag.id),
                         checkColor: Colors.white,
                         activeColor: AppColors.greenishGrey,

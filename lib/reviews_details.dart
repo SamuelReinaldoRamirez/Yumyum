@@ -104,6 +104,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/review_interface.dart';
+import 'package:yummap/translate_utils.dart';
 
 class ReviewDetailsWidget extends StatefulWidget {
   const ReviewDetailsWidget(
@@ -118,6 +119,7 @@ class ReviewDetailsWidget extends StatefulWidget {
 }
 
 class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
+  static final CustomTranslate customTranslate = CustomTranslate(); // Ajout de l'instance
   Restaurant restaurant;
   List<ReviewInterface> _reviews = [];
   final bool _isLoading = false;
@@ -178,14 +180,54 @@ class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
                           ],
                         ),
                         const SizedBox(height: 8.0),
-                        Text(
-                          review.comment,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
+                        // Text(
+                        //   review.comment,
+                        //   style: const TextStyle(
+                        //     fontSize: 16,
+                        //     color: Colors.grey,
+                        //     fontFamily: 'Poppins',
+                        //   ),
+                        // ),
+                        context.locale.languageCode == "fr"
+                          ? Text(
+                              review.comment,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                                fontFamily: 'Poppins',
+                              ),
+                            )
+                          : FutureBuilder<String>(
+                              future: customTranslate.translate(
+                                review.comment,
+                                "fr",
+                                context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+                              ), // Utilisation de l'instance pour la traduction
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return LinearProgressIndicator(); // Affiche une barre de progression 2D pendant la traduction
+                                } else if (snapshot.hasError) {
+                                  return Text(
+                                    'Erreur de traduction: ${snapshot.error}',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  );
+                                } else {
+                                  return Text(
+                                    snapshot.data ?? review.comment, // Affiche le texte traduit ou le commentaire d'origine si la traduction échoue
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+
                         const SizedBox(height: 16.0),
                         Align(
                           alignment: Alignment.bottomRight,

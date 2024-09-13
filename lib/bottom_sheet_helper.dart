@@ -2,14 +2,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restau_details.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/video_carousel.dart';
 import 'theme.dart';
+import 'package:yummap/translate_utils.dart';
 
 class BottomSheetHelper {
+  static final logger = Logger();
+  static final CustomTranslate customTranslate = CustomTranslate(); // Ajout de l'instance
+
   static void showBottomSheet(BuildContext context, Restaurant restaurant) {
     showModalBottomSheet(
       context: context,
@@ -65,8 +68,36 @@ class BottomSheetHelper {
                                     .darkGrey, // Couleur de la pastille
                                 borderRadius: BorderRadius.circular(3),
                               ),
-                              child: Text(restaurant.cuisine,
-                                  style: AppTextStyles.hintTextWhiteStyle),
+
+
+//UTILISER UN CACHE ---------------------------------  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+                              child: 
+                              context.locale.languageCode == "fr"
+                                ? Text(
+                                    restaurant.cuisine, // Affiche le texte d'origine si la langue est "fr"
+                                    style: AppTextStyles.hintTextWhiteStyle,
+                                  )
+                                : FutureBuilder<String>(
+                                    future: customTranslate.translate(
+                                      restaurant.cuisine,
+                                      "fr", 
+                                      context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode
+                                    ), // Utilisation de l'instance pour la traduction
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState == ConnectionState.waiting) {
+                                        return CircularProgressIndicator(); // Affiche un indicateur de chargement pendant la traduction
+                                      } else if (snapshot.hasError) {
+                                        return Text('Erreur de traduction: ${snapshot.error}');
+                                      } else {
+                                        return Text(
+                                          snapshot.data ?? restaurant.cuisine, // Affiche le texte traduit, ou le texte d'origine si la traduction échoue
+                                          style: AppTextStyles.hintTextWhiteStyle,
+                                        );
+                                      }
+                                    },
+                                  ),
+
+
                             ),
                           ],
                         ),
