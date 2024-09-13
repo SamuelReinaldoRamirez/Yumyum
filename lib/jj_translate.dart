@@ -811,5 +811,12 @@
 //   }
 // }
 
+1) supprimer jjtranslate
+1) faire une branche en reroll le dernier commit pour voir à quel point les traductions dynamiques font lagger
+2) en bar de recherche #en# ou #ja# pour switcher la langue?
+2b) centrer le bouton comptes suivis et le bouton filtres etc
+3) anglais par defaut quand le fichier de traduction est absent
+4) cache pour toutes les strings
+5) mapbox translate
 ce fichier est à supprimer et il faut créer un systeme de cache pour les strings (et pour les strings traduites (on utilisera une api avec tant d'appels gratuits par mois pour avoir des traductions plus accurates)) et puis il faut aussi faire mapbox pour traduire la map 
 
