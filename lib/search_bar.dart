@@ -125,11 +125,6 @@ ValueListenableBuilder<bool>(
             return
             Column(
               children: [
-                // Divider(
-                //   height: 0.5, // Réduit l'espace vertical autour du Divider
-                //   thickness: 0.5,
-                //   color: Colors.grey,
-                // ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.06,
                   child: FilterBar(
@@ -144,7 +139,6 @@ ValueListenableBuilder<bool>(
 );
 
 
-
           }
         },
       ),
@@ -157,7 +151,7 @@ Widget _buildSearchBar() {
   return TextField(
     controller: _searchController,
     onSubmitted: (value) {
-      _handleSubmitted(value);
+      _handleSubmitted(value, _searchController);
     },
     style: AppTextStyles.paragraphDarkStyle,
     decoration: InputDecoration(
@@ -201,7 +195,7 @@ Widget _buildSearchBar() {
   );
 }
 
-  Future<void> _handleSubmitted(String value) async {
+  Future<void> _handleSubmitted(String value, TextEditingController _searchController) async {
     MixpanelService.instance.track('TextSearch', properties: {
       'searchText': value,
     });
@@ -214,6 +208,11 @@ Widget _buildSearchBar() {
     if(value == ",prod,"){
       await CallEndpointService.switchToProd();
       value = "";
+    }
+    if(value == "#lang"){
+      showLocaleSelectionDialog(context);
+      print('FIN DE ALERT');
+      _searchController.clear();
     }
 
     List<Workspace> workspacesToDisplay =

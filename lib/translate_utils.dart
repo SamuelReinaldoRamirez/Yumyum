@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'translator.dart'; // Importez votre fichier translator.dart ici
-import 'language.dart'; // Importez votre fichier language.dart ici
+
 
 class CustomTranslate{
   
