@@ -62,7 +62,7 @@ void main() async {
         Locale('ht'),
         Locale('ha'),
         Locale('haw'),
-        Locale('he'), // Hebrew (use 'iw' in older versions of Flutter)
+        Locale('he'),
         Locale('hi'),
         Locale('hmn'),
         Locale('hu'),
