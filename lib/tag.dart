@@ -19,5 +19,14 @@ class Tag {
     );
   }
 
+ // Méthode pour convertir un objet Tag en JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'tag': tag,
+      'type': type,
+    };
+  }
+
 }
 

@@ -1,68 +1,3 @@
-# name: yummap
-# description: "La carte aux tresors du Paris culinaire."
-# version: 2.1.3+1  # Changement de la version ici
-# environment:
-#   sdk: '>=3.2.6 <4.0.0'
-
-# flutter:
-#   uses-material-design: true
-#   assets:
-#     - assets/splash.png
-#     - assets/custom_map.json
-#   fonts:
-#     - family: Poppins
-#       fonts:
-#         - asset: assets/fonts/Poppins/Poppins-Regular.ttf
-#         - asset: assets/fonts/Poppins/Poppins-Italic.ttf
-#         - asset: assets/fonts/Poppins/Poppins-Bold.ttf
-#         - asset: assets/fonts/Poppins/Poppins-BoldItalic.ttf
-#         # Ajoutez d'autres variantes de la police Poppins si nécessaire
-#     - family: Sifonn
-#       fonts:
-#         - asset: assets/fonts/sifonn/SIFONN_PRO.otf
-#         # Ajoutez d'autres variantes de la police Sifonn si nécessaire
-
-# dependencies:
-#   flutter:
-#     sdk: flutter
-#   shared_preferences: ^2.0.6
-#   sensors_plus: ^2.0.0
-#   flutter_map: ^4.0.0
-#   latlng: any
-#   http: ^0.13.3
-#   chewie: ^1.2.2
-#   video_player: ^2.4.2
-#   carousel_slider: ^4.0.0
-#   logger: ^2.0.2+1
-#   glassmorphism: ^3.0.0
-#   url_launcher: ^6.2.5
-#   geolocator: '>=7.1.0 <10.0.0' # Ajustement de la version de geolocator pour répondre aux exigences de flutter_map_location_marker
-#   flutter_native_splash: any
-#   cupertino_icons: ^1.0.2
-#   flutter_rating_bar: ^4.0.0
-#   flutter_inappwebview: ^6.0.0
-#   mixpanel_flutter: ^2.2.0
-#   flutter_secure_storage: ^9.0.0
-#   uuid: ^4.4.0
-#   mixpanel_analytics: ^2.1.1
-#   app_tracking_transparency: ^2.0.4
-#   latlong2: ^0.8.2 # Mise à jour de la version de latlong2 pour répondre aux exigences de flutter_map_location_marker
-#   flutter_map_marker_cluster: ^1.1.1
-#   flutter_map_location_marker: ^6.0.0
-#   device_info_plus: ^10.1.0
-
-# dev_dependencies:
-#   flutter_test:
-#     sdk: flutter
-#   flutter_lints: ^2.0.0
-
-# flutter_native_splash:
-#   color: "#ffffff"
-#   image: assets/splash.png
-#   ios: true
-#   android: true
-
-
 name: yummap
 description: "La carte aux trésors du Paris culinaire."
 version: 2.1.3+1  # Changement de la version ici
@@ -75,6 +10,7 @@ flutter:
     - assets/splash.png
     - assets/custom_map.json
     - assets/i18n/ # Dossier contenant les fichiers de traduction
+
   fonts:
     - family: Poppins
       fonts:

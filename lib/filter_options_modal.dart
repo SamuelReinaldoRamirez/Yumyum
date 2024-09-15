@@ -1,5 +1,8 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:yummap/call_endpoint_service.dart';
@@ -8,6 +11,7 @@ import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/tag.dart';
 import 'package:yummap/theme.dart';
 import 'package:yummap/translate_utils.dart';
+import 'package:path_provider/path_provider.dart'; // Pour accéder aux chemins de fichiers locaux
 
 import 'restaurant.dart';
 
@@ -33,7 +37,68 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
   static final CustomTranslate customTranslate = CustomTranslate(); // Ajout de l'instance
 
 
-  @override
+//   @override
+//   void initState() {
+//     super.initState();
+//     selectedTagIds = List.from(widget.initialSelectedTagIds);
+//     _fetchTagList();
+//   }
+
+// Future<void> _fetchTagList() async {
+//   try {
+//     // Obtenir le chemin du fichier filtres.json
+//     Directory directory = await getApplicationDocumentsDirectory();
+//     String filePath = '${directory.path}/assets/pseudo_caches/filtres.json';
+    
+//     // Lire le fichier JSON
+//     File file = File(filePath);
+//     if (await file.exists()) {
+//       String jsonString = await file.readAsString();
+      
+//       // Décoder le JSON en List<Tag>
+//       List<dynamic> jsonResponse = jsonDecode(jsonString);
+//       List<Tag> tags = jsonResponse.map((tagJson) => Tag.fromJson(tagJson)).toList();
+      
+//       setState(() {
+//         tagList = tags;
+//       });
+//     } else {
+//       // Si le fichier n'existe pas, gérer le cas ici (ou le créer à partir de Xano)
+//       print("Le fichier filtres.json n'existe pas.");
+//     }
+//   } catch (e) {
+//     print("Erreur lors de la lecture du fichier filtres.json: $e");
+//   }
+// }
+
+
+// Future<List<Tag>> readJsonFile() async {
+//   try {
+//     Directory directory = await getApplicationDocumentsDirectory();
+//     String filePath = '${directory.path}/pseudo_caches/filtres.json';
+    
+//     File file = File(filePath);
+
+//     // Vérifier si le fichier existe
+//     if (await file.exists()) {
+//       String fileContent = await file.readAsString();
+//       List<dynamic> jsonData = jsonDecode(fileContent);
+
+//       // Convertir les données JSON en objets Tag
+//       List<Tag> tags = jsonData.map((tagJson) => Tag.fromJson(tagJson)).toList();
+//       return tags;
+//     } else {
+//       print("Le fichier filtres.json n'existe pas.");
+//       return [];
+//     }
+//   } catch (e) {
+//     print("Erreur lors de la lecture du fichier filtres.json : $e");
+//     return [];
+//   }
+// }
+
+
+ @override
   void initState() {
     super.initState();
     selectedTagIds = List.from(widget.initialSelectedTagIds);
@@ -41,11 +106,64 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
   }
 
   Future<void> _fetchTagList() async {
-    List<Tag> tags = await CallEndpointService().getTagsFromXanos();
-    setState(() {
-      tagList = tags;
-    });
+    try {
+      // Obtenir le chemin du fichier filtres.json
+      Directory directory = await getApplicationDocumentsDirectory();
+      String filePath = '${directory.path}/pseudo_caches/filtres.json'; // Corrigé le chemin
+
+      // Lire le fichier JSON
+      File file = File(filePath);
+      if (await file.exists()) {
+        String jsonString = await file.readAsString();
+
+        // Décoder le JSON en List<Tag>
+        List<dynamic> jsonResponse = jsonDecode(jsonString);
+        List<Tag> tags = jsonResponse.map((tagJson) => Tag.fromJson(tagJson)).toList();
+
+        setState(() {
+          tagList = tags;
+        });
+      } else {
+        // Si le fichier n'existe pas, gérer le cas ici (ou le créer à partir de Xano)
+        print("Le fichier filtres.json n'existe pas.");
+      }
+    } catch (e) {
+      print("Erreur lors de la lecture du fichier filtres.json: $e");
+    }
   }
+
+  Future<List<Tag>> readJsonFile() async {
+    try {
+      Directory directory = await getApplicationDocumentsDirectory();
+      String filePath = '${directory.path}/pseudo_caches/filtres.json'; // Corrigé le chemin
+
+      File file = File(filePath);
+
+      // Vérifier si le fichier existe
+      if (await file.exists()) {
+        String fileContent = await file.readAsString();
+        List<dynamic> jsonData = jsonDecode(fileContent);
+
+        // Convertir les données JSON en objets Tag
+        List<Tag> tags = jsonData.map((tagJson) => Tag.fromJson(tagJson)).toList();
+        return tags;
+      } else {
+        print("Le fichier filtres.json n'existe pas.");
+        return [];
+      }
+    } catch (e) {
+      print("Erreur lors de la lecture du fichier filtres.json : $e");
+      return [];
+    }
+  }
+
+
+  // Future<void> _fetchTagList() async {
+  //   List<Tag> tags = await CallEndpointService().getTagsFromXanos();
+  //   setState(() {
+  //     tagList = tags;
+  //   });
+  // }
 
   Widget _buildApplyButton(BuildContext context) {
     return Padding(
