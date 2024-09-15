@@ -284,6 +284,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                     //   ),
                     // ),
 
+
+//IL FAUT FORCEMENT TRADUIRE LES REVIEWS DEPUIS AUTO
                     context.locale.languageCode == "fr"
                       ? Text(
                           reviews[0].comment,
@@ -297,6 +299,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                           future: customTranslate.translate(
                             reviews[0].comment,
                             "fr",
+                            // "auto",
                             context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
                           ), // Utilisation de l'instance pour la traduction
                           builder: (context, snapshot) {

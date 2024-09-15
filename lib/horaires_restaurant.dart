@@ -81,6 +81,57 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
               ),
             ),
           ),
+          // Padding(
+          //   padding: const EdgeInsets.all(10.0),
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //     children: List.generate(
+          //       7,
+          //       (index) {
+          //         String dayName =
+          //             _getDayOfWeek((DateTime.monday + index - 1) % 7 + 1);
+          //         bool isSelected = _selectedDay == dayName;
+
+          //         return Expanded(
+          //           child: InkWell(
+          //             onTap: () {
+          //               setState(() {
+          //                 _selectedDay = dayName;
+          //               });
+          //             },
+          //             child: Column(
+          //               children: [
+          //                 Container(
+          //                   padding: const EdgeInsets.all(8.0),
+          //                   decoration: BoxDecoration(
+          //                     color: isSelected
+          //                         ? const Color(0xFF95A472)
+          //                         : Colors.white,
+          //                     borderRadius: BorderRadius.circular(10.0),
+          //                   ),
+          //                   child: Text(
+          //                     (dayName + "Short").tr(),
+          //                     maxLines: 1, // Limite le texte à une seule ligne
+          //                     overflow: TextOverflow.ellipsis, // Ajoute des points de suspension si le texte est trop long
+          //                     style: TextStyle(
+          //                       color: isSelected
+          //                           ? Colors.white
+          //                           : const Color(0xFF646165),
+          //                       fontWeight: FontWeight.bold,
+          //                       fontSize: 14, // Ajustez la taille de la police si nécessaire
+          //                     ),
+          //                     textAlign: TextAlign.center, // Centre le texte
+          //                   ),
+          //                 ),
+          //               ],
+          //             ),
+          //           ),
+          //         );
+          //       },
+          //     ),
+          //   ),
+          // ),
+
           const SizedBox(height: 8.0),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -119,7 +170,6 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
   }
 
   String _getDayOfWeek(int index) {
-// <<<<<<< HEAD
     if (index < 1 || index > 7) {
       return 'Monday';
     }
@@ -132,12 +182,9 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
       'Saturday',
       'Sunday'
     ][index - 1];
-      // return ["MondayShort".tr(), "TuesdayShort".tr(), "WednesdayShort".tr(), "ThursdayShort".tr(), "FridayShort".tr(), "SaturdayShort".tr(), "SundayShort".tr()][index - 1];}
 
   }
-// =======
-//     return ["MondayShort".tr(), "TuesdayShort".tr(), "WednesdayShort".tr(), "ThursdayShort".tr(), "FridayShort".tr(), "SaturdayShort".tr(), "SundayShort".tr()][index];}
-// >>>>>>> traduction
+
 
   Widget _buildOpeningHoursBox(double containerWidth) {
     List<String> times = widget.schedule[_selectedDay] ?? [];

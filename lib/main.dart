@@ -27,6 +27,9 @@ import 'package:easy_localization/easy_localization.dart'; // Importer easy_loca
 // idk) deployer yummap sur firebase ou git en demandant à gpt
 // idk) gerer la position et l'orientation de l'utilisateur
 // idk) faire des soustitres pour toutes les videos et les traduire
+// idk) bouton boussole pour remettre le nord au nord
+// photos des hotels dans les commentaires des hotels
+//il faut traduire les reviews meme si on a un systeme en francais car les reviews sont souvent ecrites en anglais
 
 
 void main() async {
