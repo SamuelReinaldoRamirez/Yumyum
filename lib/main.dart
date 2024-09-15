@@ -11,6 +11,24 @@ import 'package:yummap/mixpanel_service.dart'; // Importez la classe MixpanelSer
 import 'package:yummap/search_bar.dart' as CustomSearchBar;
 import 'package:easy_localization/easy_localization.dart'; // Importer easy_localization
 
+
+// 0) OK generer tous les fichiers de translate qui sont mentionnés dans main
+// 1b) OK faire une branche en reroll le dernier commit pour voir à quel point les traductions dynamiques font lagger
+// 2) OK en bar de recherche #lang pour switcher la langue?
+// 2b) OK centrer le bouton comptes suivis et le bouton filtres etc
+// 3) OK anglais par defaut quand le fichier de traduction est absent
+// 7) OK à la place du shake, faire ## dans la recherche ou ### pour activer/desactiver le shake
+// idk) OK laisser plus de place pour voir tout le placeholder de la searchbar
+// idk) OK onsearchchaged mettre la croix en orange
+// 4) cache pour toutes les strings
+// 5) mapbox translate
+// 8) stocker les locales sur aws et les charger à la demande? plutot que de toutes les avoir dna sle telephone de tout le monde inutilement?
+// idk) mettre toutes les sizes en taille relative de l'ecran comme dans le main
+// idk) deployer yummap sur firebase ou git en demandant à gpt
+// idk) gerer la position et l'orientation de l'utilisateur
+// idk) faire des soustitres pour toutes les videos et les traduire
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -202,7 +220,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   builder: (context, isFilterVisibleForMainValue, child) {
                     return SizedBox(
                       height: isFilterVisibleForMainValue
-                          ? MediaQuery.of(context).size.height * 0.155
+                          ? MediaQuery.of(context).size.height * 0.16
                           : MediaQuery.of(context).size.height * 0.1,
                       child: CustomSearchBar.SearchBar(
                         onSearchChanged: (value) {},
@@ -218,9 +236,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   builder: (context, isFilterVisibleForMainValue, child) {
                     return 
                 SizedBox(
-                  // height: MediaQuery.of(context).size.height * 0.84,
                   height: isFilterVisibleForMainValue
-                          ? MediaQuery.of(context).size.height * 0.845
+                          ? MediaQuery.of(context).size.height * 0.84
                           : MediaQuery.of(context).size.height * 0.9,
                   child: MapPage(restaurantList: widget.restaurantList),
                 );
@@ -234,26 +251,3 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     );
   }
 }
-
-
-// import 'package:flutter/material.dart';
-// import 'package:yummap/jj_translate.dart';
-
-// void main() {
-//   runApp(const MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Simply Translate Example',
-//       theme: ThemeData(
-//         primarySwatch: Colors.blue,
-//       ),
-//       home: const TestScreen(),
-//     );
-//   }
-// }

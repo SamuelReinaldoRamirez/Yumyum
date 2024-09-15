@@ -92,6 +92,33 @@ class FilterBarState extends State<FilterBar> {
   }
 
   /// Méthode pour créer un bouton stylisé
+// Widget buildStyledButton({
+//   required BuildContext context,
+//   required String label,
+//   required VoidCallback onTap,
+// }) {
+//   return GestureDetector(
+//     onTap: onTap,
+//     child: Material(
+//       elevation: 6, // Ombre pour donner un effet de profondeur
+//       borderRadius: BorderRadius.circular(12), // Coins arrondis
+//       child: Container(
+//         alignment: Alignment.center,
+//         height: 55, // Hauteur des boutons
+
+//         child: Text(
+//           label,
+//           style: const TextStyle(
+//             color: AppColors.greenishGrey, // Texte en blanc
+//             fontSize: 20,
+//             // fontWeight: FontWeight.bold,
+//           ),
+//         ),
+//       ),
+//     ),
+//   );
+// }
+
 Widget buildStyledButton({
   required BuildContext context,
   required String label,
@@ -103,38 +130,26 @@ Widget buildStyledButton({
       elevation: 6, // Ombre pour donner un effet de profondeur
       borderRadius: BorderRadius.circular(12), // Coins arrondis
       child: Container(
-        alignment: Alignment.center,
-        height: 55, // Hauteur des boutons
-        // decoration: BoxDecoration(
-        //   gradient: LinearGradient(
-        //     colors: [
-        //       AppColors.paleGreen,
-        //         AppColors.greenishGrey, // Couleur de fin du dégradé
-        //     ],
-        //     begin: Alignment.topLeft,
-        //     end: Alignment.bottomRight,
-        //   ),
-        //   borderRadius: BorderRadius.circular(12), // Coins arrondis
-        // ),
-
-
-        // decoration: BoxDecoration(
-        //   color: Colors.white, // Couleur de fond blanche
-        //   borderRadius: BorderRadius.circular(12), // Coins arrondis
-        // ),
-
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: AppColors.greenishGrey, // Texte en blanc
-            fontSize: 20,
-            // fontWeight: FontWeight.bold,
+        alignment: Alignment.center, // Centre le contenu
+        height: 40, // Hauteur des boutons
+        padding: const EdgeInsets.symmetric(horizontal: 16), // Optionnel : ajout de rembourrage horizontal
+        child: Center( // Centre le texte horizontalement et verticalement
+          child: Text(
+            label,
+            textAlign: TextAlign.center, // Centre le texte
+            style: const TextStyle( // Utilise la police Poppins
+              color:  Color(0xFF95A472), // Couleur du texte
+              fontSize: 16,
+              fontFamily: 'Poppins'
+              // fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
     ),
   );
 }
+
 
   @override
   Widget build(BuildContext context) {

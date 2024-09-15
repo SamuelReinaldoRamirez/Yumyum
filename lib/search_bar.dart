@@ -1,5 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
@@ -10,13 +12,15 @@ import 'package:yummap/map_helper.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restaurant.dart';
 import 'package:yummap/theme.dart';
+import 'package:yummap/translate_utils.dart';
 import 'package:yummap/widgetUtils.dart';
 import 'package:yummap/workspace.dart';
 import 'package:yummap/workspace_selection_page.dart';
 import 'package:latlong2/latlong.dart' as lat2;
+import 'package:shared_preferences/shared_preferences.dart';
+//pour faire des choses en secouant le téléphone
 import 'dart:math';
 import 'package:sensors_plus/sensors_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchBar extends StatefulWidget implements PreferredSizeWidget {
   final List<Restaurant> restaurantList;
@@ -41,12 +45,15 @@ class SearchBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _SearchBarState extends State<SearchBar> {
   final TextEditingController _searchController = TextEditingController();
+  // pour faire des choses en secouant le telephone
   static const double shakeThresholdGravity = 2.7;
   static const int shakeSlopTimeMs = 500;
   int lastShakeTimestamp = 0;
-  // static bool _filterIsOn = false;
+  bool _shakeDetectionEnabled = false; // Variable pour activer/désactiver la détection
 
-
+// StreamSubscription pour l'accéléromètre
+  late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
+  
 @override
   void dispose() {
     // Ne pas oublier de retirer l'écouteur lors de la destruction du widget
@@ -58,29 +65,119 @@ class _SearchBarState extends State<SearchBar> {
   void initState() {
     super.initState();
 
-    accelerometerEvents.listen((AccelerometerEvent event) {
-      final now = DateTime.now().millisecondsSinceEpoch;
+    // Activer la détection de secousses au départ
+    _enableShakeDetection();
 
-      if ((now - lastShakeTimestamp) > shakeSlopTimeMs) {
-        final gX = event.x / 9.81;
-        final gY = event.y / 9.81;
-        final gZ = event.z / 9.81;
-
-        final gForce = sqrt(gX * gX + gY * gY + gZ * gZ);
-
-        if (gForce > shakeThresholdGravity) {
-          lastShakeTimestamp = now;
-          _onShake();
-        }
-      }
-    });
     // Écouter les changements de filterIsOn
     filterIsOn.addListener(() {
       setState(() {});
     });
   }
 
-  void _onShake() {
+  // @override
+  // void initState() {
+  //   super.initState();
+
+  //   //pour faire des choses en secouant le téléphone
+  //   accelerometerEvents.listen((AccelerometerEvent event) {
+  //     final now = DateTime.now().millisecondsSinceEpoch;
+
+  //     if ((now - lastShakeTimestamp) > shakeSlopTimeMs) {
+  //       final gX = event.x / 9.81;
+  //       final gY = event.y / 9.81;
+  //       final gZ = event.z / 9.81;
+
+  //       final gForce = sqrt(gX * gX + gY * gY + gZ * gZ);
+
+  //       if (gForce > shakeThresholdGravity) {
+  //         lastShakeTimestamp = now;
+  //         _randomRestaurant();
+  //       }
+  //     }
+  //   });
+
+  //   // Écouter les changements de filterIsOn
+  //   filterIsOn.addListener(() {
+  //     setState(() {});
+  //   });
+  // }
+
+    // Activer la détection de secousses
+  void _enableShakeDetection() {
+    _accelerometerSubscription = accelerometerEvents.listen((AccelerometerEvent event) {
+      if (!_shakeDetectionEnabled) return;
+
+      final now = DateTime.now().millisecondsSinceEpoch;
+      if ((now - lastShakeTimestamp) > shakeSlopTimeMs) {
+        final gX = event.x / 9.81;
+        final gY = event.y / 9.81;
+        final gZ = event.z / 9.81;
+        final gForce = sqrt(gX * gX + gY * gY + gZ * gZ);
+
+        if (gForce > shakeThresholdGravity) {
+          lastShakeTimestamp = now;
+          _randomRestaurant();
+        }
+      }
+    });
+  }
+
+  // Désactiver la détection de secousses
+  void _disableShakeDetection() {
+    _accelerometerSubscription.pause();
+  }
+
+  // Fonction pour activer ou désactiver la détection de secousses
+  void _enableOrDisableShake() {
+    setState(() async {
+      _shakeDetectionEnabled = !_shakeDetectionEnabled;
+      if (_shakeDetectionEnabled) {
+        _accelerometerSubscription.resume();
+      } else {
+        _accelerometerSubscription.pause();
+      }
+       // Affiche l'alerte avec le bon message
+      String shakeModeStatus = _shakeDetectionEnabled ? 'Shake mode ON' : 'Shake mode OFF';
+
+      CustomTranslate translator = CustomTranslate();
+
+      // Traduire le message
+      String translatedMessage = await translator.translate(
+        shakeModeStatus,
+        "en",
+        context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+      );
+
+      String translateTitle = await translator.translate(
+        'Information',
+        "en",
+        context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+      );
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(translateTitle),
+            content: Text(translatedMessage),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'.tr()),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Ferme la boîte de dialogue
+                },
+              ),
+            ],
+          );
+        },
+      );
+
+    });
+  }
+  
+
+//pour faire des choses en secouant le telephone
+  void _randomRestaurant() {
     Random random = Random();
     int randomIndex = random.nextInt(widget.restaurantList.length);
     FocusScope.of(context).requestFocus(FocusNode());
@@ -95,7 +192,7 @@ Widget build(BuildContext context) {
     mainAxisSize: MainAxisSize.min, // Réduit l'espace vertical
     children: [
       AppBar(
-        titleSpacing: 20.0, // Supprime l'espacement autour du titre
+        titleSpacing: 0.0, // Supprime l'espacement autour du titre
         toolbarHeight: 40.0,
         leading: boutonFiltreOrangeSearchBar(
           context, 
@@ -106,6 +203,9 @@ Widget build(BuildContext context) {
           },
         ), // Réduit la hauteur de la barre d'applications
         title: _buildSearchBar(),
+        actions: [
+         infobulle(context),
+        ]
       ),
       // Condition pour afficher le Divider et la FilterBar ensemble
       ValueListenableBuilder<bool>(
@@ -152,6 +252,17 @@ Widget _buildSearchBar() {
     controller: _searchController,
     onSubmitted: (value) {
       _handleSubmitted(value, _searchController);
+    },
+    onChanged: (value) {
+      // Cette fonction sera appelée chaque fois que le texte change
+      widget.onSearchChanged(value);
+      if(value!=""){
+        filterIsOn.value = true;
+        print("VALUE TRUE");
+      }else{
+        filterIsOn.value = false;
+        print("VALUE FALSE");
+      }
     },
     style: AppTextStyles.paragraphDarkStyle,
     decoration: InputDecoration(
@@ -208,6 +319,13 @@ Widget _buildSearchBar() {
     if(value == ",prod,"){
       await CallEndpointService.switchToProd();
       value = "";
+    }
+    if(value == "##"){
+      _randomRestaurant();
+    }
+    if(value == "#"){
+      _enableOrDisableShake();
+      _searchController.clear();
     }
     if(value == "#lang"){
       showLocaleSelectionDialog(context);

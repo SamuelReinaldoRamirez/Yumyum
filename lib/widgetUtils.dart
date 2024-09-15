@@ -93,6 +93,7 @@ import 'package:yummap/filter_bar.dart';
 import 'package:yummap/filter_options_modal.dart';
 import 'package:yummap/global.dart';
 import 'package:yummap/theme.dart';
+import 'package:yummap/translate_utils.dart';
 
 
 void showLocaleSelectionDialog(BuildContext context) {
@@ -286,6 +287,71 @@ void showLocaleSelectionDialog(BuildContext context) {
   );
 }
 
+
+Widget infoButton(){
+  return FloatingActionButton(
+            onPressed: () {
+            },
+            backgroundColor: const Color(0xFF95A472),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(50), // Définit le bouton comme rond
+            ),
+            child: const Icon(
+              Icons.info_outline,
+              color: Colors.white, // Couleur de l'icône en blanc
+              size: 30, // Ajuste la taille de l'icône si nécessaire
+            ),
+          );
+}
+
+Widget infobulle(BuildContext context) {
+  return IconButton(
+    icon: Icon(
+      Icons.help_outline, // Utilise l'icône de point d'interrogation
+      color: const Color(0xFF95A472), // Couleur de l'icône
+      // size: 30, // Ajuste la taille de l'icône si nécessaire
+    ),
+    onPressed: () async {
+      // Crée une instance de CustomTranslate
+      CustomTranslate translator = CustomTranslate();
+
+      // Traduire le message
+      String translatedMessage = await translator.translate(
+        '- Type "##" in the search bar for a random search or \n - Type "#" to enable or disable the shake mode for random search \n - Type "#lang" to choose the language.',
+        "en",
+        context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+      );
+
+      String translateTitle = await translator.translate(
+        'Information',
+        "en",
+        context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+      );
+
+      // Affiche une boîte de dialogue d'alerte
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(translateTitle), // Titre de la boîte de dialogue
+            content: Text(
+              translatedMessage,
+              softWrap: true
+            ), // Message traduit
+            actions: <Widget>[
+              TextButton(
+                child: Text("OK".tr()),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Ferme la boîte de dialogue
+                },
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
 
 
 //factoriser les 2 filterBouttons en passant en parametre la lambda du onTap
