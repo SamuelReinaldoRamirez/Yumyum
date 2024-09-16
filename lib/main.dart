@@ -13,7 +13,6 @@ import 'package:yummap/search_bar.dart' as CustomSearchBar;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:yummap/tag.dart'; // Importer easy_localization
 
-
 //une fois qu'on a bien géré les filtres, on gere les cuisines pareil.
 // 4) cache pour toutes les strings
 // 5) mapbox translate
@@ -25,6 +24,7 @@ import 'package:yummap/tag.dart'; // Importer easy_localization
 // idk) bouton boussole pour remettre le nord au nord
 // photos des hotels dans les commentaires des hotels
 //il faut traduire les reviews meme si on a un systeme en francais car les reviews sont souvent ecrites en anglais
+//en fait on va plutot mettre un bouton "traduire le commentaire (la review), si l'envie nous en dit"
 // arreter avec les pseudocaches et créer le fichier au chargement de l'application
 
 void main() async {
@@ -193,8 +193,11 @@ Future<void> _initAsync() async {
   try {
     // Créer ou mettre à jour le fichier filtres.json avec les données des tags
     if(context.locale.languageCode != "fr"){
+      //pour les filtres
       await createOrUpdateGLOBALLocalizedJsonFile(widget.tagList, context);
-      filtersLocalizedFinishedLoading.value = true;
+      //pour les infos des restos
+      await createOrUpdateGLOBALLocalizedRestoInfosJsonFile(widget.restaurantList, context);
+      // filtersLocalizedFinishedLoading.value = true;
       print("Fichier filtres.json mis à jour !");
     }
   } catch (e) {

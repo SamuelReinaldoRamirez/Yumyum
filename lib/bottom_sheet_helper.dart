@@ -2,6 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:yummap/caching.dart';
+import 'package:yummap/global.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restau_details.dart';
 import 'package:yummap/restaurant.dart';
@@ -75,6 +77,33 @@ class BottomSheetHelper {
                                     restaurant.cuisine, // Affiche le texte d'origine si la langue est "fr"
                                     style: AppTextStyles.hintTextWhiteStyle,
                                   )
+                                : 
+                                restoInfosLocalizedFinishedLoading.value ? 
+
+                            aaaaaaaaaaa    //il faut utiliser la methode en parametre de bottomsheethelper pour prendre le bon restaurant à la base.
+                                FutureBuilder<Map<String, dynamic>?>(
+  future: readPartialJsonFileForRestaurant(restaurant.id.toString()),
+  builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>?> snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      // Afficher un indicateur de chargement pendant la lecture du fichier
+      return CircularProgressIndicator();
+    } else if (snapshot.hasError) {
+      // Gérer les erreurs de lecture
+      return Text('Erreur lors de la lecture: ${snapshot.error}');
+    } else if (snapshot.hasData) {
+      // Vérifiez si les données sont présentes
+      final translatedCuisine = snapshot.data?["translated_cuisine"] ?? restaurant.cuisine; // Affiche la cuisine traduite ou le texte d'origine
+      return Text(
+        translatedCuisine,
+        style: AppTextStyles.hintTextWhiteStyle,
+      );
+    } else {
+      // Gérer le cas où aucune donnée n'est trouvée
+      return Text('Aucune donnée trouvée');
+    }
+  },
+)
+
                                 : FutureBuilder<String>(
                                     future: customTranslate.translate(
                                       restaurant.cuisine,
