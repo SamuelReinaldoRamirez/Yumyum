@@ -286,80 +286,6 @@ Future<bool> showLocaleSelectionDialog(BuildContext context) async {
   ).then((value) => value ?? false); // Par défaut, retourne false si aucune option n'est sélectionnée.
 }
 
-  // showDialog(
-  //   context: context,
-  //   builder: (BuildContext context) {
-  //     return StatefulBuilder(
-  //       builder: (BuildContext context, StateSetter setState) {
-  //         return AlertDialog(
-  //           title: Text('Sélectionner une langue'),
-  //           content: Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               // Search bar
-  //               TextField(
-  //                 decoration: InputDecoration(
-  //                   hintText: 'Rechercher une langue',
-  //                 ),
-  //                 onChanged: (String value) {
-  //                   setState(() {
-  //                     filter = value.toLowerCase();
-  //                   });
-  //                 },
-  //               ),
-  //               SizedBox(height: 10),
-  //               // Dropdown filtered by search
-  //               Expanded(
-  //                 child: DropdownButton<Locale>(
-  //                   isExpanded: true,
-  //                   value: selectedLocale,
-  //                   hint: Text('Choisissez une langue'),
-  //                   onChanged: (Locale? newValue) {
-  //                     setState(() {
-  //                       selectedLocale = newValue;
-  //                     });
-  //                   },
-  //                   items: locales
-  //                       .where((localeMap) => localeMap['name']
-  //                           .toLowerCase()
-  //                           .contains(filter))
-  //                       .map<DropdownMenuItem<Locale>>((localeMap) {
-  //                     return DropdownMenuItem<Locale>(
-  //                       value: localeMap['locale'],
-  //                       child: Text(
-  //                           '${localeMap['name']} (${localeMap['locale'].languageCode})'),
-  //                     );
-  //                   }).toList(),
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //               child: Text('OK'),
-  //               onPressed: () {
-  //                 Navigator.of(context).pop();
-  //                 // Applique la langue sélectionnée
-  //                 if (selectedLocale != null) {
-  //                   context.setLocale(selectedLocale!);
-  //                 }
-  //               },
-  //             ),
-  //             TextButton(
-  //               child: Text('Annuler'),
-  //               onPressed: () {
-  //                 Navigator.of(context).pop();
-  //               },
-  //             ),
-  //           ],
-  //         );
-  //       },
-  //     );
-  //   },
-  // );
-// }
-
-
 Widget infoButton(){
   return FloatingActionButton(
             onPressed: () {
@@ -391,13 +317,13 @@ Widget infobulle(BuildContext context) {
       String translatedMessage = await translator.translate(
         '- Type "##" in the search bar for a random search or \n - Type "#" to enable or disable the shake mode for random search \n - Type "#lang" to choose the language.',
         "en",
-        context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+        context.locale.languageCode,
       );
 
       String translateTitle = await translator.translate(
         'Information',
         "en",
-        context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+        context.locale.languageCode,
       );
 
       // Affiche une boîte de dialogue d'alerte

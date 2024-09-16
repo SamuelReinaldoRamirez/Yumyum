@@ -82,34 +82,6 @@ class _SearchBarState extends State<SearchBar> {
     });
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-
-  //   //pour faire des choses en secouant le téléphone
-  //   accelerometerEvents.listen((AccelerometerEvent event) {
-  //     final now = DateTime.now().millisecondsSinceEpoch;
-
-  //     if ((now - lastShakeTimestamp) > shakeSlopTimeMs) {
-  //       final gX = event.x / 9.81;
-  //       final gY = event.y / 9.81;
-  //       final gZ = event.z / 9.81;
-
-  //       final gForce = sqrt(gX * gX + gY * gY + gZ * gZ);
-
-  //       if (gForce > shakeThresholdGravity) {
-  //         lastShakeTimestamp = now;
-  //         _randomRestaurant();
-  //       }
-  //     }
-  //   });
-
-  //   // Écouter les changements de filterIsOn
-  //   filterIsOn.addListener(() {
-  //     setState(() {});
-  //   });
-  // }
-
     // Activer la détection de secousses
   void _enableShakeDetection() {
     _accelerometerSubscription = accelerometerEvents.listen((AccelerometerEvent event) {
@@ -153,13 +125,13 @@ class _SearchBarState extends State<SearchBar> {
       String translatedMessage = await translator.translate(
         shakeModeStatus,
         "en",
-        context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+        context.locale.languageCode,
       );
 
       String translateTitle = await translator.translate(
         'Information',
         "en",
-        context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+        context.locale.languageCode,
       );
 
       showDialog(
@@ -345,30 +317,14 @@ Widget _buildSearchBar() {
       orangeCross.value = false;
       return;
     }
-    // if(value == "#lang"){
-    //   // filtersLocalizedFinishedLoading.value = false;
-    //   await showLocaleSelectionDialog(context);
-    //   print('FIN DE ALERT');
-    //   //appeler la mise à jour de filtres et cuisine tags AAABBB
-    //   await createOrUpdateGLOBALLocalizedJsonFile(widget.tagList, context);
-    //   // filtersLocalizedFinishedLoading.value = true;
-    //   print("GLOBAL FILTERS CHANGED !!!!!!!!!!!!!!!!!!!!!!!");
-    //   _searchController.clear();
-    //   orangeCross.value = false;
-    //   return;
-    // }
     if (value == "#lang") {
       // Attendre le résultat de showLocaleSelectionDialog
-      bool dialogResult = await showLocaleSelectionDialog(context);
-      _searchController.clear();
-      orangeCross.value = false;
-
-      print('FIN DE ALERT');
-      
+      bool dialogResult = await showLocaleSelectionDialog(context);      
       // Si l'utilisateur a cliqué sur "OK", exécuter la mise à jour
       if (dialogResult) {
+        _searchController.clear();
+        orangeCross.value = false;
         await createOrUpdateGLOBALLocalizedJsonFile(widget.tagList, context);
-        print("GLOBAL FILTERS CHANGED !!!!!!!!!!!!!!!!!!!!!!!");
       } else {
         print("Action annulée par l'utilisateur.");
       }

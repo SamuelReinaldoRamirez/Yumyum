@@ -504,7 +504,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                           future: customTranslate.translate(
                                             _cuisine!,
                                             "fr", 
-                                            context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+                                            context.locale.languageCode,
                                           ), // Utilisation de l'instance pour la traduction
                                           builder: (context, snapshot) {
                                             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -622,7 +622,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                         future: customTranslate.translate(
                                           widget.restaurant.address,
                                           "fr",
-                                          context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+                                          context.locale.languageCode,
                                         ), // Utilisation de l'instance pour la traduction
                                         builder: (context, snapshot) {
                                           if (snapshot.connectionState == ConnectionState.waiting) {

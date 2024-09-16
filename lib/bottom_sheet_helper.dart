@@ -69,8 +69,6 @@ class BottomSheetHelper {
                                 borderRadius: BorderRadius.circular(3),
                               ),
 
-
-//UTILISER UN CACHE ---------------------------------  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
                               child: 
                               context.locale.languageCode == "fr"
                                 ? Text(
@@ -81,7 +79,7 @@ class BottomSheetHelper {
                                     future: customTranslate.translate(
                                       restaurant.cuisine,
                                       "fr", 
-                                      context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode
+                                      context.locale.languageCode
                                     ), // Utilisation de l'instance pour la traduction
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState == ConnectionState.waiting) {

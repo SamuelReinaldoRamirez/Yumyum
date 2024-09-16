@@ -14,8 +14,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:yummap/tag.dart'; // Importer easy_localization
 
 
-// traduction des filtres à faire au moment ou on detecte un changement de local et aussi et d'abord dans le main init state avec une meilleure api que simplytranslate
-//traduction des filtres, ca veut dire génération d'un fichier copain 
 //une fois qu'on a bien géré les filtres, on gere les cuisines pareil.
 // 4) cache pour toutes les strings
 // 5) mapbox translate

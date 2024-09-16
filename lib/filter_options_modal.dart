@@ -1,12 +1,8 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:yummap/caching.dart';
-import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/filter_bar.dart';
 import 'package:yummap/global.dart';
 import 'package:yummap/mixpanel_service.dart';
@@ -20,13 +16,11 @@ import 'restaurant.dart';
 class FilterOptionsModal extends StatefulWidget {
   final List<int> initialSelectedTagIds;
   final ValueChanged<List<int>> onApply;
-  // final FilterBarState parentState;
 
   const FilterOptionsModal({
     Key? key,
     required this.initialSelectedTagIds,
     required this.onApply,
-    // required this.parentState,
   }) : super(key: key);
 
   @override
@@ -37,103 +31,6 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
   List<int> selectedTagIds = [];
   List<Tag> tagList = [];
   static final CustomTranslate customTranslate = CustomTranslate(); // Ajout de l'instance
-
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     selectedTagIds = List.from(widget.initialSelectedTagIds);
-//     _fetchTagList();
-//   }
-
-// Future<void> _fetchTagList() async {
-//   try {
-//     // Obtenir le chemin du fichier filtres.json
-//     Directory directory = await getApplicationDocumentsDirectory();
-//     String filePath = '${directory.path}/assets/pseudo_caches/filtres.json';
-    
-//     // Lire le fichier JSON
-//     File file = File(filePath);
-//     if (await file.exists()) {
-//       String jsonString = await file.readAsString();
-      
-//       // Décoder le JSON en List<Tag>
-//       List<dynamic> jsonResponse = jsonDecode(jsonString);
-//       List<Tag> tags = jsonResponse.map((tagJson) => Tag.fromJson(tagJson)).toList();
-      
-//       setState(() {
-//         tagList = tags;
-//       });
-//     } else {
-//       // Si le fichier n'existe pas, gérer le cas ici (ou le créer à partir de Xano)
-//       print("Le fichier filtres.json n'existe pas.");
-//     }
-//   } catch (e) {
-//     print("Erreur lors de la lecture du fichier filtres.json: $e");
-//   }
-// }
-
-
-// Future<List<Tag>> readJsonFile() async {
-//   try {
-//     Directory directory = await getApplicationDocumentsDirectory();
-//     String filePath = '${directory.path}/pseudo_caches/filtres.json';
-    
-//     File file = File(filePath);
-
-//     // Vérifier si le fichier existe
-//     if (await file.exists()) {
-//       String fileContent = await file.readAsString();
-//       List<dynamic> jsonData = jsonDecode(fileContent);
-
-//       // Convertir les données JSON en objets Tag
-//       List<Tag> tags = jsonData.map((tagJson) => Tag.fromJson(tagJson)).toList();
-//       return tags;
-//     } else {
-//       print("Le fichier filtres.json n'existe pas.");
-//       return [];
-//     }
-//   } catch (e) {
-//     print("Erreur lors de la lecture du fichier filtres.json : $e");
-//     return [];
-//   }
-// }
-
-
-
-
-
-
-// @override
-//   void initState() {
-//     super.initState();
-//     selectedTagIds = List.from(widget.initialSelectedTagIds);
-//   }
-
-//   @override
-//   void didChangeDependencies() {
-//     super.didChangeDependencies();
-//     _fetchTagList(); // Appeler la méthode qui dépend de `context`
-//   }
-
-// Future<void> _fetchTagList() async {
-//     try {
-//       String languageCode = (context.locale.languageCode);
-//       List<Tag> tags;
-//       if(languageCode == "fr"){
-//         tags = await readJsonFile(); // Corriger le chemin
-//       }else if (filtersLocalizedFinishedLoading.value) {
-//         tags = await readGLOBALJsonFile();
-//       }else{
-//         tags = await readJsonFile();
-//       }
-//       setState(() {
-//         tagList = tags;
-//       });
-//     } catch (e) {
-//       print("Erreur lors de la lecture du fichier filtres_locale.json, on n'a pas pu charger les tags: $e");
-//     }
-//   }
 
  @override
   void initState() {
@@ -157,47 +54,6 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
       print("Erreur lors de la lecture du fichier filtres_locale.json, on n'a pas pu charger les tags: $e");
     }
   }
-
-  // Future<void> _fetchTagList() async {
-  //   try {
-  //     // Obtenir le chemin du fichier filtres.json
-  //     Directory directory = await getApplicationDocumentsDirectory();
-  //     String languageCode = (context.locale.languageCode);
-  //     // String filePath = "";
-  //     // if(context.locale.languageCode == "fr"){
-  //     //   String filePath = '${directory.path}/pseudo_caches/filtres.json'; // Corriger le chemin
-  //     // }else{
-  //       String filePath = '${directory.path}/pseudo_caches/filtres_$languageCode.json';
-  //     // }
-  //     //AAABBB il faut prendre les tags correspondant à la bonne locale. idem pour les cuisines
-
-  //     // Lire le fichier JSON
-  //     File file = File(filePath);
-  //     if (await file.exists()) {
-  //       String jsonString = await file.readAsString();
-
-  //       // Décoder le JSON en List<Tag>
-  //       List<dynamic> jsonResponse = jsonDecode(jsonString);
-  //       List<Tag> tags = jsonResponse.map((tagJson) => Tag.fromJson(tagJson)).toList();
-
-  //       setState(() {
-  //         tagList = tags;
-  //       });
-  //     } else {
-  //       // Si le fichier n'existe pas, gérer le cas ici (ou le créer à partir de Xano)
-  //       print('Le fichier $filePath n\'existe pas.');
-  //     }
-  //   } catch (e) {
-  //     print("Erreur lors de la lecture du fichier filtres_locale.json: $e");
-  //   }
-  // }
-
-  // Future<void> _fetchTagList() async {
-  //   List<Tag> tags = await CallEndpointService().getTagsFromXanos();
-  //   setState(() {
-  //     tagList = tags;
-  //   });
-  // }
 
   Widget _buildApplyButton(BuildContext context) {
     return Padding(
@@ -266,11 +122,6 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
                       final tag = tagList[index];
                       return CheckboxListTile(
 
-
-
-
-
-                        // filtersLocalizedFinishedLoading
                         title: context.locale.languageCode == "fr" || filtersLocalizedFinishedLoading.value == true
                           ? Text(
                               tag.tag, // Affiche le texte d'origine si la langue est "fr"
@@ -281,7 +132,7 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
                               future: customTranslate.translate(
                                 tag.tag,
                                 "fr", 
-                                context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode
+                                context.locale.languageCode
                               ), // Utilisation de l'instance pour la traduction
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -289,7 +140,6 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
                                     width: 50, // Optionnel, pour donner une largeur fixe à la barre
                                     child: LinearProgressIndicator(), // Affiche une barre de progression 2D
                                   );
-                                  // return CircularProgressIndicator(); // Affiche un indicateur de chargement pendant la traduction
                                 } else if (snapshot.hasError) {
                                   return Text('Erreur de traduction: ${snapshot.error}');
                                 } else {
@@ -301,42 +151,6 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
                               },
                             ),
                           
-
-//ici
-                        // title: context.locale.languageCode == "fr"
-                        //   ? Text(
-                        //       tag.tag, // Affiche le texte d'origine si la langue est "fr"
-                        //       style: AppTextStyles.paragraphDarkStyle,
-                        //     )
-                        //   : FutureBuilder<String>(
-                        //       future: customTranslate.translate(
-                        //         tag.tag,
-                        //         "fr", 
-                        //         context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode
-                        //       ), // Utilisation de l'instance pour la traduction
-                        //       builder: (context, snapshot) {
-                        //         if (snapshot.connectionState == ConnectionState.waiting) {
-                        //           return const SizedBox(
-                        //             width: 50, // Optionnel, pour donner une largeur fixe à la barre
-                        //             child: LinearProgressIndicator(), // Affiche une barre de progression 2D
-                        //           );
-                        //           // return CircularProgressIndicator(); // Affiche un indicateur de chargement pendant la traduction
-                        //         } else if (snapshot.hasError) {
-                        //           return Text('Erreur de traduction: ${snapshot.error}');
-                        //         } else {
-                        //           return Text(
-                        //             snapshot.data ?? tag.tag, // Affiche le texte traduit, ou le texte d'origine si la traduction échoue
-                        //             style: AppTextStyles.paragraphDarkStyle,
-                        //           );
-                        //         }
-                        //       },
-                        //     ),
-//à la
-                            // title: Text(
-                            //   tag.tag, // Affiche le texte d'origine si la langue est "fr"
-                            //   style: AppTextStyles.paragraphDarkStyle,
-                            // ),
-
                         value: selectedTagIds.contains(tag.id),
                         checkColor: Colors.white,
                         activeColor: AppColors.greenishGrey,
