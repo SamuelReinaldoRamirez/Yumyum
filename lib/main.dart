@@ -1,9 +1,7 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
-import 'package:yummap/filter_bar.dart';
+import 'package:yummap/caching.dart';
 import 'package:yummap/global.dart';
 import 'package:yummap/map_page.dart';
 import 'package:yummap/call_endpoint_service.dart';
@@ -14,10 +12,10 @@ import 'package:yummap/mixpanel_service.dart'; // Importez la classe MixpanelSer
 import 'package:yummap/search_bar.dart' as CustomSearchBar;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:yummap/tag.dart'; // Importer easy_localization
-import 'package:path_provider/path_provider.dart'; // Pour accéder aux chemins de fichiers locaux
 
 
 // traduction des filtres à faire au moment ou on detecte un changement de local et aussi et d'abord dans le main init state avec une meilleure api que simplytranslate
+//traduction des filtres, ca veut dire génération d'un fichier copain 
 //une fois qu'on a bien géré les filtres, on gere les cuisines pareil.
 // 4) cache pour toutes les strings
 // 5) mapbox translate
@@ -33,14 +31,13 @@ import 'package:path_provider/path_provider.dart'; // Pour accéder aux chemins 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await EasyLocalization.ensureInitialized(); // Initialiser easy_localization
-
   await MixpanelService.initialize(mixpanelToken);
-
-  List<Restaurant> restaurantList =
-      (await CallEndpointService().getRestaurantsFromXanos()).cast<Restaurant>();
   await initializeGlobals();
+
+  List<Restaurant> restaurantList = await CallEndpointService().getRestaurantsFromXanos();
+      // (await CallEndpointService().getRestaurantsFromXanos()).cast<Restaurant>();
+  List<Tag> tagList = await CallEndpointService().getTagsFromXanos();
 
   runApp(
     EasyLocalization(
@@ -154,15 +151,16 @@ void main() async {
         ], // Définir les langues supportées
       path: 'assets/i18n', // Dossier contenant les fichiers de traduction
       fallbackLocale: const Locale('en'), // Langue de secours en cas de problème
-      child: MyApp(restaurantList: restaurantList),
+      child: MyApp(restaurantList: restaurantList, tagList: tagList),
     ),
   );
 }
 
 class MyApp extends StatefulWidget {
   final List<Restaurant> restaurantList;
+  final List<Tag> tagList;
 
-  MyApp({Key? key, required this.restaurantList}) : super(key: key);
+  MyApp({Key? key, required this.restaurantList, required this.tagList}) : super(key: key);
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -170,6 +168,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late Mixpanel _mixpanel;
+  Logger logger = Logger();
   
 
   @override
@@ -184,79 +183,27 @@ void initState() {
 
 Future<void> _initAsync() async {
   try {
-    // Récupérer les tags de Xano
-    List<Tag> tags = await CallEndpointService().getTagsFromXanos();
-
     // Créer ou mettre à jour le fichier filtres.json avec les données des tags
-    await createOrUpdateJsonFile(tags);
+    await createOrUpdateJsonFile(widget.tagList);
+    filtersFinishedLoading.value = true;
+    // await createOrUpdateLocalizedJsonFile(tags, context);
+    print("Fichier filtres_fr.json mis à jour !");
+  } catch (e) {
+    print("Erreur lors de la mise à jour de filtres_fr.json : $e");
+  }
 
-    print("Fichier filtres.json mis à jour !");
+  try {
+    // Créer ou mettre à jour le fichier filtres.json avec les données des tags
+    if(context.locale.languageCode != "fr"){
+      await createOrUpdateGLOBALLocalizedJsonFile(widget.tagList, context);
+      filtersLocalizedFinishedLoading.value = true;
+      print("Fichier filtres.json mis à jour !");
+    }
   } catch (e) {
     print("Erreur lors de la mise à jour de filtres.json : $e");
   }
+  
 }
-
-Future<void> createOrUpdateJsonFile(List<Tag> tags) async {
-  try {
-    // Convertir les tags en JSON
-    String tagsJson = jsonEncode(tags.map((tag) => tag.toJson()).toList());
-
-    // Obtenir le répertoire de documents de l'application
-    Directory directory = await getApplicationDocumentsDirectory();
-
-    // Créer le chemin pour le sous-répertoire pseudo_caches
-    String cacheDirPath = '${directory.path}/pseudo_caches';
-    Directory cacheDir = Directory(cacheDirPath);
-
-    // Si le répertoire n'existe pas, le créer
-    if (!(await cacheDir.exists())) {
-      await cacheDir.create(recursive: true); // Crée tous les sous-répertoires nécessaires
-    }
-
-    // Chemin du fichier filtres.json dans ce sous-répertoire
-    String filePath = '$cacheDirPath/filtres.json';
-
-    // Créer et écrire dans le fichier filtres.json
-    File file = File(filePath);
-    await file.writeAsString(tagsJson);
-
-    print("Fichier filtres.json créé/mis à jour dans : $filePath");
-  } catch (e) {
-    print("Erreur lors de la création ou mise à jour du fichier filtres.json : $e");
-  }
-}
-
-
-// Future<void> _initAsync() async {
-//   try {
-//     // Récupérer les tags de Xano
-//     List<Tag> tags = await CallEndpointService().getTagsFromXanos();
-
-//     // Convertir les tags en JSON
-//     String tagsJson = jsonEncode(tags.map((tag) => tag.toJson()).toList());
-
-//     // Obtenir le chemin du répertoire de documents
-//     Directory directory = await getApplicationDocumentsDirectory();
-    
-//     // Créer le répertoire si nécessaire
-//     String cacheDirPath = '${directory.path}/pseudo_caches';
-//     Directory cacheDir = Directory(cacheDirPath);
-//     if (!(await cacheDir.exists())) {
-//       await cacheDir.create(recursive: true); // Crée le répertoire
-//     }
-
-//     // Chemin complet vers le fichier filtres.json
-//     String filePath = '$cacheDirPath/filtres.json';
-
-//     // Écrire les données dans le fichier JSON
-//     File file = File(filePath);
-//     await file.writeAsString(tagsJson);
-
-//     print("Fichier filtres.json mis à jour !");
-//   } catch (e) {
-//     print("Erreur lors de la mise à jour de filtres.json : $e");
-//   }
-// }
 
   @override
   void dispose() {
@@ -308,6 +255,7 @@ Future<void> createOrUpdateJsonFile(List<Tag> tags) async {
                         restaurantList: widget.restaurantList,
                         selectedTagIdsNotifier: selectedTagIdsNotifier,
                         selectedWorkspacesNotifier: selectedWorkspacesNotifier,
+                        tagList : widget.tagList
                       ),
                     );
                   },

@@ -1,9 +1,4 @@
-// <<<<<<< HEAD
-// =======
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:easy_localization/easy_localization.dart';
-// >>>>>>> traduction
 import 'package:flutter/material.dart';
 
 class HorairesRestaurant extends StatefulWidget {

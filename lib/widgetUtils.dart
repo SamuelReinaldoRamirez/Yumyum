@@ -96,7 +96,7 @@ import 'package:yummap/theme.dart';
 import 'package:yummap/translate_utils.dart';
 
 
-void showLocaleSelectionDialog(BuildContext context) {
+Future<bool> showLocaleSelectionDialog(BuildContext context) async {
   // Liste des locales avec noms des langues en anglais
   List<Map<String, dynamic>> locales = [
     {'locale': Locale('af'), 'name': 'Afrikaans'},
@@ -214,7 +214,7 @@ void showLocaleSelectionDialog(BuildContext context) {
   // Filtrage des résultats
   String filter = '';
 
-  showDialog(
+  return showDialog<bool>(
     context: context,
     builder: (BuildContext context) {
       return StatefulBuilder(
@@ -266,8 +266,7 @@ void showLocaleSelectionDialog(BuildContext context) {
               TextButton(
                 child: Text('OK'),
                 onPressed: () {
-                  Navigator.of(context).pop();
-                  // Applique la langue sélectionnée
+                  Navigator.of(context).pop(true); // Retourne true si OK est cliqué
                   if (selectedLocale != null) {
                     context.setLocale(selectedLocale!);
                   }
@@ -276,7 +275,7 @@ void showLocaleSelectionDialog(BuildContext context) {
               TextButton(
                 child: Text('Annuler'),
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(false); // Retourne false si Annuler est cliqué
                 },
               ),
             ],
@@ -284,8 +283,81 @@ void showLocaleSelectionDialog(BuildContext context) {
         },
       );
     },
-  );
+  ).then((value) => value ?? false); // Par défaut, retourne false si aucune option n'est sélectionnée.
 }
+
+  // showDialog(
+  //   context: context,
+  //   builder: (BuildContext context) {
+  //     return StatefulBuilder(
+  //       builder: (BuildContext context, StateSetter setState) {
+  //         return AlertDialog(
+  //           title: Text('Sélectionner une langue'),
+  //           content: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               // Search bar
+  //               TextField(
+  //                 decoration: InputDecoration(
+  //                   hintText: 'Rechercher une langue',
+  //                 ),
+  //                 onChanged: (String value) {
+  //                   setState(() {
+  //                     filter = value.toLowerCase();
+  //                   });
+  //                 },
+  //               ),
+  //               SizedBox(height: 10),
+  //               // Dropdown filtered by search
+  //               Expanded(
+  //                 child: DropdownButton<Locale>(
+  //                   isExpanded: true,
+  //                   value: selectedLocale,
+  //                   hint: Text('Choisissez une langue'),
+  //                   onChanged: (Locale? newValue) {
+  //                     setState(() {
+  //                       selectedLocale = newValue;
+  //                     });
+  //                   },
+  //                   items: locales
+  //                       .where((localeMap) => localeMap['name']
+  //                           .toLowerCase()
+  //                           .contains(filter))
+  //                       .map<DropdownMenuItem<Locale>>((localeMap) {
+  //                     return DropdownMenuItem<Locale>(
+  //                       value: localeMap['locale'],
+  //                       child: Text(
+  //                           '${localeMap['name']} (${localeMap['locale'].languageCode})'),
+  //                     );
+  //                   }).toList(),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               child: Text('OK'),
+  //               onPressed: () {
+  //                 Navigator.of(context).pop();
+  //                 // Applique la langue sélectionnée
+  //                 if (selectedLocale != null) {
+  //                   context.setLocale(selectedLocale!);
+  //                 }
+  //               },
+  //             ),
+  //             TextButton(
+  //               child: Text('Annuler'),
+  //               onPressed: () {
+  //                 Navigator.of(context).pop();
+  //               },
+  //             ),
+  //           ],
+  //         );
+  //       },
+  //     );
+  //   },
+  // );
+// }
 
 
 Widget infoButton(){

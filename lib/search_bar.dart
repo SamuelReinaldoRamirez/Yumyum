@@ -5,12 +5,14 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:yummap/bottom_sheet_helper.dart';
+import 'package:yummap/caching.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/filter_bar.dart';
 import 'package:yummap/global.dart';
 import 'package:yummap/map_helper.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/restaurant.dart';
+import 'package:yummap/tag.dart';
 import 'package:yummap/theme.dart';
 import 'package:yummap/translate_utils.dart';
 import 'package:yummap/widgetUtils.dart';
@@ -26,14 +28,16 @@ class SearchBar extends StatefulWidget implements PreferredSizeWidget {
   final List<Restaurant> restaurantList;
   final Function(String) onSearchChanged;
   final ValueNotifier<List<int>> selectedTagIdsNotifier;
-  final ValueNotifier<List<int>> selectedWorkspacesNotifier;
+  final ValueNotifier<List<int>> selectedWorkspacesNotifier; 
+  final List<Tag> tagList;
+
 
   const SearchBar({
     Key? key,
     required this.onSearchChanged,
     required this.restaurantList,
     required this.selectedTagIdsNotifier,
-    required this.selectedWorkspacesNotifier,
+    required this.selectedWorkspacesNotifier, required this.tagList,
   }) : super(key: key);
 
   @override
@@ -58,6 +62,7 @@ class _SearchBarState extends State<SearchBar> {
   void dispose() {
     // Ne pas oublier de retirer l'écouteur lors de la destruction du widget
     filterIsOn.removeListener(() {});
+    orangeCross.removeListener(() {});
     super.dispose();
   }
 
@@ -70,6 +75,9 @@ class _SearchBarState extends State<SearchBar> {
 
     // Écouter les changements de filterIsOn
     filterIsOn.addListener(() {
+      setState(() {});
+    });
+    orangeCross.addListener(() {
       setState(() {});
     });
   }
@@ -257,10 +265,12 @@ Widget _buildSearchBar() {
       // Cette fonction sera appelée chaque fois que le texte change
       widget.onSearchChanged(value);
       if(value!=""){
-        filterIsOn.value = true;
+        // filterIsOn.value = true;
+        orangeCross.value = true;
         print("VALUE TRUE");
       }else{
-        filterIsOn.value = false;
+        // filterIsOn.value = false;
+        orangeCross.value = false;
         print("VALUE FALSE");
       }
     },
@@ -279,7 +289,7 @@ Widget _buildSearchBar() {
       ),
       suffixIcon: IconButton(
         icon: Container(
-          decoration: filterIsOn.value
+          decoration: (filterIsOn.value || orangeCross.value)
               ? BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.orangeButton,
@@ -287,7 +297,7 @@ Widget _buildSearchBar() {
               : null,
           child: Icon(
             Icons.clear,
-            color: filterIsOn.value ? Colors.white : AppColors.greenishGrey,
+            color: (filterIsOn.value || orangeCross.value) ? Colors.white : AppColors.greenishGrey,
             size: 24.0, // Taille ajustée pour correspondre à celle du prefixIcon
           ),
           padding: EdgeInsets.all(8.0), // Ajustement du padding pour correspondre à l'icône
@@ -300,6 +310,7 @@ Widget _buildSearchBar() {
           _clearSearch(context);
           MarkerManager.resetMarkers();
           filterIsOn.value = false;
+          orangeCross.value = false;
         },
       ),
     ),
@@ -315,23 +326,55 @@ Widget _buildSearchBar() {
       print("TO DEV ??");
       await CallEndpointService.switchToDev();
       value = "";
+      orangeCross.value = false;
+      return;
     }
     if(value == ",prod,"){
       await CallEndpointService.switchToProd();
       value = "";
+      orangeCross.value = false;
+      return;
     }
     if(value == "##"){
       _randomRestaurant();
+      return;
     }
     if(value == "#"){
       _enableOrDisableShake();
       _searchController.clear();
+      orangeCross.value = false;
+      return;
     }
-    if(value == "#lang"){
-      showLocaleSelectionDialog(context);
-      print('FIN DE ALERT');
+    // if(value == "#lang"){
+    //   // filtersLocalizedFinishedLoading.value = false;
+    //   await showLocaleSelectionDialog(context);
+    //   print('FIN DE ALERT');
+    //   //appeler la mise à jour de filtres et cuisine tags AAABBB
+    //   await createOrUpdateGLOBALLocalizedJsonFile(widget.tagList, context);
+    //   // filtersLocalizedFinishedLoading.value = true;
+    //   print("GLOBAL FILTERS CHANGED !!!!!!!!!!!!!!!!!!!!!!!");
+    //   _searchController.clear();
+    //   orangeCross.value = false;
+    //   return;
+    // }
+    if (value == "#lang") {
+      // Attendre le résultat de showLocaleSelectionDialog
+      bool dialogResult = await showLocaleSelectionDialog(context);
       _searchController.clear();
+      orangeCross.value = false;
+
+      print('FIN DE ALERT');
+      
+      // Si l'utilisateur a cliqué sur "OK", exécuter la mise à jour
+      if (dialogResult) {
+        await createOrUpdateGLOBALLocalizedJsonFile(widget.tagList, context);
+        print("GLOBAL FILTERS CHANGED !!!!!!!!!!!!!!!!!!!!!!!");
+      } else {
+        print("Action annulée par l'utilisateur.");
+      }
+      return;
     }
+
 
     List<Workspace> workspacesToDisplay =
         await CallEndpointService().searchWorkspaceByName(value);

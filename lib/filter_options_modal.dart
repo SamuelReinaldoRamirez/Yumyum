@@ -5,8 +5,10 @@ import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:yummap/caching.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/filter_bar.dart';
+import 'package:yummap/global.dart';
 import 'package:yummap/mixpanel_service.dart';
 import 'package:yummap/tag.dart';
 import 'package:yummap/theme.dart';
@@ -98,6 +100,41 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
 // }
 
 
+
+
+
+
+// @override
+//   void initState() {
+//     super.initState();
+//     selectedTagIds = List.from(widget.initialSelectedTagIds);
+//   }
+
+//   @override
+//   void didChangeDependencies() {
+//     super.didChangeDependencies();
+//     _fetchTagList(); // Appeler la méthode qui dépend de `context`
+//   }
+
+// Future<void> _fetchTagList() async {
+//     try {
+//       String languageCode = (context.locale.languageCode);
+//       List<Tag> tags;
+//       if(languageCode == "fr"){
+//         tags = await readJsonFile(); // Corriger le chemin
+//       }else if (filtersLocalizedFinishedLoading.value) {
+//         tags = await readGLOBALJsonFile();
+//       }else{
+//         tags = await readJsonFile();
+//       }
+//       setState(() {
+//         tagList = tags;
+//       });
+//     } catch (e) {
+//       print("Erreur lors de la lecture du fichier filtres_locale.json, on n'a pas pu charger les tags: $e");
+//     }
+//   }
+
  @override
   void initState() {
     super.initState();
@@ -107,56 +144,53 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
 
   Future<void> _fetchTagList() async {
     try {
-      // Obtenir le chemin du fichier filtres.json
-      Directory directory = await getApplicationDocumentsDirectory();
-      String filePath = '${directory.path}/pseudo_caches/filtres.json'; // Corrigé le chemin
-
-      // Lire le fichier JSON
-      File file = File(filePath);
-      if (await file.exists()) {
-        String jsonString = await file.readAsString();
-
-        // Décoder le JSON en List<Tag>
-        List<dynamic> jsonResponse = jsonDecode(jsonString);
-        List<Tag> tags = jsonResponse.map((tagJson) => Tag.fromJson(tagJson)).toList();
-
-        setState(() {
-          tagList = tags;
-        });
-      } else {
-        // Si le fichier n'existe pas, gérer le cas ici (ou le créer à partir de Xano)
-        print("Le fichier filtres.json n'existe pas.");
+      List<Tag> tags;
+      if (filtersLocalizedFinishedLoading.value) {
+        tags = await readGLOBALJsonFile();
+      }else{
+        tags = await readJsonFile();
       }
+      setState(() {
+        tagList = tags;
+      });
     } catch (e) {
-      print("Erreur lors de la lecture du fichier filtres.json: $e");
+      print("Erreur lors de la lecture du fichier filtres_locale.json, on n'a pas pu charger les tags: $e");
     }
   }
 
-  Future<List<Tag>> readJsonFile() async {
-    try {
-      Directory directory = await getApplicationDocumentsDirectory();
-      String filePath = '${directory.path}/pseudo_caches/filtres.json'; // Corrigé le chemin
+  // Future<void> _fetchTagList() async {
+  //   try {
+  //     // Obtenir le chemin du fichier filtres.json
+  //     Directory directory = await getApplicationDocumentsDirectory();
+  //     String languageCode = (context.locale.languageCode);
+  //     // String filePath = "";
+  //     // if(context.locale.languageCode == "fr"){
+  //     //   String filePath = '${directory.path}/pseudo_caches/filtres.json'; // Corriger le chemin
+  //     // }else{
+  //       String filePath = '${directory.path}/pseudo_caches/filtres_$languageCode.json';
+  //     // }
+  //     //AAABBB il faut prendre les tags correspondant à la bonne locale. idem pour les cuisines
 
-      File file = File(filePath);
+  //     // Lire le fichier JSON
+  //     File file = File(filePath);
+  //     if (await file.exists()) {
+  //       String jsonString = await file.readAsString();
 
-      // Vérifier si le fichier existe
-      if (await file.exists()) {
-        String fileContent = await file.readAsString();
-        List<dynamic> jsonData = jsonDecode(fileContent);
+  //       // Décoder le JSON en List<Tag>
+  //       List<dynamic> jsonResponse = jsonDecode(jsonString);
+  //       List<Tag> tags = jsonResponse.map((tagJson) => Tag.fromJson(tagJson)).toList();
 
-        // Convertir les données JSON en objets Tag
-        List<Tag> tags = jsonData.map((tagJson) => Tag.fromJson(tagJson)).toList();
-        return tags;
-      } else {
-        print("Le fichier filtres.json n'existe pas.");
-        return [];
-      }
-    } catch (e) {
-      print("Erreur lors de la lecture du fichier filtres.json : $e");
-      return [];
-    }
-  }
-
+  //       setState(() {
+  //         tagList = tags;
+  //       });
+  //     } else {
+  //       // Si le fichier n'existe pas, gérer le cas ici (ou le créer à partir de Xano)
+  //       print('Le fichier $filePath n\'existe pas.');
+  //     }
+  //   } catch (e) {
+  //     print("Erreur lors de la lecture du fichier filtres_locale.json: $e");
+  //   }
+  // }
 
   // Future<void> _fetchTagList() async {
   //   List<Tag> tags = await CallEndpointService().getTagsFromXanos();
@@ -231,19 +265,19 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
                     itemBuilder: (context, index) {
                       final tag = tagList[index];
                       return CheckboxListTile(
-                        // title: 
-                        // Text(
-                        //   tag.tag,
-                        //   style: AppTextStyles.paragraphDarkStyle,
-                        // ),
 
 
-                        title: context.locale.languageCode == "fr"
+
+
+
+                        // filtersLocalizedFinishedLoading
+                        title: context.locale.languageCode == "fr" || filtersLocalizedFinishedLoading.value == true
                           ? Text(
                               tag.tag, // Affiche le texte d'origine si la langue est "fr"
                               style: AppTextStyles.paragraphDarkStyle,
                             )
-                          : FutureBuilder<String>(
+                          : 
+                          FutureBuilder<String>(
                               future: customTranslate.translate(
                                 tag.tag,
                                 "fr", 
@@ -266,7 +300,42 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
                                 }
                               },
                             ),
+                          
 
+//ici
+                        // title: context.locale.languageCode == "fr"
+                        //   ? Text(
+                        //       tag.tag, // Affiche le texte d'origine si la langue est "fr"
+                        //       style: AppTextStyles.paragraphDarkStyle,
+                        //     )
+                        //   : FutureBuilder<String>(
+                        //       future: customTranslate.translate(
+                        //         tag.tag,
+                        //         "fr", 
+                        //         context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode
+                        //       ), // Utilisation de l'instance pour la traduction
+                        //       builder: (context, snapshot) {
+                        //         if (snapshot.connectionState == ConnectionState.waiting) {
+                        //           return const SizedBox(
+                        //             width: 50, // Optionnel, pour donner une largeur fixe à la barre
+                        //             child: LinearProgressIndicator(), // Affiche une barre de progression 2D
+                        //           );
+                        //           // return CircularProgressIndicator(); // Affiche un indicateur de chargement pendant la traduction
+                        //         } else if (snapshot.hasError) {
+                        //           return Text('Erreur de traduction: ${snapshot.error}');
+                        //         } else {
+                        //           return Text(
+                        //             snapshot.data ?? tag.tag, // Affiche le texte traduit, ou le texte d'origine si la traduction échoue
+                        //             style: AppTextStyles.paragraphDarkStyle,
+                        //           );
+                        //         }
+                        //       },
+                        //     ),
+//à la
+                            // title: Text(
+                            //   tag.tag, // Affiche le texte d'origine si la langue est "fr"
+                            //   style: AppTextStyles.paragraphDarkStyle,
+                            // ),
 
                         value: selectedTagIds.contains(tag.id),
                         checkColor: Colors.white,

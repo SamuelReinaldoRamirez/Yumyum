@@ -46,7 +46,7 @@ class CallEndpointService {
         rootUrl = jsonData['xano_endpoint'];
         baseUrl = rootUrl + '/restaurants';
         allTagsUrl = rootUrl + '/tags';
-        logger.d("Switched to environment: $envId, rootUrl: $rootUrl");
+        // logger.d("Switched to environment: $envId, rootUrl: $rootUrl");
       } else {
         throw Exception('Failed to switch environment');
       }

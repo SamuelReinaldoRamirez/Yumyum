@@ -108,7 +108,7 @@ class Restaurant {
       };
     }
 
-    logger.d(schedule);
+    // logger.d(schedule);
 
     // Parsing des autres données du restaurant
     List<String> videoLinks = [];
@@ -152,10 +152,10 @@ class Restaurant {
         ratings = json['ratings'];
       } else if (json['ratings'] is String) {
         ratings = double.tryParse(json['ratings']) ?? 0.0;
-        logger.d('Conversion de ratings String vers double: $ratings');
+        // logger.d('Conversion de ratings String vers double: $ratings');
       } else if (json['ratings'] is int) {
         ratings = (json['ratings'] as int).toDouble();
-        logger.d('Conversion de ratings int vers double: $ratings');
+        // logger.d('Conversion de ratings int vers double: $ratings');
       } else {
         logger.e('Type inattendu pour ratings: ${json['ratings'].runtimeType}');
       }

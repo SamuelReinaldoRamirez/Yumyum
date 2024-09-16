@@ -38,7 +38,7 @@ class Review implements ReviewInterface {
   // Méthode pour créer une instance de Review à partir d'un JSON
   factory Review.fromJson(Map<String, dynamic> json) {
     final logger = Logger();
-    logger.e(json);
+    // logger.e(json);
 
     // On vérifie que `rating` est bien un double, même si la valeur est un entier
     double parsedRating;

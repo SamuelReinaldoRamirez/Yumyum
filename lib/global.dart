@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final ValueNotifier<bool> filterIsOn = ValueNotifier<bool>(false);
+final ValueNotifier<bool> orangeCross = ValueNotifier<bool>(false);
+final ValueNotifier<bool> filtersFinishedLoading = ValueNotifier<bool>(false);
+final ValueNotifier<bool> filtersLocalizedFinishedLoading = ValueNotifier<bool>(false);
+
 ValueNotifier<List<int>> selectedTagIdsNotifier = ValueNotifier<List<int>>([]);
 ValueNotifier<List<int>> selectedWorkspacesNotifier = ValueNotifier<List<int>>([]);
 ValueNotifier<bool> hasSubscription = ValueNotifier<bool>(false);

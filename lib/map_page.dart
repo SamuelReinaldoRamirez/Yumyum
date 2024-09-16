@@ -60,8 +60,8 @@ class MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    logger.d(context.deviceLocale.languageCode);
-    logger.e(context.deviceLocale.languageCode);
+    // logger.d(context.deviceLocale.languageCode);
+    // logger.e(context.deviceLocale.languageCode);
     return Scaffold(
       body: Stack(
         children: [

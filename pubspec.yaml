@@ -53,8 +53,8 @@ dependencies:
   device_info_plus: ^10.1.0
   easy_localization: ^3.0.0
   flutter_webview_plugin: ^0.4.0
-  # simplytranslate: ^2.2.1
-  simplytranslate: ^1.2.2
+  simplytranslate: ^1.2.2 # faut essayer d el'enlever, je crois qu'on n'en a pas besoin
+  path_provider: ^2.0.11
 
 dev_dependencies:
   flutter_test:
