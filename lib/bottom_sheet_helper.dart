@@ -72,22 +72,25 @@ class BottomSheetHelper {
                               ),
 
                               child: 
-                              context.locale.languageCode == "fr"
+
+ context.locale.languageCode == "fr"
                                 ? Text(
                                     restaurant.cuisine, // Affiche le texte d'origine si la langue est "fr"
                                     style: AppTextStyles.hintTextWhiteStyle,
                                   )
                                 : 
-                                restoInfosLocalizedFinishedLoading.value ? 
+  //il faut utiliser la methode en parametre de bottomsheethelper pour prendre le bon restaurant à la base.
 
-                            aaaaaaaaaaa    //il faut utiliser la methode en parametre de bottomsheethelper pour prendre le bon restaurant à la base.
                                 FutureBuilder<Map<String, dynamic>?>(
-  future: readPartialJsonFileForRestaurant(restaurant.id.toString()),
+  future: readPartialJsonFileForRestaurant(restaurant.id.toString(), context),
   builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>?> snapshot) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      // Afficher un indicateur de chargement pendant la lecture du fichier
-      return CircularProgressIndicator();
-    } else if (snapshot.hasError) {
+    // if (snapshot.connectionState == ConnectionState.waiting) {
+    //   // Afficher un indicateur de chargement pendant la lecture du fichier
+    //   return CircularProgressIndicator(
+    //     valueColor: AlwaysStoppedAnimation<Color>(Color.fromARGB(255, 251, 0, 0)),
+    //   );
+    // } else 
+    if (snapshot.hasError) {
       // Gérer les erreurs de lecture
       return Text('Erreur lors de la lecture: ${snapshot.error}');
     } else if (snapshot.hasData) {
@@ -99,12 +102,7 @@ class BottomSheetHelper {
       );
     } else {
       // Gérer le cas où aucune donnée n'est trouvée
-      return Text('Aucune donnée trouvée');
-    }
-  },
-)
-
-                                : FutureBuilder<String>(
+                                  return FutureBuilder<String>(
                                     future: customTranslate.translate(
                                       restaurant.cuisine,
                                       "fr", 
@@ -112,7 +110,9 @@ class BottomSheetHelper {
                                     ), // Utilisation de l'instance pour la traduction
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState == ConnectionState.waiting) {
-                                        return CircularProgressIndicator(); // Affiche un indicateur de chargement pendant la traduction
+                                        return CircularProgressIndicator(
+                                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF95A472)), // Change la couleur ici
+                                        ); // Affiche un indicateur de chargement pendant la traduction
                                       } else if (snapshot.hasError) {
                                         return Text('Erreur de traduction: ${snapshot.error}');
                                       } else {
@@ -122,7 +122,14 @@ class BottomSheetHelper {
                                         );
                                       }
                                     },
-                                  ),
+                                  );
+
+    }
+  },
+),
+
+                              
+
 
 
                             ),

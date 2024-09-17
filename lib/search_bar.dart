@@ -325,9 +325,9 @@ Widget _buildSearchBar() {
         _searchController.clear();
         orangeCross.value = false;
         //pour les filtres
-        await createOrUpdateGLOBALLocalizedJsonFile(widget.tagList, context);
+        await createOrUpdateGLOBALLocalizedJsonFileBatched(widget.tagList, context, 30);
         //pour les infos restos
-        await createOrUpdateGLOBALLocalizedRestoInfosJsonFile(widget.restaurantList, context);
+        await createOrUpdateGLOBALLocalizedRestoInfosJsonFileBatched(widget.restaurantList, context, 16);
       } else {
         print("Action annulée par l'utilisateur.");
       }

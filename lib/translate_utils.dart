@@ -7,8 +7,8 @@ class CustomTranslate{
   Logger logger = Logger();
   
   Future<String> translate(String inputText, String fromLanguage, String toLanguage) async {
+    logger.e(inputText);
     logger.e(toLanguage);
-    // logger.e(inputText);
     // logger.e(fromLanguage);
     // logger.e(toLanguage);
     if(toLanguage == "he"){
@@ -23,6 +23,7 @@ class CustomTranslate{
       to: toLanguage,
       instanceMode: InstanceMode.Loop);
     var result = translation.translations.text;
+    logger.d(result);
     return result;
   }
 

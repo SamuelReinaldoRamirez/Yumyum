@@ -8,6 +8,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:yummap/caching.dart';
 import 'package:yummap/call_endpoint_service.dart';
 import 'package:yummap/review.dart';
 import 'package:yummap/review_interface.dart';
@@ -102,7 +103,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     _userRatingsTotal = widget.restaurant.numberOfReviews;
     _photoReference = widget.restaurant.pictureProfile;
     _siteInternet = widget.restaurant.websiteUrl;
-    _cuisine = widget.restaurant.cuisine;
+    _cuisine = widget.restaurant.cuisine; //c'est ici qu'il faut recup la cuisine du json ou alors traduire ou alors rester comme on est si on est en fr...
     _position =
         lat2.LatLng(widget.restaurant.latitude, widget.restaurant.longitude);
     try {
@@ -300,7 +301,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                             reviews[0].comment,
                             "fr",
                             // "auto",
-                            context.locale.languageCode == "zh" ? "zh-cn" : context.locale.languageCode,
+                            context.locale.languageCode,
                           ), // Utilisation de l'instance pour la traduction
                           builder: (context, snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -476,18 +477,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                             ),
                           ),
                           const SizedBox(height: 5),
-                          // Row(
-                          //   children: [
-                          //     const Icon(
-                          //         Icons.local_dining), // Icône de la cuisine
-                          //     const SizedBox(width: 5),
-                          //     Text(
-                          //       _cuisine ??
-                          //           "non precise cuisine".tr(), // Exemple de type de cuisine
-                          //       style: AppTextStyles.paragraphDarkStyle,
-                          //     ),
-                          //   ],
-                          // ),
 
 
                           Row(
@@ -495,12 +484,36 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                               const Icon(Icons.local_dining), // Icône de la cuisine
                               const SizedBox(width: 5),
                               (_cuisine != null && _cuisine != "")
-                                  ? (context.locale.languageCode == "fr"
+                                  ? 
+                                  
+              
+
+
+                                  (context.locale.languageCode == "fr"
                                       ? Text(
                                           _cuisine!, // Affiche le texte d'origine si la langue est "fr"
                                           style: AppTextStyles.paragraphDarkStyle,
                                         )
-                                      : FutureBuilder<String>(
+                                      : 
+
+                                                                      FutureBuilder<Map<String, dynamic>?>(
+  future: readPartialJsonFileForRestaurant(widget.restaurant.id.toString(), context),
+  builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>?> snapshot) {
+    if (snapshot.hasError) {
+      // Gérer les erreurs de lecture
+      return Text('Erreur lors de la lecture: ${snapshot.error}');
+    } else if (snapshot.hasData) {
+      // Vérifiez si les données sont présentes
+      final translatedCuisine = snapshot.data?["translated_cuisine"] ?? _cuisine!; // Affiche la cuisine traduite ou le texte d'origine
+      return Text(
+        translatedCuisine,
+        style: AppTextStyles.paragraphDarkStyle,
+      );
+    } else {
+
+        return       
+        
+    FutureBuilder<String>(
                                           future: customTranslate.translate(
                                             _cuisine!,
                                             "fr", 
@@ -508,7 +521,9 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                           ), // Utilisation de l'instance pour la traduction
                                           builder: (context, snapshot) {
                                             if (snapshot.connectionState == ConnectionState.waiting) {
-                                              return CircularProgressIndicator(); // Affiche un indicateur de chargement pendant la traduction
+                                              return CircularProgressIndicator(
+                                                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF95A472)),
+                                              ); // Affiche un indicateur de chargement pendant la traduction
                                             } else if (snapshot.hasError) {
                                               return Text('Erreur de traduction: ${snapshot.error}');
                                             } else {
@@ -518,7 +533,11 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                               );
                                             }
                                           },
-                                        ))
+                                        );
+    }
+  },
+)
+)
                                   : Text(
                                       "non precise cuisine".tr(), // Si _cuisine est null ou vide
                                       style: AppTextStyles.paragraphDarkStyle,
@@ -618,7 +637,27 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                         widget.restaurant.address,
                                         style: AppTextStyles.paragraphDarkStyle,
                                       )
-                                    : FutureBuilder<String>(
+                                    : 
+                                    
+                                    
+
+
+                                    FutureBuilder<Map<String, dynamic>?>(
+  future: readPartialJsonFileForRestaurant(widget.restaurant.id.toString(), context),
+  builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>?> snapshot) {
+    if (snapshot.hasError) {
+      // Gérer les erreurs de lecture
+      return Text('Erreur lors de la lecture: ${snapshot.error}');
+    } else if (snapshot.hasData) {
+      // Vérifiez si les données sont présentes
+      final translatedAdress = snapshot.data?["translated_address"] ?? widget.restaurant.address; // Affiche la cuisine traduite ou le texte d'origine
+      return Text(
+        translatedAdress,
+        style: AppTextStyles.paragraphDarkStyle,
+      );
+    } else {
+
+      return FutureBuilder<String>(
                                         future: customTranslate.translate(
                                           widget.restaurant.address,
                                           "fr",
@@ -626,7 +665,9 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                         ), // Utilisation de l'instance pour la traduction
                                         builder: (context, snapshot) {
                                           if (snapshot.connectionState == ConnectionState.waiting) {
-                                            return LinearProgressIndicator(); // Affiche une barre de progression 2D pendant la traduction
+                                            return LinearProgressIndicator(
+                                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF95A472)),
+                                            ); // Affiche une barre de progression 2D pendant la traduction
                                           } else if (snapshot.hasError) {
                                             return Text(
                                               'Erreur de traduction: ${snapshot.error}',
@@ -639,7 +680,44 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                             );
                                           }
                                         },
-                                      ),
+                                      );
+
+    }
+  },
+),
+                                    
+                                    
+                                    // FutureBuilder<String>(
+                                    //     future: customTranslate.translate(
+                                    //       widget.restaurant.address,
+                                    //       "fr",
+                                    //       context.locale.languageCode,
+                                    //     ), // Utilisation de l'instance pour la traduction
+                                    //     builder: (context, snapshot) {
+                                    //       if (snapshot.connectionState == ConnectionState.waiting) {
+                                    //         return LinearProgressIndicator(); // Affiche une barre de progression 2D pendant la traduction
+                                    //       } else if (snapshot.hasError) {
+                                    //         return Text(
+                                    //           'Erreur de traduction: ${snapshot.error}',
+                                    //           style: AppTextStyles.paragraphDarkStyle,
+                                    //         );
+                                    //       } else {
+                                    //         return Text(
+                                    //           snapshot.data ?? widget.restaurant.address, // Affiche le texte traduit, ou l'adresse d'origine si la traduction échoue
+                                    //           style: AppTextStyles.paragraphDarkStyle,
+                                    //         );
+                                    //       }
+                                    //     },
+                                    //   ),
+
+
+
+
+
+
+
+
+
                                   onTap: () {
                                     Clipboard.setData(ClipboardData(
                                         text: widget.restaurant.address));

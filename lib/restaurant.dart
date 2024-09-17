@@ -206,6 +206,38 @@ class Restaurant {
   List<ReviewRestau> getReviews() {
     return reviews;
   }
+
+  String getForTranslationWithReviews(String separator, String reviewSeparator, String reviewElementSeparator) {
+    // Concaténation des informations du restaurant
+    String reviewsConcatenated = reviews.map((review) {
+      // Concaténation des éléments d'une review (auteur, texte, note)
+      return [
+        review.author,                  // Auteur de la review
+        review.comment,                 // Commentaire de la review
+        review.rating.toString()        // Note de la review
+      ].join(reviewElementSeparator);   // Séparateur pour les éléments de la review
+    }).join(reviewSeparator);           // Séparateur pour les différentes reviews
+
+    return [
+      id.toString(),   // ID du restaurant
+      name,            // Nom du restaurant
+      address,         // Adresse
+      cuisine,         // Type de cuisine
+      reviewsConcatenated  // Concaténation des reviews
+    ].join(separator);  // Tout est séparé par le séparateur principal
+  }
+
+  String getForTranslation(String separator) {
+  // Concaténation des informations du restaurant, sans inclure les reviews
+  return [
+    id.toString(),   // ID du restaurant
+    name,            // Nom du restaurant
+    address,         // Adresse
+    cuisine          // Type de cuisine
+  ].join(separator);  // Tout est séparé par le séparateur principal
+}
+
+
 }
 
 class ReviewRestau implements ReviewInterface {

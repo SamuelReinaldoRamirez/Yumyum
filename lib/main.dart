@@ -194,10 +194,9 @@ Future<void> _initAsync() async {
     // Créer ou mettre à jour le fichier filtres.json avec les données des tags
     if(context.locale.languageCode != "fr"){
       //pour les filtres
-      await createOrUpdateGLOBALLocalizedJsonFile(widget.tagList, context);
+      await createOrUpdateGLOBALLocalizedJsonFileBatched(widget.tagList, context, 30);
       //pour les infos des restos
-      await createOrUpdateGLOBALLocalizedRestoInfosJsonFile(widget.restaurantList, context);
-      // filtersLocalizedFinishedLoading.value = true;
+      await createOrUpdateGLOBALLocalizedRestoInfosJsonFileBatched(widget.restaurantList, context, 16);
       print("Fichier filtres.json mis à jour !");
     }
   } catch (e) {

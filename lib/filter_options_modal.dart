@@ -138,7 +138,9 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
                                 if (snapshot.connectionState == ConnectionState.waiting) {
                                   return const SizedBox(
                                     width: 50, // Optionnel, pour donner une largeur fixe à la barre
-                                    child: LinearProgressIndicator(), // Affiche une barre de progression 2D
+                                    child: LinearProgressIndicator(
+                                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF95A472)), // Change la couleur ici/ A
+                                    ), // Affiche une barre de progression 2D
                                   );
                                 } else if (snapshot.hasError) {
                                   return Text('Erreur de traduction: ${snapshot.error}');
