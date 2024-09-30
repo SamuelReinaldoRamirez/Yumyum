@@ -28,16 +28,16 @@ class SearchBar extends StatefulWidget implements PreferredSizeWidget {
   final List<Restaurant> restaurantList;
   final Function(String) onSearchChanged;
   final ValueNotifier<List<int>> selectedTagIdsNotifier;
-  final ValueNotifier<List<int>> selectedWorkspacesNotifier; 
+  final ValueNotifier<List<int>> selectedWorkspacesNotifier;
   final List<Tag> tagList;
-
 
   const SearchBar({
     Key? key,
     required this.onSearchChanged,
     required this.restaurantList,
     required this.selectedTagIdsNotifier,
-    required this.selectedWorkspacesNotifier, required this.tagList,
+    required this.selectedWorkspacesNotifier,
+    required this.tagList,
   }) : super(key: key);
 
   @override
@@ -53,12 +53,13 @@ class _SearchBarState extends State<SearchBar> {
   static const double shakeThresholdGravity = 2.7;
   static const int shakeSlopTimeMs = 500;
   int lastShakeTimestamp = 0;
-  bool _shakeDetectionEnabled = false; // Variable pour activer/désactiver la détection
+  bool _shakeDetectionEnabled =
+      false; // Variable pour activer/désactiver la détection
 
 // StreamSubscription pour l'accéléromètre
   late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
-  
-@override
+
+  @override
   void dispose() {
     // Ne pas oublier de retirer l'écouteur lors de la destruction du widget
     filterIsOn.removeListener(() {});
@@ -82,9 +83,10 @@ class _SearchBarState extends State<SearchBar> {
     });
   }
 
-    // Activer la détection de secousses
+  // Activer la détection de secousses
   void _enableShakeDetection() {
-    _accelerometerSubscription = accelerometerEvents.listen((AccelerometerEvent event) {
+    _accelerometerSubscription =
+        accelerometerEvents.listen((AccelerometerEvent event) {
       if (!_shakeDetectionEnabled) return;
 
       final now = DateTime.now().millisecondsSinceEpoch;
@@ -116,8 +118,9 @@ class _SearchBarState extends State<SearchBar> {
       } else {
         _accelerometerSubscription.pause();
       }
-       // Affiche l'alerte avec le bon message
-      String shakeModeStatus = _shakeDetectionEnabled ? 'Shake mode ON' : 'Shake mode OFF';
+      // Affiche l'alerte avec le bon message
+      String shakeModeStatus =
+          _shakeDetectionEnabled ? 'Shake mode ON' : 'Shake mode OFF';
 
       CustomTranslate translator = CustomTranslate();
 
@@ -151,10 +154,8 @@ class _SearchBarState extends State<SearchBar> {
           );
         },
       );
-
     });
   }
-  
 
 //pour faire des choses en secouant le telephone
   void _randomRestaurant() {
@@ -165,153 +166,152 @@ class _SearchBarState extends State<SearchBar> {
         MarkerManager.context, widget.restaurantList[randomIndex]);
   }
 
-
-@override
-Widget build(BuildContext context) {
-  return Column(
-    mainAxisSize: MainAxisSize.min, // Réduit l'espace vertical
-    children: [
-      AppBar(
-        titleSpacing: 0.0, // Supprime l'espacement autour du titre
-        toolbarHeight: 40.0,
-        leading: boutonFiltreOrangeSearchBar(
-          context, 
-          (List<int> selectedIds) {
-            setState(() {
-              widget.selectedTagIdsNotifier.value = selectedIds;
-            });
-          },
-        ), // Réduit la hauteur de la barre d'applications
-        title: _buildSearchBar(),
-        actions: [
-         infobulle(context),
-        ]
-      ),
-      // Condition pour afficher le Divider et la FilterBar ensemble
-      ValueListenableBuilder<bool>(
-        valueListenable: isFilterOpen,
-        builder: (context, filterIsOpen, child) {
-          if (!filterIsOpen) {
-            return Container(); // N'affiche rien si hasSubscription est vrai
-          } else {
-            return 
-
-ValueListenableBuilder<bool>(
-        valueListenable: hasSubscription,
-        builder: (context, subscriptions, child) {
-          if (!subscriptions) {
-            return Container(); // N'affiche rien si hasSubscription est vrai
-          } else {
-            return
-            Column(
-              children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.06,
-                  child: FilterBar(
-                    selectedTagIdsNotifier: selectedTagIdsNotifier,
-                    selectedWorkspacesNotifier: selectedWorkspacesNotifier,
-                  ),
-                ),
-              ],
-            );
-          }
-        }
-);
-
-
-          }
-        },
-      ),
-    ],
-  );
-}
-
-
-Widget _buildSearchBar() {
-  return TextField(
-    controller: _searchController,
-    onSubmitted: (value) {
-      _handleSubmitted(value, _searchController);
-    },
-    onChanged: (value) {
-      // Cette fonction sera appelée chaque fois que le texte change
-      widget.onSearchChanged(value);
-      if(value!=""){
-        // filterIsOn.value = true;
-        orangeCross.value = true;
-        print("VALUE TRUE");
-      }else{
-        // filterIsOn.value = false;
-        orangeCross.value = false;
-        print("VALUE FALSE");
-      }
-    },
-    style: AppTextStyles.paragraphDarkStyle,
-    decoration: InputDecoration(
-      contentPadding: EdgeInsets.symmetric(vertical: 12.0), // Ajustement pour un meilleur alignement vertical
-      // hintText: 'Rechercher dans Yummap',
-      hintText: 'research.placeholder'.tr(),
-
-      hintStyle: AppTextStyles.hintTextDarkStyle,
-      border: InputBorder.none,
-      prefixIcon: const Icon(
-        Icons.search,
-        color: AppColors.greenishGrey,
-        size: 24.0, // Taille ajustée pour correspondre à celle du suffixIcon
-      ),
-      suffixIcon: IconButton(
-        icon: Container(
-          decoration: (filterIsOn.value || orangeCross.value)
-              ? BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.orangeButton,
-                )
-              : null,
-          child: Icon(
-            Icons.clear,
-            color: (filterIsOn.value || orangeCross.value) ? Colors.white : AppColors.greenishGrey,
-            size: 24.0, // Taille ajustée pour correspondre à celle du prefixIcon
-          ),
-          padding: EdgeInsets.all(8.0), // Ajustement du padding pour correspondre à l'icône
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min, // Réduit l'espace vertical
+      children: [
+        AppBar(
+          titleSpacing: 0.0, // Supprime l'espacement autour du titre
+          toolbarHeight: 40.0,
+          leading: boutonFiltreOrangeSearchBar(
+            context,
+            (List<int> selectedIds) {
+              setState(() {
+                widget.selectedTagIdsNotifier.value = selectedIds;
+              });
+            },
+          ), // Réduit la hauteur de la barre d'applications
+          title: _buildSearchBar(),
+          // actions: [
+          //  infobulle(context),
+          // ]
         ),
-        onPressed: () async {
-          setState(() {
-            widget.selectedWorkspacesNotifier.value = [];
-            widget.selectedTagIdsNotifier.value = [];
-          });
-          _clearSearch(context);
-          MarkerManager.resetMarkers();
-          filterIsOn.value = false;
-          orangeCross.value = false;
-        },
-      ),
-    ),
-  );
-}
+        // Condition pour afficher le Divider et la FilterBar ensemble
+        ValueListenableBuilder<bool>(
+          valueListenable: isFilterOpen,
+          builder: (context, filterIsOpen, child) {
+            if (!filterIsOpen) {
+              return Container(); // N'affiche rien si hasSubscription est vrai
+            } else {
+              return ValueListenableBuilder<bool>(
+                  valueListenable: hasSubscription,
+                  builder: (context, subscriptions, child) {
+                    if (!subscriptions) {
+                      return Container(); // N'affiche rien si hasSubscription est vrai
+                    } else {
+                      return Column(
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.06,
+                            child: FilterBar(
+                              selectedTagIdsNotifier: selectedTagIdsNotifier,
+                              selectedWorkspacesNotifier:
+                                  selectedWorkspacesNotifier,
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                  });
+            }
+          },
+        ),
+      ],
+    );
+  }
 
-  Future<void> _handleSubmitted(String value, TextEditingController _searchController) async {
+  Widget _buildSearchBar() {
+    return TextField(
+      controller: _searchController,
+      onSubmitted: (value) {
+        _handleSubmitted(value, _searchController);
+      },
+      onChanged: (value) {
+        // Cette fonction sera appelée chaque fois que le texte change
+        widget.onSearchChanged(value);
+        if (value != "") {
+          // filterIsOn.value = true;
+          orangeCross.value = true;
+          print("VALUE TRUE");
+        } else {
+          // filterIsOn.value = false;
+          orangeCross.value = false;
+          print("VALUE FALSE");
+        }
+      },
+      style: AppTextStyles.paragraphDarkStyle,
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.symmetric(
+            vertical: 12.0), // Ajustement pour un meilleur alignement vertical
+        // hintText: 'Rechercher dans Yummap',
+        hintText: 'research.placeholder'.tr(),
+
+        hintStyle: AppTextStyles.hintTextDarkStyle,
+        border: InputBorder.none,
+        prefixIcon: const Icon(
+          Icons.search,
+          color: AppColors.greenishGrey,
+          size: 24.0, // Taille ajustée pour correspondre à celle du suffixIcon
+        ),
+        suffixIcon: IconButton(
+          icon: Container(
+            decoration: (filterIsOn.value || orangeCross.value)
+                ? BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.orangeButton,
+                  )
+                : null,
+            child: Icon(
+              Icons.clear,
+              color: (filterIsOn.value || orangeCross.value)
+                  ? Colors.white
+                  : AppColors.greenishGrey,
+              size:
+                  24.0, // Taille ajustée pour correspondre à celle du prefixIcon
+            ),
+            padding: EdgeInsets.all(
+                8.0), // Ajustement du padding pour correspondre à l'icône
+          ),
+          onPressed: () async {
+            setState(() {
+              widget.selectedWorkspacesNotifier.value = [];
+              widget.selectedTagIdsNotifier.value = [];
+            });
+            _clearSearch(context);
+            MarkerManager.resetMarkers();
+            filterIsOn.value = false;
+            orangeCross.value = false;
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleSubmitted(
+      String value, TextEditingController _searchController) async {
     MixpanelService.instance.track('TextSearch', properties: {
       'searchText': value,
     });
 
-    if(value == ",dev,"){
+    if (value == ",dev,") {
       print("TO DEV ??");
       await CallEndpointService.switchToDev();
       value = "";
       orangeCross.value = false;
       return;
     }
-    if(value == ",prod,"){
+    if (value == ",prod,") {
       await CallEndpointService.switchToProd();
       value = "";
       orangeCross.value = false;
       return;
     }
-    if(value == "##"){
+    if (value == "##") {
       _randomRestaurant();
       return;
     }
-    if(value == "#"){
+    if (value == "#") {
       _enableOrDisableShake();
       _searchController.clear();
       orangeCross.value = false;
@@ -319,21 +319,22 @@ Widget _buildSearchBar() {
     }
     if (value == "#lang") {
       // Attendre le résultat de showLocaleSelectionDialog
-      bool dialogResult = await showLocaleSelectionDialog(context);      
+      bool dialogResult = await showLocaleSelectionDialog(context);
       // Si l'utilisateur a cliqué sur "OK", exécuter la mise à jour
       if (dialogResult) {
         _searchController.clear();
         orangeCross.value = false;
         //pour les filtres
-        await createOrUpdateGLOBALLocalizedJsonFileBatched(widget.tagList, context, 30);
+        await createOrUpdateGLOBALLocalizedJsonFileBatched(
+            widget.tagList, context, 30);
         //pour les infos restos
-        await createOrUpdateGLOBALLocalizedRestoInfosJsonFileBatched(widget.restaurantList, context, 16);
+        await createOrUpdateGLOBALLocalizedRestoInfosJsonFileBatched(
+            widget.restaurantList, context, 16);
       } else {
         print("Action annulée par l'utilisateur.");
       }
       return;
     }
-
 
     List<Workspace> workspacesToDisplay =
         await CallEndpointService().searchWorkspaceByName(value);
@@ -403,7 +404,8 @@ Widget _buildSearchBar() {
     );
   }
 
-  void _handleWorkspaceSelection(Workspace workspace) async { //sert à rien
+  void _handleWorkspaceSelection(Workspace workspace) async {
+    //sert à rien
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> aliasList = prefs.getStringList('workspaceAliases') ?? [];
 

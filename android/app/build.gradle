@@ -4,14 +4,13 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
-def flutterVersionCode = 6 // Définition du code de version
-def flutterVersionName = "2.1.3" // Définition du nom de version
+def flutterVersionCode = 8 // Définition du code de version
+def flutterVersionName = "2.2.0" // Définition du nom de version
 
 android {
     namespace "com.example.yummap"
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdkVersion 34 // Mise à jour pour Android 14 (API 34)
     ndkVersion flutter.ndkVersion
-    compileSdkVersion 34
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -29,15 +28,12 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.domain.yummap"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        // minSdkVersion flutter.minSdkVersion
-        minSdkVersion 23
-        targetSdkVersion flutter.targetSdkVersion
+        minSdkVersion 23 // Version minimum d'Android prise en charge
+        targetSdkVersion 34 // Mise à jour du niveau d'API cible pour Android 14 (API 34)
         versionCode flutterVersionCode // Utilisation du code de version défini
         versionName flutterVersionName // Utilisation du nom de version défini
         multiDexEnabled true
-        }
+    }
 
     buildTypes {
         release {
