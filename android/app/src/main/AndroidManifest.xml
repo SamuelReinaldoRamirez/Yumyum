@@ -8,6 +8,13 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+       <!-- Ajout pour Android 12 et versions supérieures (queries) -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+        </intent>
+    </queries>
+
     <application
         android:label="Yummap"
         android:name="${applicationName}"
@@ -23,18 +30,60 @@
             android:hardwareAccelerated="true"
             android:enableOnBackInvokedCallback="true"
             android:windowSoftInputMode="adjustResize">
-            
 
             <!-- Définition du thème -->
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme" />
 
-            <!-- Intent filter pour l'activité principale -->
+           <!-- Intent filter pour l'activité principale -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
+            </intent-filter> 
+
+            <!-- Branch URI Scheme -->
+			<intent-filter>
+				<!-- If utilizing $deeplink_path please explicitly declare your hosts, or utilize a wildcard(*) -->
+				<!-- REPLACE `android:scheme` with your Android URI scheme -->
+				<data android:scheme="yummap" android:host="open" />
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+			</intent-filter>
+
+			<!-- Branch App Links - Live App -->
+			<intent-filter android:autoVerify="true">
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<!-- REPLACE `android:host` with your `app.link` domain -->
+				<data android:scheme="https" android:host="ptvvb.app.link" />
+                <!-- <data android:scheme="https" android:host="yummap" /> -->
+				<!-- REPLACE `android:host` with your `-alternate` domain (required for proper functioning of App Links and Deepviews) -->
+				<data android:scheme="https" android:host="ptvvb-alternate.app.link" />
+			</intent-filter>
+
+			<!-- Branch App Links - Test App -->
+			<intent-filter android:autoVerify="true">
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:scheme="https" android:host="example.test-app.link" />
+				<!-- REPLACE `android:host` with your `-alternate` domain (required for proper functioning of App Links and Deepviews) -->
+				<data android:scheme="https" android:host="example-alternate.test-app.link" />
+			</intent-filter>
+
+            <!-- Intent filter pour gérer les liens profonds (deep links) -->
+        <!--    <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>  -->
+
+                <!-- Permet de reconnaître ton schéma personnalisé -->
+          <!--      <data android:scheme="yummap" android:host="hotel" android:pathPrefix="/" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter> -->
         </activity>
 
         <!-- Métadonnées nécessaires à Flutter -->
@@ -54,6 +103,14 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <!-- Branch init -->
+		<!-- REPLACE `BranchKey` with the value from your Branch Dashboard -->
+		<meta-data android:name="io.branch.sdk.BranchKey" android:value="key_live_dygK3WSss6PAxaR17xXRYpkaACmu0ygy" />
+		<!-- REPLACE `BranchKey.test` with the value from your Branch Dashboard -->
+		<meta-data android:name="io.branch.sdk.BranchKey.test" android:value="secret_live_CebZo8eo55f8GN5KSn9UIl6qESoj1Sfl" />
+		<!-- Set to `true` to use `BranchKey.test` -->
+		<meta-data android:name="io.branch.sdk.TestMode" android:value="false" />
 
     </application>
 </manifest>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1011074533701",
+    "project_id": "yummap-web-beta",
+    "storage_bucket": "yummap-web-beta.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1011074533701:android:d35ba294d011acc0eb562c",
+        "android_client_info": {
+          "package_name": "com.domain.yummap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0C2skYNFmyrY9vAX8PYmqo2m65ouGZE4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
