@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:yummap/chewie_video_player.dart';
+import 'package:yummap/widget/chewie_video_player.dart';
 
 class VideoCarousel extends StatefulWidget {
   final List<String> videoLinks;

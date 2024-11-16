@@ -1,19 +1,19 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:yummap/bottom_sheet_helper.dart';
-import 'package:yummap/call_endpoint_service.dart';
-import 'package:yummap/global.dart';
-import 'package:yummap/map_helper.dart';
-import 'package:yummap/mixpanel_service.dart';
-import 'package:yummap/restaurant.dart';
-import 'package:yummap/theme.dart';
-import 'package:yummap/workspace.dart';
-import 'package:yummap/workspace_selection_page.dart';
+import 'package:yummap/helper/bottom_sheet_helper.dart';
+import 'package:yummap/service/call_endpoint_service.dart';
+import 'package:yummap/constants/global.dart';
+import 'package:yummap/helper/map_helper.dart';
+import 'package:yummap/service/mixpanel_service.dart';
+import 'package:yummap/model/restaurant.dart';
+import 'package:yummap/constants/theme.dart';
+import 'package:yummap/model/workspace.dart';
+import 'package:yummap/page/workspace_selection_page.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 import 'dart:math';
 import 'package:sensors_plus/sensors_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchBar extends StatefulWidget implements PreferredSizeWidget {
   final List<Restaurant> restaurantList;
@@ -43,8 +43,7 @@ class _SearchBarState extends State<SearchBar> {
   int lastShakeTimestamp = 0;
   // static bool _filterIsOn = false;
 
-
-@override
+  @override
   void dispose() {
     // Ne pas oublier de retirer l'écouteur lors de la destruction du widget
     filterIsOn.removeListener(() {});
@@ -109,18 +108,18 @@ class _SearchBarState extends State<SearchBar> {
             //   color: Colors.blueAccent,
             // ),
             icon: Container(
-              decoration: filterIsOn.value ?
-                BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.orangeButton, // Fond orange
-                  )
-                : null, // Pas de bordure si non pressé
+              decoration: filterIsOn.value
+                  ? BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.orangeButton, // Fond orange
+                    )
+                  : null, // Pas de bordure si non pressé
               child: Icon(
                 Icons.clear,
-                color: filterIsOn.value
-                ? Colors.white : AppColors.greenishGrey,
+                color: filterIsOn.value ? Colors.white : AppColors.greenishGrey,
               ),
-              padding: EdgeInsets.all(4.0), // Espace entre l'icône et la bordure
+              padding:
+                  EdgeInsets.all(4.0), // Espace entre l'icône et la bordure
             ),
             onPressed: () async {
               setState(() {
@@ -142,12 +141,12 @@ class _SearchBarState extends State<SearchBar> {
       'searchText': value,
     });
 
-    if(value == ",dev,"){
+    if (value == ",dev,") {
       print("TO DEV ??");
       await CallEndpointService.switchToDev();
       value = "";
     }
-    if(value == ",prod,"){
+    if (value == ",prod,") {
       await CallEndpointService.switchToProd();
       value = "";
     }
@@ -221,8 +220,8 @@ class _SearchBarState extends State<SearchBar> {
   }
 
   void _handleWorkspaceSelection(Workspace workspace) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> aliasList = prefs.getStringList('workspaceAliases') ?? [];
+    //SharedPreferences prefs = await SharedPreferences.getInstance();
+    //List<String> aliasList = prefs.getStringList('workspaceAliases') ?? [];
 
     // Afficher la liste mise à jour des alias
     // _showAliasAlert(context, aliasList, 'After setting');

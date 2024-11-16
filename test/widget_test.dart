@@ -8,7 +8,7 @@ void main() {
     // Créez un Mixpanel simulé pour le test
 
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp(
+    await tester.pumpWidget(MyApp(
       restaurantList: [],
       // Fournissez le Mixpanel simulé ici
     ));

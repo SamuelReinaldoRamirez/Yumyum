@@ -1,5 +1,5 @@
 import 'package:logger/logger.dart';
-import 'package:yummap/review_interface.dart';
+import 'package:yummap/model/review_interface.dart';
 
 class Review implements ReviewInterface {
   final int id;
@@ -17,7 +17,8 @@ class Review implements ReviewInterface {
     required this.user_id,
     required this.restaurants_id,
     required this.workspace_id,
-    required String workspaceName, // Ajout du paramètre pour le nom du workspace
+    required String
+        workspaceName, // Ajout du paramètre pour le nom du workspace
   })  : _comment = comment, // Initialisation du champ privé
         _rating = rating, // Initialisation du champ privé
         _workspaceName = workspaceName; // Initialisation du champ privé
@@ -53,12 +54,12 @@ class Review implements ReviewInterface {
     return Review(
       id: json['id'] ?? 0,
       comment: json['comment'] ?? '',
-      rating: parsedRating,  // Assurez-vous que `rating` est bien un double
+      rating: parsedRating, // Assurez-vous que `rating` est bien un double
       user_id: json['user_id'] ?? 0,
       restaurants_id: json['restaurants_id'] ?? 0,
       workspace_id: json['workspace_id'] ?? 0,
-      workspaceName: json['_workspace']?['name'] ?? 'Workspace #${json['workspace_id']}',  // Récupération du nom du workspace depuis l'objet `_workspace`
+      workspaceName: json['_workspace']?['name'] ??
+          'Workspace #${json['workspace_id']}', // Récupération du nom du workspace depuis l'objet `_workspace`
     );
   }
-  
 }

@@ -2,13 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:yummap/call_endpoint_service.dart';
-import 'package:yummap/global.dart';
-import 'package:yummap/map_helper.dart';
-import 'package:yummap/restaurant.dart';
-import 'package:yummap/theme.dart';
-import 'package:yummap/workspace_options_modal.dart';
-import 'filter_options_modal.dart';
+import 'package:yummap/service/call_endpoint_service.dart';
+import 'package:yummap/constants/global.dart';
+import 'package:yummap/helper/map_helper.dart';
+import 'package:yummap/model/restaurant.dart';
+import 'package:yummap/constants/theme.dart';
+import 'package:yummap/helper/workspace_options_modal.dart';
+import '../helper/filter_options_modal.dart';
 
 class FilterBar extends StatefulWidget implements PreferredSizeWidget {
   final ValueNotifier<List<int>> selectedTagIdsNotifier;
@@ -76,19 +76,20 @@ class FilterBarState extends State<FilterBar> {
     });
   }
 
-  Future<List<Restaurant>> generalFilter() async{
+  Future<List<Restaurant>> generalFilter() async {
     List<int> filterTags = widget.selectedTagIdsNotifier.value;
     List<int> workspaceIds = widget.selectedWorkspacesNotifier.value;
-    List<Restaurant> newRestoList =  await CallEndpointService().getRestaurantsByTagsAndWorkspaces(filterTags, workspaceIds);
+    List<Restaurant> newRestoList = await CallEndpointService()
+        .getRestaurantsByTagsAndWorkspaces(filterTags, workspaceIds);
     MarkerManager.createFull(MarkerManager.context, newRestoList);
     print("workspaceIds == [] && filterTags == []");
     print(workspaceIds);
     print(workspaceIds == []);
     print(filterTags);
     print(filterTags == []);
-    if(workspaceIds.isEmpty && filterTags.isEmpty){
+    if (workspaceIds.isEmpty && filterTags.isEmpty) {
       filterIsOn.value = false;
-    }else{
+    } else {
       filterIsOn.value = true;
     }
     return newRestoList;
@@ -104,7 +105,8 @@ class FilterBarState extends State<FilterBar> {
           children: [
             const SizedBox(width: 10),
             Container(
-              width: MediaQuery.of(context).size.width * (8 / 100), // 8% de l'espace horizontal
+              width: MediaQuery.of(context).size.width *
+                  (8 / 100), // 8% de l'espace horizontal
               child: FractionallySizedBox(
                 alignment: Alignment.center,
                 child: Container(
@@ -112,16 +114,17 @@ class FilterBarState extends State<FilterBar> {
                     shape: BoxShape.circle,
                     color: AppColors.orangeButton, // Fond orange
                   ),
-                  padding: const EdgeInsets.all(5), // Un peu plus d'espace autour de l'icône
+                  padding: const EdgeInsets.all(
+                      5), // Un peu plus d'espace autour de l'icône
                   child: const Icon(
                     Icons.filter_list,
                     color: Colors.white,
-                    size: 25, // Augmenter légèrement la taille de l'icône pour plus de visibilité
+                    size:
+                        25, // Augmenter légèrement la taille de l'icône pour plus de visibilité
                   ),
                 ),
               ),
             ),
-
             const SizedBox(
               width: 20,
             ),

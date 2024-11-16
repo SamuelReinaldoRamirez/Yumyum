@@ -7,13 +7,13 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:yummap/call_endpoint_service.dart';
-import 'package:yummap/review.dart';
-import 'package:yummap/review_interface.dart';
-import 'package:yummap/theme.dart';
+import 'package:yummap/service/call_endpoint_service.dart';
+import 'package:yummap/model/review.dart';
+import 'package:yummap/model/review_interface.dart';
+import 'package:yummap/constants/theme.dart';
 import 'restaurant.dart';
-import 'reviews_details.dart';
-import 'horaires_restaurant.dart';
+import '../widget/reviews_details.dart';
+import '../widget/horaires_restaurant.dart';
 
 class RestaurantDetailsWidget extends StatefulWidget {
   const RestaurantDetailsWidget({Key? key, required this.restaurant})

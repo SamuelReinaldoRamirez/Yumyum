@@ -1,16 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-import 'package:yummap/restaurant.dart';
-import 'package:yummap/review.dart';
-import 'package:yummap/workspace.dart';
-import 'package:yummap/tag.dart';
+import 'package:yummap/model/restaurant.dart';
+import 'package:yummap/model/review.dart';
+import 'package:yummap/model/workspace.dart';
+import 'package:yummap/model/tag.dart';
 
 class CallEndpointService {
   // Instance unique de la classe
   static final CallEndpointService _instance = CallEndpointService._internal();
   static var logger = Logger();
-
 
   // Constructeur privé
   CallEndpointService._internal() {
@@ -35,7 +34,7 @@ class CallEndpointService {
     allTagsUrl = rootUrl + '/tags';
   }
 
-    // Méthode pour changer l'URL en fonction de l'environnement
+  // Méthode pour changer l'URL en fonction de l'environnement
   static Future<void> switchToEnv(String envId) async {
     final String endpoint = rootUrl + "/env/$envId";
 
@@ -111,7 +110,8 @@ class CallEndpointService {
     }
   }
 
-  Future<List<Review>> getReviewsByRestaurantAndWorkspaces(int restaurant_id, List<int> workspace_ids) async {
+  Future<List<Review>> getReviewsByRestaurantAndWorkspaces(
+      int restaurant_id, List<int> workspace_ids) async {
     final String url = '$rootUrl/review/restaurant/workspaces/$restaurant_id';
     try {
       // Préparation du corps de la requête
@@ -130,7 +130,8 @@ class CallEndpointService {
       if (response.statusCode == 200) {
         // Décodage de la réponse JSON en liste
         final List<dynamic> jsonData = json.decode(response.body);
-        final List<Review> reviews = jsonData.map((data) => Review.fromJson(data)).toList();
+        final List<Review> reviews =
+            jsonData.map((data) => Review.fromJson(data)).toList();
 
         return reviews;
       } else {
@@ -144,7 +145,7 @@ class CallEndpointService {
   }
 
   Future<List> getWorkspaceIdsByAliases(List<String> aliasList) async {
-  final String url = '$rootUrl/workspace/byAlias';
+    final String url = '$rootUrl/workspace/byAlias';
 
     try {
       // Préparation du corps de la requête
@@ -174,10 +175,8 @@ class CallEndpointService {
     }
   }
 
-
   Future<List<Restaurant>> getRestaurantsByTagsAndWorkspaces(
       List<int> tagsId, List<int> workspaceIds) async {
-    
     if (baseUrl.isEmpty) {
       throw Exception('Service not initialized. Call init() first.');
     }
@@ -195,13 +194,14 @@ class CallEndpointService {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: requestBody, 
+        body: requestBody,
       );
       if (response.statusCode == 200) {
         // Décoder la réponse JSON
         final dynamic jsonData = json.decode(response.body);
         // Accéder à la clé "restaurants1" pour obtenir la liste des restaurants
-        if (jsonData is Map<String, dynamic> && jsonData.containsKey('restaurants1')) {
+        if (jsonData is Map<String, dynamic> &&
+            jsonData.containsKey('restaurants1')) {
           List<dynamic> restaurantList = jsonData['restaurants1'];
           // Convertir chaque élément de la liste en un objet Restaurant
           List<Restaurant> restaurants = restaurantList.map((data) {
@@ -209,7 +209,8 @@ class CallEndpointService {
           }).toList();
           return restaurants;
         } else {
-          throw Exception('Expected a Map with key "restaurants1", but received a different type');
+          throw Exception(
+              'Expected a Map with key "restaurants1", but received a different type');
         }
       } else {
         throw Exception('Failed to load restaurants by tags and workspaces');

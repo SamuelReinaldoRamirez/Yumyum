@@ -1,5 +1,5 @@
 import 'package:logger/logger.dart';
-import 'package:yummap/review_interface.dart';
+import 'package:yummap/model/review_interface.dart';
 
 class Restaurant {
   final int id;

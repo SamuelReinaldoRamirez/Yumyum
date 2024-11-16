@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:yummap/bottom_sheet_helper.dart';
-import 'package:yummap/restaurant.dart';
-import 'package:yummap/map_page.dart';
-import 'package:yummap/tracking_transparency_helper.dart';
+import 'package:yummap/helper/bottom_sheet_helper.dart';
+import 'package:yummap/model/restaurant.dart';
+import 'package:yummap/page/map_page.dart';
+import 'package:yummap/helper/tracking_transparency_helper.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 
 class MarkerManager {
