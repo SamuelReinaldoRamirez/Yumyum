@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import 'package:yummap/model/hotel.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/model/review.dart';
 import 'package:yummap/model/workspace.dart';
@@ -84,6 +85,32 @@ class CallEndpointService {
       }
     } catch (e) {
       throw Exception('Failed to load restaurants: $e');
+    }
+  }
+
+  Future<List<Hotel>> getHotelsFromXano() async {
+    final String hotelsUrl =
+        "https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/hotels";
+
+    try {
+      final response = await http.get(Uri.parse(hotelsUrl));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+
+        // Conversion de chaque élément JSON en instance de Hotel
+        List<Hotel> hotels = jsonData.map((data) {
+          return Hotel.fromJson(data);
+        }).toList();
+
+        return hotels;
+      } else {
+        logger.e('Failed to load hotels: ${response.statusCode}');
+        throw Exception('Failed to load hotels');
+      }
+    } catch (e) {
+      logger.e('Error while fetching hotels: $e');
+      throw Exception('Failed to load hotels: $e');
     }
   }
 

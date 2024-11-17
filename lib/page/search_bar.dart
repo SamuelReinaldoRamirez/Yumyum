@@ -11,8 +11,6 @@ import 'package:yummap/constant/theme.dart';
 import 'package:yummap/model/workspace.dart';
 import 'package:yummap/model/workspace_selection_page.dart';
 import 'package:latlong2/latlong.dart' as lat2;
-import 'dart:math';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchBar extends StatefulWidget implements PreferredSizeWidget {
   final List<Restaurant> restaurantList;
@@ -37,8 +35,6 @@ class SearchBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _SearchBarState extends State<SearchBar> {
   final TextEditingController _searchController = TextEditingController();
-  static const double shakeThresholdGravity = 2.7;
-  static const int shakeSlopTimeMs = 500;
   int lastShakeTimestamp = 0;
   // static bool _filterIsOn = false;
 
@@ -57,14 +53,6 @@ class _SearchBarState extends State<SearchBar> {
     filterIsOn.addListener(() {
       setState(() {});
     });
-  }
-
-  void _onShake() {
-    Random random = Random();
-    int randomIndex = random.nextInt(widget.restaurantList.length);
-    FocusScope.of(context).requestFocus(FocusNode());
-    BottomSheetHelper.showBottomSheet(
-        MarkerManager.context, widget.restaurantList[randomIndex]);
   }
 
   @override
@@ -124,6 +112,45 @@ class _SearchBarState extends State<SearchBar> {
       'searchText': value,
     });
 
+    if (value == "#hotelz") {
+      // Appeler l'API Xano pour récupérer les hôtels
+      try {
+        final hotels = await CallEndpointService()
+            .getHotelsFromXano(); // Implémenter cette méthode pour récupérer les hôtels
+        if (hotels.isNotEmpty) {
+          // Créer les nouveaux marqueurs pour les hôtels
+          List<lat2.LatLng> hotelLocations = hotels
+              .map((hotel) => lat2.LatLng(hotel.latitude, hotel.longitude))
+              .toList();
+
+          // Utiliser MapHelper pour créer les marqueurs des hôtels
+          MarkerManager.markersList = MapHelper.createHotelMarkers(
+            MarkerManager.context,
+            hotels,
+            hotelLocations,
+          );
+
+          MarkerManager.updateMap();
+        } else {
+          ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
+            const SnackBar(
+              content: Text('Aucun hôtel trouvé'),
+            ),
+          );
+        }
+      } catch (e) {
+        print('Erreur lors de la récupération des hôtels : $e');
+        ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur lors de la récupération des hôtels'),
+          ),
+        );
+      }
+
+      return; // Terminer l'exécution pour éviter de poursuivre avec les autres logiques
+    }
+
+    // Logique pour changer l'environnement (dev/prod)
     if (value == ",dev,") {
       print("TO DEV ??");
       await CallEndpointService.switchToDev();
@@ -134,6 +161,7 @@ class _SearchBarState extends State<SearchBar> {
       value = "";
     }
 
+    // Recherche de workspaces et de restaurants
     List<Workspace> workspacesToDisplay =
         await CallEndpointService().searchWorkspaceByName(value);
 
@@ -141,24 +169,30 @@ class _SearchBarState extends State<SearchBar> {
         await CallEndpointService().searchRestaurantByName(value);
 
     if (workspacesToDisplay.isNotEmpty) {
+      // Si des workspaces sont trouvés, afficher la page de sélection
       _showWorkspaceSelectionPage(
-          context, workspacesToDisplay, restaurantsToDisplay);
+          MarkerManager.context, workspacesToDisplay, restaurantsToDisplay);
     } else {
-      if (restaurantsToDisplay.length > 1) {
-        MarkerManager.createFull(MarkerManager.context, restaurantsToDisplay);
-      } else if (restaurantsToDisplay.length == 1) {
-        final restaurant = restaurantsToDisplay[0];
-        final latitude = restaurant.latitude;
-        final longitude = restaurant.longitude;
+      // Afficher les restaurants sur la carte
+      if (restaurantsToDisplay.isNotEmpty) {
+        if (restaurantsToDisplay.length > 1) {
+          // Plusieurs restaurants trouvés, les afficher sur la carte
+          MarkerManager.createFull(MarkerManager.context, restaurantsToDisplay);
+        } else {
+          // Un seul restaurant trouvé, afficher son détail dans un bottom sheet
+          final restaurant = restaurantsToDisplay[0];
+          final latitude = restaurant.latitude;
+          final longitude = restaurant.longitude;
 
-        BottomSheetHelper.showBottomSheet(MarkerManager.context, restaurant);
-        MarkerManager.mapPageState?.mapController
-            .move(lat2.LatLng(latitude, longitude), 15);
-        MarkerManager.resetMarkers();
+          BottomSheetHelper.showBottomSheet(MarkerManager.context, restaurant);
+          MarkerManager.mapPageState?.mapController
+              .move(lat2.LatLng(latitude, longitude), 15);
+          MarkerManager.resetMarkers();
+        }
       } else {
         ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
           const SnackBar(
-            content: Text('Aucun résultat trouvé'),
+            content: Text('Aucun restaurant trouvé'),
           ),
         );
       }
@@ -203,8 +237,8 @@ class _SearchBarState extends State<SearchBar> {
   }
 
   void _handleWorkspaceSelection(Workspace workspace) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> aliasList = prefs.getStringList('workspaceAliases') ?? [];
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    // List<String> aliasList = prefs.getStringList('workspaceAliases') ?? [];
 
     // Afficher la liste mise à jour des alias
     // _showAliasAlert(context, aliasList, 'After setting');

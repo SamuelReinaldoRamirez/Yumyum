@@ -1,7 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/plugin_api.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:flutter_map/plugin_api.dart';
 import 'package:yummap/service/mixpanel_service.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/helper/map_helper.dart';
@@ -20,6 +21,8 @@ class MapPage extends StatefulWidget {
 class MapPageState extends State<MapPage> {
   late MapController mapController;
   List<lat2.LatLng> restaurantLocations = [];
+  late Timer _locationUpdateTimer;
+  Marker? userMarker;
 
   @override
   void initState() {
@@ -28,16 +31,72 @@ class MapPageState extends State<MapPage> {
         widget.restaurantList, restaurantLocations);
 
     mapController = MapController();
-    //_requestAppTrackingAuthorization(context);
     MarkerManager.mapPageState = this;
     MarkerManager.context = context;
     _createListMarkers(); // Appel initial pour créer les marqueurs
     _getCurrentLocation();
+    _startLocationUpdates(); // Démarrer les mises à jour de la position de l'utilisateur
   }
 
   void _getCurrentLocation() async {
     MapHelper.getCurrentLocation((Position position) {
-      // Utilisez la position ici si nécessaire
+      // Initialiser la position de l'utilisateur si nécessaire
+      if (userMarker == null) {
+        userMarker = Marker(
+          width: 20.0,
+          height: 20.0,
+          point: lat2.LatLng(position.latitude, position.longitude),
+          builder: (ctx) => const DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(2),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+        );
+        MarkerManager.addMarker(
+            userMarker!); // Ajouter le marqueur à la liste des marqueurs
+      }
+    });
+  }
+
+  void _startLocationUpdates() {
+    // Mise à jour régulière de la position toutes les 3 secondes
+    _locationUpdateTimer = Timer.periodic(Duration(seconds: 3), (_) async {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      setState(() {
+        userMarker = Marker(
+          width: 20.0,
+          height: 20.0,
+          point: lat2.LatLng(position.latitude, position.longitude),
+          builder: (ctx) => const DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(2),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+        );
+        MarkerManager.addMarker(
+            userMarker!); // Ajouter le marqueur à la liste des marqueurs
+      });
     });
   }
 
@@ -110,6 +169,8 @@ class MapPageState extends State<MapPage> {
 
   @override
   void dispose() {
+    _locationUpdateTimer
+        .cancel(); // Annuler le timer lors de la destruction de l'écran
     super.dispose();
   }
 }

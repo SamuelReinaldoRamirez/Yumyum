@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:yummap/helper/bottom_sheet_helper.dart';
+import 'package:yummap/model/hotel.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/page/map_page.dart';
-import 'package:yummap/helper/tracking_transparency_helper.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 
 class MarkerManager {
-  //static Set<Marker> markers = {};
   static List<Marker> allmarkers = [];
   static MapPageState? mapPageState;
   static List<Marker> markersList = [];
   static late BuildContext context;
+  static Marker? userMarker; // Marqueur de la position de l'utilisateur
 
   static void addMarker(Marker marker) {
     markersList.add(marker);
@@ -35,7 +35,6 @@ class MarkerManager {
   }
 
   static void updateMap() {
-    // ignore: invalid_use_of_protected_member
     mapPageState?.setState(() {});
   }
 
@@ -49,6 +48,39 @@ class MarkerManager {
     markersList = List<Marker>.from(allmarkers);
     updateMap();
   }
+
+  // Fonction pour initialiser et mettre à jour la position de l'utilisateur
+  static void startUserLocationUpdates() {
+    // Initialisation immédiate de la position au démarrage
+    MapHelper.getCurrentLocation((position) {
+      // Mettre à jour la position de l'utilisateur avec un nouveau marqueur
+      if (userMarker == null) {
+        userMarker = Marker(
+          width: 20.0,
+          height: 20.0,
+          point: lat2.LatLng(position.latitude, position.longitude),
+          builder: (ctx) => const DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(2),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+        );
+        addMarker(
+            userMarker!); // Ajouter le marqueur de l'utilisateur à la liste
+      }
+      updateMap();
+    });
+  }
 }
 
 class MapHelper {
@@ -60,43 +92,6 @@ class MapHelper {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
     callback(position);
-    Marker marker = Marker(
-      width: 20.0,
-      height: 20.0,
-      point: lat2.LatLng(
-          position.latitude,
-          position
-              .longitude), // Utilisation de LatLng pour définir les coordonnées
-      builder: (ctx) => const DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(2),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-      ),
-    );
-    MarkerManager.addMarker(marker);
-    MarkerManager.updateMap();
-  }
-
-  static Future<void> requestAppTrackingAuthorization(context) async {
-    TrackingStatusDialog.requestAppTrackingAuthorization(context);
-  }
-
-  static void createRestaurantLocations(
-      List<Restaurant> restaurantList, List<lat2.LatLng> restaurantLocations) {
-    for (var restaurant in restaurantList) {
-      restaurantLocations
-          .add(lat2.LatLng(restaurant.latitude, restaurant.longitude));
-    }
   }
 
   static void createFull(
@@ -108,15 +103,16 @@ class MapHelper {
     MarkerManager.markersList = newMarkers;
   }
 
-  static void _showMarkerInfo(BuildContext context, Restaurant restaurant) {
-    BottomSheetHelper.showBottomSheet(context, restaurant);
+  static void createRestaurantLocations(
+      List<Restaurant> restaurantList, List<lat2.LatLng> restaurantLocations) {
+    for (var restaurant in restaurantList) {
+      restaurantLocations
+          .add(lat2.LatLng(restaurant.latitude, restaurant.longitude));
+    }
   }
 
-  static Future<void> setMapStyle(
-      BuildContext context, MapController mapController) async {
-    // String style = await DefaultAssetBundle.of(context)
-    //     .loadString('assets/custom_map.json');
-    //mapController.style(style);
+  static void _showMarkerInfo(BuildContext context, Restaurant restaurant) {
+    BottomSheetHelper.showBottomSheet(context, restaurant);
   }
 
   static List<Marker> createMarkers(
@@ -152,7 +148,6 @@ class MapHelper {
         point: restaurantLocations[i],
         builder: (ctx) => GestureDetector(
           onTap: () {
-            //Imprime "Tap" lorsque l'utilisateur tape sur le marqueur
             showMarkerInfo(context, restaurantList[i]);
           },
           child: const DecoratedBox(
@@ -168,11 +163,10 @@ class MapHelper {
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  // Centrer l'icône à l'intérieur du cercle
                   child: Icon(
-                    Icons.local_dining_outlined, // Utiliser l'icône de broche
-                    size: 24, // Ajuster la taille de l'icône selon vos besoins
-                    color: Color(0xFFDDFCAD), // Couleur de l'icône
+                    Icons.local_dining_outlined,
+                    size: 24,
+                    color: Color(0xFFDDFCAD),
                   ),
                 ),
               ),
@@ -185,5 +179,86 @@ class MapHelper {
 
     MarkerManager.markersList = markers;
     return markers;
+  }
+
+  static void createHotelLocations(
+      List<Hotel> hotelList, List<lat2.LatLng> hotelLocations) {
+    for (var hotel in hotelList) {
+      hotelLocations.add(lat2.LatLng(hotel.latitude, hotel.longitude));
+    }
+  }
+
+  static void showHotelBottomSheet(BuildContext context, Hotel hotel) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              hotel.photoUrl != null
+                  ? Container(
+                      width: 150, // Largeur maximale de l'image
+                      height: 150, // Hauteur maximale de l'image
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        image: DecorationImage(
+                          image: NetworkImage(hotel.photoUrl!),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    )
+                  : const Icon(Icons.hotel, size: 50),
+              const SizedBox(height: 8),
+              Text(hotel.name),
+              const SizedBox(height: 4),
+              Text(hotel.address),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  static List<Marker> createHotelMarkers(BuildContext context,
+      List<Hotel> hotelList, List<lat2.LatLng> hotelLocations) {
+    List<Marker> hotelMarkers = [];
+
+    for (int i = 0; i < hotelLocations.length; i++) {
+      Marker marker = Marker(
+        point: hotelLocations[i],
+        builder: (ctx) => GestureDetector(
+          onTap: () {
+            showHotelBottomSheet(context, hotelList[i]);
+          },
+          child: const DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(2),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Color(0xFF95A472),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.hotel, // Icône spécifique pour les hôtels
+                    size: 24,
+                    color: Color(0xFFDDFCAD),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      hotelMarkers.add(marker);
+    }
+
+    return hotelMarkers;
   }
 }
