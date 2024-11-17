@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:yummap/mixpanel_service.dart';
-import 'package:yummap/restau_details.dart';
-import 'package:yummap/restaurant.dart';
-import 'package:yummap/video_carousel.dart';
-import 'theme.dart';
+import 'package:yummap/service/mixpanel_service.dart';
+import 'package:yummap/page/restau_details.dart';
+import 'package:yummap/model/restaurant.dart';
+import 'package:yummap/widget/video_carousel.dart';
+import '../constant/theme.dart';
 
 class BottomSheetHelper {
   static void showBottomSheet(BuildContext context, Restaurant restaurant) {
@@ -88,7 +88,8 @@ class BottomSheetHelper {
                       },
                       backgroundColor: const Color(0xFF95A472),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50), // Définit le bouton comme rond
+                        borderRadius: BorderRadius.circular(
+                            50), // Définit le bouton comme rond
                       ),
                       child: const Icon(
                         Icons.info_outline,
@@ -96,7 +97,6 @@ class BottomSheetHelper {
                         size: 30, // Ajuste la taille de l'icône si nécessaire
                       ),
                     ),
-
                   ],
                 ),
                 const SizedBox(height: 8),

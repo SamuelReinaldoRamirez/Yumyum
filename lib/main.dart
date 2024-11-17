@@ -2,14 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
-import 'package:yummap/filter_bar.dart';
-import 'package:yummap/map_page.dart';
-import 'package:yummap/call_endpoint_service.dart';
-import 'package:yummap/restaurant.dart';
-import 'package:yummap/keys_data.dart'; // Importez le fichier contenant le token Mixpanel
-import 'package:yummap/mixpanel_service.dart'; // Importez la classe MixpanelService
+import 'package:yummap/page/map_page.dart';
+import 'package:yummap/service/call_endpoint_service.dart';
+import 'package:yummap/model/restaurant.dart';
+import 'package:yummap/constant/keys_data.dart'; // Importez le fichier contenant le token Mixpanel
+import 'package:yummap/service/mixpanel_service.dart'; // Importez la classe MixpanelService
 // ignore: library_prefixes
-import 'package:yummap/search_bar.dart' as CustomSearchBar;
+import 'package:yummap/page/search_bar.dart' as CustomSearchBar;
+import 'package:yummap/widget/filter_bar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +17,8 @@ void main() async {
   await MixpanelService.initialize(mixpanelToken);
 
   List<Restaurant> restaurantList =
-      (await CallEndpointService().getRestaurantsFromXanos()).cast<Restaurant>();
+      (await CallEndpointService().getRestaurantsFromXanos())
+          .cast<Restaurant>();
   runApp(MyApp(restaurantList: restaurantList));
 }
 

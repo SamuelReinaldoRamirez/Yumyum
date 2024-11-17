@@ -2,13 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:yummap/call_endpoint_service.dart';
-import 'package:yummap/global.dart';
-import 'package:yummap/map_helper.dart';
-import 'package:yummap/workspace.dart'; // Importez le modèle de données Workspace si nécessaire
-import 'package:yummap/restaurant.dart'; // Importez le modèle de données Restaurant si nécessaire
-import 'theme.dart'; // Importez les thèmes
-import 'package:yummap/filter_bar.dart';
+import 'package:yummap/service/call_endpoint_service.dart';
+import 'package:yummap/constant/global.dart';
+import 'package:yummap/helper/map_helper.dart';
+import 'package:yummap/model/workspace.dart'; // Importez le modèle de données Workspace si nécessaire
+import 'package:yummap/model/restaurant.dart'; // Importez le modèle de données Restaurant si nécessaire
+import '../constant/theme.dart'; // Importez les thèmes
+import 'package:yummap/widget/filter_bar.dart';
 
 class WorkspaceSelectionPage extends StatelessWidget {
   final List<Workspace> workspaces;
@@ -225,7 +225,10 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                   children: [
                     TextButton(
                       onPressed: () async {
-                        List<Restaurant> restaurants = await CallEndpointService().getRestaurantsByTagsAndWorkspaces([], [widget.workspace.id]);
+                        List<Restaurant> restaurants =
+                            await CallEndpointService()
+                                .getRestaurantsByTagsAndWorkspaces(
+                                    [], [widget.workspace.id]);
                         if (restaurants.isNotEmpty) {
                           // Afficher les restaurants sur la carte
                           MarkerManager.createFull(

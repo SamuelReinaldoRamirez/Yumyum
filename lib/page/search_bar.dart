@@ -1,15 +1,15 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:yummap/bottom_sheet_helper.dart';
-import 'package:yummap/call_endpoint_service.dart';
-import 'package:yummap/global.dart';
-import 'package:yummap/map_helper.dart';
-import 'package:yummap/mixpanel_service.dart';
-import 'package:yummap/restaurant.dart';
-import 'package:yummap/theme.dart';
-import 'package:yummap/workspace.dart';
-import 'package:yummap/workspace_selection_page.dart';
+import 'package:yummap/helper/bottom_sheet_helper.dart';
+import 'package:yummap/service/call_endpoint_service.dart';
+import 'package:yummap/constant/global.dart';
+import 'package:yummap/helper/map_helper.dart';
+import 'package:yummap/service/mixpanel_service.dart';
+import 'package:yummap/model/restaurant.dart';
+import 'package:yummap/constant/theme.dart';
+import 'package:yummap/model/workspace.dart';
+import 'package:yummap/model/workspace_selection_page.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';

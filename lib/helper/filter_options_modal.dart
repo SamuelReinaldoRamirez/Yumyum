@@ -1,13 +1,13 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:yummap/call_endpoint_service.dart';
-import 'package:yummap/filter_bar.dart';
-import 'package:yummap/mixpanel_service.dart';
-import 'package:yummap/tag.dart';
-import 'package:yummap/theme.dart';
+import 'package:yummap/service/call_endpoint_service.dart';
+import 'package:yummap/widget/filter_bar.dart';
+import 'package:yummap/service/mixpanel_service.dart';
+import 'package:yummap/model/tag.dart';
+import 'package:yummap/constant/theme.dart';
 
-import 'restaurant.dart';
+import '../model/restaurant.dart';
 
 class FilterOptionsModal extends StatefulWidget {
   final List<int> initialSelectedTagIds;
@@ -52,12 +52,14 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
           MixpanelService.instance.track('FilterTagSearch', properties: {
             'filter_ids': selectedTagIds,
           });
-           List<Restaurant> newRestaurants = await widget.parentState.generalFilter();
-           if (newRestaurants.isEmpty) {
+          List<Restaurant> newRestaurants =
+              await widget.parentState.generalFilter();
+          if (newRestaurants.isEmpty) {
             Navigator.of(context).pop(); // Ferme le BottomSheet
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text("Aucun résultat trouvé avec ces filtres ou combinaison de filtres"),
+                content: const Text(
+                    "Aucun résultat trouvé avec ces filtres ou combinaison de filtres"),
                 duration: const Duration(seconds: 3),
                 action: SnackBarAction(
                   label: 'OK',
@@ -67,7 +69,7 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
                 ),
               ),
             );
-          }else{
+          } else {
             Navigator.of(context).pop();
           }
         },
@@ -145,6 +147,4 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
     // });
     return true; // Retourne true pour permettre le pop, false pour l'empêcher
   }
-
-
 }

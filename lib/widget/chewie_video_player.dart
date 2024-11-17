@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
-import 'package:yummap/mixpanel_service.dart';
+import 'package:yummap/service/mixpanel_service.dart';
 import 'custom_controls.dart'; // Importer CustomControls ici
 
 class ChewieVideoPlayer extends StatefulWidget {

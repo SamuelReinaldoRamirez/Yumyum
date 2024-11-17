@@ -1,9 +1,9 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
-import 'package:yummap/call_endpoint_service.dart';
-import 'package:yummap/restaurant.dart';
-import 'package:yummap/tag.dart';
+import 'package:yummap/service/call_endpoint_service.dart';
+import 'package:yummap/model/restaurant.dart';
+import 'package:yummap/model/tag.dart';
 
 class RestoTags extends StatefulWidget {
   const RestoTags({Key? key, required this.restaurant}) : super(key: key);
@@ -80,7 +80,8 @@ class _RestoTagsState extends State<RestoTags> {
 
     //List<Tag> filteredTags = _filterTags(restaurant.getTagStr().cast<String>());
 
-    List<Tag> filteredTags = _filterTags( intListToStringList(restaurant.getTagStr()) );
+    List<Tag> filteredTags =
+        _filterTags(intListToStringList(restaurant.getTagStr()));
 
     Map<String, List<Tag>> filteredTagsByType = {};
     for (var tag in filteredTags) {
@@ -93,12 +94,12 @@ class _RestoTagsState extends State<RestoTags> {
 
 //à mettre dans un helper si ca aide mieux que le cast
   List<String> intListToStringList(List<int> inputList) {
-      List<String> outputList = [];
-      for (int i in inputList) {
-        outputList.add(i.toString());
-      }
-      return outputList;
+    List<String> outputList = [];
+    for (int i in inputList) {
+      outputList.add(i.toString());
     }
+    return outputList;
+  }
 
   List<Tag> _filterTags(List<String> tagIds) {
     return tagList.where((tag) => tagIds.contains(tag.id)).toList();

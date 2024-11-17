@@ -2,26 +2,25 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:yummap/call_endpoint_service.dart';
-import 'package:yummap/filter_bar.dart';
-import 'package:yummap/map_helper.dart';
-import 'package:yummap/mixpanel_service.dart';
-import 'package:yummap/theme.dart';
-import 'package:yummap/workspace.dart';
-import 'restaurant.dart';
+import 'package:yummap/service/call_endpoint_service.dart';
+import 'package:yummap/widget/filter_bar.dart';
+import 'package:yummap/helper/map_helper.dart';
+import 'package:yummap/service/mixpanel_service.dart';
+import 'package:yummap/constant/theme.dart';
+import 'package:yummap/model/workspace.dart';
+import '../model/restaurant.dart';
 
 class WorkspaceOptionsModal extends StatefulWidget {
   final List<int> initialSelectedWorkspaces;
   final ValueChanged<List<int>> onApply;
   final FilterBarState parentState;
 
-  const WorkspaceOptionsModal(
-      {Key? key,
-      required this.onApply,
-      required this.initialSelectedWorkspaces,
-      required this.parentState,
-})
-      : super(key: key);
+  const WorkspaceOptionsModal({
+    Key? key,
+    required this.onApply,
+    required this.initialSelectedWorkspaces,
+    required this.parentState,
+  }) : super(key: key);
 
   @override
   _WorkspaceOptionsModalState createState() => _WorkspaceOptionsModalState();
@@ -57,7 +56,8 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
     if (restaurants.isEmpty) {
       ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
         const SnackBar(
-          content: Text('Aucun restaurant trouvé pour ce workspace ou combinaison de filtres'),
+          content: Text(
+              'Aucun restaurant trouvé pour ce workspace ou combinaison de filtres'),
         ),
       );
     }
@@ -149,5 +149,4 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
     // });
     return true; // Retourne true pour permettre le pop, false pour l'empêcher
   }
-
 }

@@ -101,8 +101,8 @@
 // }
 
 import 'package:flutter/material.dart';
-import 'package:yummap/restaurant.dart';
-import 'package:yummap/review_interface.dart';
+import 'package:yummap/model/restaurant.dart';
+import 'package:yummap/model/review_interface.dart';
 
 class ReviewDetailsWidget extends StatefulWidget {
   const ReviewDetailsWidget(
@@ -207,4 +207,3 @@ class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
     );
   }
 }
-

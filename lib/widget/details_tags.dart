@@ -1,9 +1,9 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
-import 'package:yummap/call_endpoint_service.dart';
-import 'package:yummap/restaurant.dart';
-import 'package:yummap/tag.dart';
+import 'package:yummap/service/call_endpoint_service.dart';
+import 'package:yummap/model/restaurant.dart';
+import 'package:yummap/model/tag.dart';
 
 class DetailsTags extends StatefulWidget {
   const DetailsTags({Key? key, required this.restaurant}) : super(key: key);
