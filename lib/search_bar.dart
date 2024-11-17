@@ -12,7 +12,6 @@ import 'package:yummap/workspace.dart';
 import 'package:yummap/workspace_selection_page.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 import 'dart:math';
-import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchBar extends StatefulWidget implements PreferredSizeWidget {
@@ -43,8 +42,7 @@ class _SearchBarState extends State<SearchBar> {
   int lastShakeTimestamp = 0;
   // static bool _filterIsOn = false;
 
-
-@override
+  @override
   void dispose() {
     // Ne pas oublier de retirer l'écouteur lors de la destruction du widget
     filterIsOn.removeListener(() {});
@@ -55,22 +53,6 @@ class _SearchBarState extends State<SearchBar> {
   void initState() {
     super.initState();
 
-    accelerometerEvents.listen((AccelerometerEvent event) {
-      final now = DateTime.now().millisecondsSinceEpoch;
-
-      if ((now - lastShakeTimestamp) > shakeSlopTimeMs) {
-        final gX = event.x / 9.81;
-        final gY = event.y / 9.81;
-        final gZ = event.z / 9.81;
-
-        final gForce = sqrt(gX * gX + gY * gY + gZ * gZ);
-
-        if (gForce > shakeThresholdGravity) {
-          lastShakeTimestamp = now;
-          _onShake();
-        }
-      }
-    });
     // Écouter les changements de filterIsOn
     filterIsOn.addListener(() {
       setState(() {});
@@ -109,18 +91,18 @@ class _SearchBarState extends State<SearchBar> {
             //   color: Colors.blueAccent,
             // ),
             icon: Container(
-              decoration: filterIsOn.value ?
-                BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.orangeButton, // Fond orange
-                  )
-                : null, // Pas de bordure si non pressé
+              decoration: filterIsOn.value
+                  ? BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.orangeButton, // Fond orange
+                    )
+                  : null, // Pas de bordure si non pressé
               child: Icon(
                 Icons.clear,
-                color: filterIsOn.value
-                ? Colors.white : AppColors.greenishGrey,
+                color: filterIsOn.value ? Colors.white : AppColors.greenishGrey,
               ),
-              padding: EdgeInsets.all(4.0), // Espace entre l'icône et la bordure
+              padding:
+                  EdgeInsets.all(4.0), // Espace entre l'icône et la bordure
             ),
             onPressed: () async {
               setState(() {
@@ -142,12 +124,12 @@ class _SearchBarState extends State<SearchBar> {
       'searchText': value,
     });
 
-    if(value == ",dev,"){
+    if (value == ",dev,") {
       print("TO DEV ??");
       await CallEndpointService.switchToDev();
       value = "";
     }
-    if(value == ",prod,"){
+    if (value == ",prod,") {
       await CallEndpointService.switchToProd();
       value = "";
     }
