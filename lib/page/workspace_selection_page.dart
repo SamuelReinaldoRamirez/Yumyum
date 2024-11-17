@@ -109,7 +109,7 @@ class WorkspaceSelectionPage extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
         padding: const EdgeInsets.all(15.0),
         decoration: BoxDecoration(
-          color: Colors.red, // Fond gris foncé
+          color: Colors.black87, // Fond gris foncé
           borderRadius: BorderRadius.circular(10.0),
           boxShadow: [
             BoxShadow(

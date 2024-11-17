@@ -9,7 +9,7 @@ import 'package:yummap/service/mixpanel_service.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/constant/theme.dart';
 import 'package:yummap/model/workspace.dart';
-import 'package:yummap/model/workspace_selection_page.dart';
+import 'package:yummap/page/workspace_selection_page.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 
 class SearchBar extends StatefulWidget implements PreferredSizeWidget {
