@@ -35,6 +35,7 @@ class MarkerManager {
   }
 
   static void updateMap() {
+    // ignore: invalid_use_of_protected_member
     mapPageState?.setState(() {});
   }
 
@@ -197,19 +198,17 @@ class MapHelper {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              hotel.photoUrl != null
-                  ? Container(
-                      width: 150, // Largeur maximale de l'image
-                      height: 150, // Hauteur maximale de l'image
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        image: DecorationImage(
-                          image: NetworkImage(hotel.photoUrl!),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    )
-                  : const Icon(Icons.hotel, size: 50),
+              Container(
+                width: 150, // Largeur maximale de l'image
+                height: 150, // Hauteur maximale de l'image
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  image: DecorationImage(
+                    image: NetworkImage(hotel.photoUrl),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
               const SizedBox(height: 8),
               Text(hotel.name),
               const SizedBox(height: 4),
