@@ -179,29 +179,31 @@ class FilterBarState extends State<FilterBar> {
 
   // Méthode publique pour réinitialiser les filtres
   void resetFilters() {
-    // Reset rating filter
-    _isRatingFilterActive = false;
-    _minRating = 1.0;
-    _maxRating = 5.0;
-    
-    // Reset other filters
-    widget.selectedTagIdsNotifier.value = [];
-    widget.selectedWorkspacesNotifier.value = [];
-    
-    // Reset loading states
-    _tagsByType.keys.forEach((type) {
-      _loadingStates[type] = false;
+    setState(() {
+      // Reset rating filter
+      _isRatingFilterActive = false;
+      _minRating = 1.0;
+      _maxRating = 5.0;
+      
+      // Reset other filters
+      widget.selectedTagIdsNotifier.value = [];
+      widget.selectedWorkspacesNotifier.value = [];
+      
+      // Reset loading states
+      _tagsByType.keys.forEach((type) {
+        _loadingStates[type] = false;
+      });
+      _isLoadingWorkspaces = false;
+      
+      // Reset filter state
+      filterIsOn.value = false;
+      
+      // Force UI update
+      setState(() {});
+      
+      // Update filters
+      generalFilter();
     });
-    _isLoadingWorkspaces = false;
-    
-    // Reset filter state
-    filterIsOn.value = false;
-    
-    // Force UI update
-    setState(() {});
-    
-    // Update filters
-    generalFilter();
   }
 
   Future<List<Restaurant>> generalFilter() async {
@@ -594,7 +596,11 @@ class FilterBarState extends State<FilterBar> {
       child: ValueListenableBuilder<bool>(
         valueListenable: filterIsOn,
         builder: (context, isFilterOn, child) {
-          final isActive = _isRatingFilterActive && isFilterOn;
+          // Si filterIsOn est false, on force _isRatingFilterActive à false aussi
+          if (!isFilterOn && _isRatingFilterActive) {
+            _isRatingFilterActive = false;
+          }
+          
           return ElevatedButton(
             onPressed: () {
               showModalBottomSheet(
@@ -604,15 +610,13 @@ class FilterBarState extends State<FilterBar> {
                     initialMinRating: _minRating,
                     initialMaxRating: _maxRating,
                     onApply: (min, max) async {
-                      if (mounted) {
-                        setState(() {
-                          _minRating = min;
-                          _maxRating = max;
-                          _isRatingFilterActive = (min > 1.0 || max < 5.0);
-                        });
-                        if (_isRatingFilterActive) {
-                          filterIsOn.value = true;
-                        }
+                      setState(() {
+                        _minRating = min;
+                        _maxRating = max;
+                        _isRatingFilterActive = (min > 1.0 || max < 5.0);
+                      });
+                      if (_isRatingFilterActive) {
+                        filterIsOn.value = true;
                       }
                       await generalFilter();
                     },
@@ -621,14 +625,14 @@ class FilterBarState extends State<FilterBar> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: isActive ? AppColors.orangeButton : Colors.white,
-              foregroundColor: isActive ? Colors.white : AppColors.darkGrey,
+              backgroundColor: _isRatingFilterActive ? AppColors.orangeButton : Colors.white,
+              foregroundColor: _isRatingFilterActive ? Colors.white : AppColors.darkGrey,
               elevation: 2,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
-                  color: isActive ? AppColors.orangeButton : AppColors.darkGrey,
+                  color: _isRatingFilterActive ? AppColors.orangeButton : AppColors.darkGrey,
                   width: 1,
                 ),
               ),
@@ -639,15 +643,15 @@ class FilterBarState extends State<FilterBar> {
                 Icon(
                   Icons.star,
                   size: 18,
-                  color: isActive ? Colors.white : AppColors.darkGrey,
+                  color: _isRatingFilterActive ? Colors.white : AppColors.darkGrey,
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  isActive ? '${_minRating.toStringAsFixed(1)}-${_maxRating.toStringAsFixed(1)}' : 'Note',
+                  _isRatingFilterActive ? '${_minRating.toStringAsFixed(1)}-${_maxRating.toStringAsFixed(1)}' : 'Note',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: isActive ? Colors.white : AppColors.darkGrey,
+                    color: _isRatingFilterActive ? Colors.white : AppColors.darkGrey,
                   ),
                 ),
               ],
