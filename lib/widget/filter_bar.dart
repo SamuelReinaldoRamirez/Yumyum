@@ -9,6 +9,7 @@ import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/constant/theme.dart';
 import 'package:yummap/helper/workspace_options_modal.dart';
 import 'package:yummap/model/tag.dart';
+import 'package:yummap/model/workspace.dart';
 import '../helper/filter_options_modal.dart';
 import '../service/local_data_service.dart';
 
@@ -51,10 +52,17 @@ class FilterBarState extends State<FilterBar> {
   bool _isLoading = true;
   Map<String, List<Tag>> _tagsByType = {};
   Map<String, bool> _loadingStates = {};
+  bool _isLoadingWorkspaces = false;
+  List<int> _tempSelectedWorkspaces = [];
 
   @override
   void initState() {
     super.initState();
+    _loadInitialState();
+  }
+
+  Future<void> _loadInitialState() async {
+    await _localDataService.loadFollowedWorkspaces();
     _loadTags();
     _loadInitialRestaurants();
     _localDataService.tagsNotifier.addListener(_onTagsChanged);
@@ -155,19 +163,16 @@ class FilterBarState extends State<FilterBar> {
 
     // Si le filtre "compte suivi" est actif
     if (workspaceIds.contains(-1)) {
-      try {
-        // Récupérer les workspaces suivis depuis l'API
-        final followedWorkspaces = await CallEndpointService().searchWorkspacesByAliass(['followed']);
-        print('Workspaces suivis récupérés : ${followedWorkspaces.length}');
-        
-        // Extraire les IDs des workspaces suivis
-        final followedIds = followedWorkspaces.map((w) => w.id).toList();
-        workspaceIds.remove(-1); // Enlever le marqueur spécial -1
-        workspaceIds.addAll(followedIds); // Ajouter les IDs des workspaces suivis
-      } catch (e) {
-        print('Erreur lors de la récupération des workspaces suivis : $e');
-        workspaceIds = [];
-      }
+      // Utiliser la liste locale des workspaces suivis
+      final followedWorkspaces = _localDataService.getFollowedWorkspaces();
+      print('Workspaces suivis locaux : ${followedWorkspaces.length}');
+      
+      // Extraire les IDs des workspaces suivis
+      final followedIds = followedWorkspaces.map((w) => w.id).toList();
+      workspaceIds.remove(-1);
+      workspaceIds.addAll(followedIds);
+      
+      print('Workspaces après ajout des suivis : $workspaceIds');
     }
 
     // Utiliser l'endpoint pour récupérer les restaurants filtrés
@@ -278,48 +283,221 @@ class FilterBarState extends State<FilterBar> {
 
   Widget _buildWorkspaceButton() {
     final selectedCount = widget.selectedWorkspacesNotifier.value.length;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4.0),
-      height: 36,
-      child: ElevatedButton(
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: TextButton(
         onPressed: () {
-          showModalBottomSheet<void>(
+          // Initialiser la sélection temporaire avec la sélection actuelle
+          _tempSelectedWorkspaces = List<int>.from(widget.selectedWorkspacesNotifier.value);
+          
+          // Afficher le modal des comptes suivis
+          showModalBottomSheet(
             context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
             builder: (BuildContext context) {
-              return WorkspaceOptionsModal(
-                initialSelectedWorkspaces: widget.selectedWorkspacesNotifier.value,
-                onApply: (selectedIds) {
-                  setState(() {
-                    widget.selectedWorkspacesNotifier.value = selectedIds;
-                  });
-                  generalFilter();
+              return StatefulBuilder(
+                builder: (BuildContext context, StateSetter setModalState) {
+                  return Container(
+                    height: MediaQuery.of(context).size.height * 0.6,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: Colors.grey,
+                                width: 0.5,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Text(
+                                'Comptes suivis',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Spacer(),
+                              IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: ValueListenableBuilder<List<Workspace>>(
+                            valueListenable: _localDataService.followedWorkspacesNotifier,
+                            builder: (context, followedWorkspaces, child) {
+                              if (followedWorkspaces.isEmpty) {
+                                return Container(
+                                  padding: const EdgeInsets.all(20),
+                                  child: const Center(
+                                    child: Text(
+                                      'Aucun compte suivi pour le moment',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: AppColors.darkGrey,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              return ListView.builder(
+                                padding: const EdgeInsets.all(8),
+                                itemCount: followedWorkspaces.length,
+                                itemBuilder: (context, index) {
+                                  final workspace = followedWorkspaces[index];
+                                  final isSelected = _tempSelectedWorkspaces.contains(workspace.id);
+
+                                  return ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    title: Text(
+                                      workspace.name,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    trailing: Checkbox(
+                                      value: isSelected,
+                                      activeColor: AppColors.orangeButton,
+                                      onChanged: (bool? value) {
+                                        setModalState(() {
+                                          if (value ?? false) {
+                                            if (!_tempSelectedWorkspaces.contains(workspace.id)) {
+                                              _tempSelectedWorkspaces.add(workspace.id);
+                                            }
+                                          } else {
+                                            _tempSelectedWorkspaces.remove(workspace.id);
+                                          }
+                                        });
+                                      },
+                                    ),
+                                    onTap: () {
+                                      setModalState(() {
+                                        if (_tempSelectedWorkspaces.contains(workspace.id)) {
+                                          _tempSelectedWorkspaces.remove(workspace.id);
+                                        } else {
+                                          _tempSelectedWorkspaces.add(workspace.id);
+                                        }
+                                      });
+                                    },
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              top: BorderSide(
+                                color: Colors.grey,
+                                width: 0.5,
+                              ),
+                            ),
+                          ),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.orangeButton,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: () async {
+                                Navigator.pop(context);
+                                setState(() {
+                                  _isLoadingWorkspaces = true;
+                                });
+                                
+                                try {
+                                  // Mettre à jour la sélection
+                                  widget.selectedWorkspacesNotifier.value = _tempSelectedWorkspaces;
+                                  
+                                  // Appeler la fonction de filtrage
+                                  await generalFilter();
+                                } finally {
+                                  setState(() {
+                                    _isLoadingWorkspaces = false;
+                                  });
+                                }
+                              },
+                              child: const Text(
+                                'Appliquer',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 },
-                parentState: this,
               );
             },
           );
         },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: selectedCount > 0 ? AppColors.orangeButton : Colors.white,
-          foregroundColor: selectedCount > 0 ? Colors.white : AppColors.darkGrey,
-          elevation: 2,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(
-              color: selectedCount > 0 ? AppColors.orangeButton : AppColors.darkGrey,
-              width: 1,
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(
+            selectedCount > 0 ? AppColors.orangeButton : Colors.white,
+          ),
+          foregroundColor: MaterialStateProperty.all(
+            selectedCount > 0 ? Colors.white : AppColors.darkGrey,
+          ),
+          padding: MaterialStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 12),
+          ),
+          shape: MaterialStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: selectedCount > 0 ? AppColors.orangeButton : AppColors.darkGrey,
+                width: 1,
+              ),
             ),
           ),
         ),
-        child: Text(
-          'Comptes Suivis${selectedCount > 0 ? ' ($selectedCount)' : ''}',
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        child: _isLoadingWorkspaces
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+          : Text(
+              'Comptes Suivis${selectedCount > 0 ? ' ($selectedCount)' : ''}',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
       ),
     );
   }
@@ -334,23 +512,19 @@ class FilterBarState extends State<FilterBar> {
         child: Row(
           children: [
             const SizedBox(width: 10),
-            Container(
-              width: MediaQuery.of(context).size.width * (8 / 100),
-              child: FractionallySizedBox(
-                alignment: Alignment.center,
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.orangeButton,
-                  ),
-                  padding: const EdgeInsets.all(5),
-                  child: const Icon(
+            ValueListenableBuilder<bool>(
+              valueListenable: filterIsOn,
+              builder: (context, isFilterOn, child) {
+                return IconButton(
+                  icon: Icon(
                     Icons.filter_list,
-                    color: Colors.white,
-                    size: 25,
+                    color: isFilterOn ? AppColors.orangeButton : AppColors.darkGrey,
                   ),
-                ),
-              ),
+                  onPressed: () async {
+                    await generalFilter();
+                  },
+                );
+              },
             ),
             if (!_isLoading)
               Expanded(

@@ -1,19 +1,29 @@
 import 'package:flutter/foundation.dart';
 import '../model/tag.dart';
 import '../model/restaurant.dart';
+import '../model/workspace.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class LocalDataService {
   static final LocalDataService _instance = LocalDataService._internal();
-  factory LocalDataService() => _instance;
-  LocalDataService._internal();
-
-  final ValueNotifier<List<Tag>> _tagsNotifier = ValueNotifier<List<Tag>>([]);
-  final ValueNotifier<List<Restaurant>> _restaurantsNotifier = ValueNotifier<List<Restaurant>>([]);
+  static final ValueNotifier<List<Tag>> _tagsNotifier = ValueNotifier<List<Tag>>([]);
+  static final ValueNotifier<List<Restaurant>> _restaurantsNotifier = ValueNotifier<List<Restaurant>>([]);
+  static final ValueNotifier<List<Workspace>> _followedWorkspacesNotifier = ValueNotifier<List<Workspace>>([]);
   
+  final Map<String, List<Tag>> _tagsByType = {};
+
+  LocalDataService._internal() {
+    loadFollowedWorkspaces(); // Charger les workspaces suivis au démarrage
+  }
+
+  factory LocalDataService() {
+    return _instance;
+  }
+
   ValueNotifier<List<Tag>> get tagsNotifier => _tagsNotifier;
   ValueNotifier<List<Restaurant>> get restaurantsNotifier => _restaurantsNotifier;
-
-  final Map<String, List<Tag>> _tagsByType = {};
+  ValueNotifier<List<Workspace>> get followedWorkspacesNotifier => _followedWorkspacesNotifier;
 
   void setTags(List<Tag> tags) {
     _tagsNotifier.value = tags;
@@ -83,5 +93,56 @@ class LocalDataService {
   // Récupérer la liste complète des restaurants
   List<Restaurant> getRestaurants() {
     return List.from(_restaurantsNotifier.value);
+  }
+
+  // Ajouter un workspace à la liste des suivis
+  void addFollowedWorkspace(Workspace workspace) {
+    final currentWorkspaces = List<Workspace>.from(followedWorkspacesNotifier.value);
+    if (!currentWorkspaces.any((w) => w.id == workspace.id)) {
+      currentWorkspaces.add(workspace);
+      followedWorkspacesNotifier.value = currentWorkspaces;
+      _saveFollowedWorkspaces(currentWorkspaces);
+    }
+  }
+
+  // Retirer un workspace de la liste des suivis
+  void removeFollowedWorkspace(int workspaceId) {
+    final currentWorkspaces = List<Workspace>.from(followedWorkspacesNotifier.value);
+    currentWorkspaces.removeWhere((w) => w.id == workspaceId);
+    followedWorkspacesNotifier.value = currentWorkspaces;
+    _saveFollowedWorkspaces(currentWorkspaces);
+  }
+
+  // Sauvegarder la liste des workspaces suivis dans SharedPreferences
+  Future<void> _saveFollowedWorkspaces(List<Workspace> workspaces) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final workspacesJson = workspaces.map((w) => jsonEncode(w.toJson())).toList();
+      await prefs.setStringList('followed_workspaces', workspacesJson);
+      print('Workspaces sauvegardés: ${workspaces.length}');
+    } catch (e) {
+      print('Erreur lors de la sauvegarde des workspaces suivis: $e');
+    }
+  }
+
+  // Charger la liste des workspaces suivis depuis SharedPreferences
+  Future<void> loadFollowedWorkspaces() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final workspacesJson = prefs.getStringList('followed_workspaces') ?? [];
+      final workspaces = workspacesJson
+          .map((json) => Workspace.fromJson(jsonDecode(json)))
+          .toList();
+      followedWorkspacesNotifier.value = workspaces;
+      print('Workspaces chargés: ${workspaces.length}');
+    } catch (e) {
+      print('Erreur lors du chargement des workspaces suivis: $e');
+      followedWorkspacesNotifier.value = [];
+    }
+  }
+
+  // Récupérer la liste des workspaces suivis
+  List<Workspace> getFollowedWorkspaces() {
+    return List.from(_followedWorkspacesNotifier.value);
   }
 }

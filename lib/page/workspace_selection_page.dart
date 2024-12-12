@@ -9,6 +9,7 @@ import 'package:yummap/model/workspace.dart'; // Importez le modèle de données
 import 'package:yummap/model/restaurant.dart'; // Importez le modèle de données Restaurant si nécessaire
 import '../constant/theme.dart'; // Importez les thèmes
 import 'package:yummap/widget/filter_bar.dart';
+import 'package:yummap/service/local_data_service.dart';
 
 class WorkspaceSelectionPage extends StatelessWidget {
   final List<Workspace> workspaces;
@@ -150,22 +151,55 @@ class WorkspaceItem extends StatefulWidget {
 
 class _WorkspaceItemState extends State<WorkspaceItem> {
   late Future<List<String>> _aliasListFuture;
+  bool _isLoading = false;
+  final LocalDataService _localDataService = LocalDataService();
+  final CallEndpointService _callEndpointService = CallEndpointService();
 
   @override
   void initState() {
     super.initState();
-    _aliasListFuture = _getPreferences();
+    _loadInitialState();
   }
 
-  Future<List<String>> _getPreferences() async {
+  Future<void> _loadInitialState() async {
+    _aliasListFuture = _loadAliasList();
+    await _localDataService.loadFollowedWorkspaces();
+    // Vérifier si le workspace est déjà suivi
+    if (_localDataService.followedWorkspacesNotifier.value
+        .any((w) => w.id == widget.workspace.id)) {
+      setState(() {
+        widget.workspace.isFollowed = true;
+      });
+    }
+  }
+
+  Future<List<String>> _loadAliasList() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getStringList('workspaceAliases') ?? [];
   }
 
-  void _updatePreferences() {
-    setState(() {
-      _aliasListFuture = _getPreferences();
-    });
+  Future<void> _handleFollowToggle(Workspace workspace) async {
+    try {
+      final isCurrentlyFollowed = _localDataService.followedWorkspacesNotifier.value
+          .any((w) => w.id == workspace.id);
+
+      if (isCurrentlyFollowed) {
+        _localDataService.removeFollowedWorkspace(workspace.id);
+      } else {
+        _localDataService.addFollowedWorkspace(workspace);
+      }
+
+      setState(() {
+        workspace.isFollowed = !isCurrentlyFollowed;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erreur lors de la modification du suivi'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -226,9 +260,8 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                     TextButton(
                       onPressed: () async {
                         List<Restaurant> restaurants =
-                            await CallEndpointService()
-                                .getRestaurantsByTagsAndWorkspaces(
-                                    [], [widget.workspace.id]);
+                            await _callEndpointService.getRestaurantsByTagsAndWorkspaces(
+                                [], [widget.workspace.id]);
                         if (restaurants.isNotEmpty) {
                           // Afficher les restaurants sur la carte
                           MarkerManager.createFull(
@@ -250,8 +283,8 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                       },
                       style: ButtonStyle(
                         elevation:
-                            WidgetStateProperty.all(15.0), // Ajout d'élévation
-                        shape: WidgetStateProperty.all(
+                            MaterialStateProperty.all(15.0), // Ajout d'élévation
+                        shape: MaterialStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                             side: BorderSide(
@@ -266,73 +299,15 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                       ),
                     ),
                     const SizedBox(width: 10.0),
-                    if (!isFollowing)
-                      TextButton(
-                        onPressed: () async {
-                          // Action pour le bouton "Suivre"
-                          SharedPreferences prefs =
-                              await SharedPreferences.getInstance();
-                          List<String> aliasListMemory =
-                              prefs.getStringList('workspaceAliases') ?? [];
-                          aliasListMemory.add(widget.workspace.alias);
-                          await prefs.setStringList(
-                              'workspaceAliases', aliasListMemory);
-                          _updatePreferences();
-                          FilterBar.showAccounts();
-                        },
-                        style: ButtonStyle(
-                          elevation: WidgetStateProperty.all(
-                              15.0), // Ajout d'élévation
-                          shape: WidgetStateProperty.all(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                              side: const BorderSide(
-                                  color: AppColors
-                                      .lightGreen), // Bordure plus claire
-                            ),
-                          ),
-                        ),
-                        child: const Text(
-                          'Suivre',
-                          style: TextStyle(color: AppColors.lightGreen),
-                        ),
+                    IconButton(
+                      icon: Icon(
+                        widget.workspace.isFollowed ? Icons.check_circle : Icons.add_circle_outline,
+                        color: widget.workspace.isFollowed ? AppColors.orangeButton : Colors.white,
+                        size: 28,
                       ),
-                    if (isFollowing)
-                      TextButton(
-                        onPressed: () async {
-                          SharedPreferences prefs =
-                              await SharedPreferences.getInstance();
-                          List<String> aliasListMemory =
-                              prefs.getStringList('workspaceAliases') ?? [];
-                          // Supprimer l'ancien alias s'il existe déjà
-                          aliasListMemory.remove(widget.workspace.alias);
-                          await prefs.setStringList(
-                              'workspaceAliases', aliasListMemory);
-                          _updatePreferences();
-
-                          // Vérifier s'il y a encore des comptes suivis
-                          if (aliasListMemory.isEmpty) {
-                            FilterBar.hideAccounts();
-                          }
-                        },
-                        style: ButtonStyle(
-                          elevation: WidgetStateProperty.all(
-                              15.0), // Ajout d'élévation
-                          shape: WidgetStateProperty.all(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                              side: BorderSide(
-                                color: Colors.white
-                                    .withOpacity(0.5), // Bordure plus claire
-                              ),
-                            ),
-                          ),
-                        ),
-                        child: const Text(
-                          'Désabonner',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
+                      onPressed: () => _handleFollowToggle(widget.workspace),
+                      tooltip: widget.workspace.isFollowed ? 'Ne plus suivre' : 'Suivre',
+                    ),
                   ],
                 ),
               ],

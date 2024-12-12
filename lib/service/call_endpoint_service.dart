@@ -391,4 +391,62 @@ class CallEndpointService {
       throw Exception('Failed to search restaurants by place IDs: $e');
     }
   }
+
+  Future<void> addToFollowed(int workspaceId) async {
+    if (rootUrl.isEmpty) {
+      throw Exception('Service not initialized. Call init() first.');
+    }
+
+    String url = '$rootUrl/workspace/follow';  
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({
+          'workspace_id': workspaceId,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        final errorMessage = response.body.isNotEmpty 
+            ? json.decode(response.body)['message'] ?? 'Failed to add workspace to followed'
+            : 'Failed to add workspace to followed';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      logger.e('Failed to add workspace to followed: $e');
+      throw Exception('Failed to add workspace to followed: $e');
+    }
+  }
+
+  Future<void> removeFromFollowed(int workspaceId) async {
+    if (rootUrl.isEmpty) {
+      throw Exception('Service not initialized. Call init() first.');
+    }
+
+    String url = '$rootUrl/workspace/unfollow';  
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({
+          'workspace_id': workspaceId,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        final errorMessage = response.body.isNotEmpty 
+            ? json.decode(response.body)['message'] ?? 'Failed to remove workspace from followed'
+            : 'Failed to remove workspace from followed';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      logger.e('Failed to remove workspace from followed: $e');
+      throw Exception('Failed to remove workspace from followed: $e');
+    }
+  }
 }

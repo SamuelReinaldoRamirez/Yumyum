@@ -5,12 +5,14 @@ class Workspace {
   final String name;
   final String alias;
   final List<String> restaurants_placeId;
+  bool isFollowed;
 
   Workspace({
     required this.id,
     required this.name,
     required this.alias,
     required this.restaurants_placeId,
+    this.isFollowed = false,
   });
 
   factory Workspace.fromJson(Map<String, dynamic> json) {
@@ -36,8 +38,18 @@ class Workspace {
       name: json['name'] ?? '',
       alias: json['alias'] ?? '',
       restaurants_placeId: restaurantsPlaceid,
+      isFollowed: json['is_followed'] ?? false,
     );
   }
 
   get placeIds => restaurants_placeId;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'alias': alias,
+      'is_followed': isFollowed,
+    };
+  }
 }
