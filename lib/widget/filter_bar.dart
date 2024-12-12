@@ -12,6 +12,7 @@ import 'package:yummap/model/tag.dart';
 import 'package:yummap/model/workspace.dart';
 import '../helper/filter_options_modal.dart';
 import '../service/local_data_service.dart';
+import '../helper/rating_filter_modal.dart';
 
 class FilterBar extends StatefulWidget implements PreferredSizeWidget {
   final ValueNotifier<List<int>> selectedTagIdsNotifier;
@@ -54,6 +55,9 @@ class FilterBarState extends State<FilterBar> {
   Map<String, bool> _loadingStates = {};
   bool _isLoadingWorkspaces = false;
   List<int> _tempSelectedWorkspaces = [];
+  double _minRating = 1.0;
+  double _maxRating = 5.0;
+  bool _isRatingFilterActive = false;
 
   @override
   void initState() {
@@ -151,6 +155,55 @@ class FilterBarState extends State<FilterBar> {
     });
   }
 
+  void _resetFilters() {
+    setState(() {
+      // Reset rating filter
+      _isRatingFilterActive = false;
+      _minRating = 1.0;
+      _maxRating = 5.0;
+      
+      // Reset other filters
+      widget.selectedTagIdsNotifier.value = [];
+      widget.selectedWorkspacesNotifier.value = [];
+      
+      // Reset loading states
+      _tagsByType.keys.forEach((type) {
+        _loadingStates[type] = false;
+      });
+      _isLoadingWorkspaces = false;
+    });
+    
+    // Update filters
+    generalFilter();
+  }
+
+  // Méthode publique pour réinitialiser les filtres
+  void resetFilters() {
+    // Reset rating filter
+    _isRatingFilterActive = false;
+    _minRating = 1.0;
+    _maxRating = 5.0;
+    
+    // Reset other filters
+    widget.selectedTagIdsNotifier.value = [];
+    widget.selectedWorkspacesNotifier.value = [];
+    
+    // Reset loading states
+    _tagsByType.keys.forEach((type) {
+      _loadingStates[type] = false;
+    });
+    _isLoadingWorkspaces = false;
+    
+    // Reset filter state
+    filterIsOn.value = false;
+    
+    // Force UI update
+    setState(() {});
+    
+    // Update filters
+    generalFilter();
+  }
+
   Future<List<Restaurant>> generalFilter() async {
     List<int> filterTags = widget.selectedTagIdsNotifier.value;
     List<int> workspaceIds = widget.selectedWorkspacesNotifier.value;
@@ -158,6 +211,10 @@ class FilterBarState extends State<FilterBar> {
     print('Application des filtres :');
     print('- Tags sélectionnés : $filterTags');
     print('- Workspaces sélectionnés : $workspaceIds');
+    print('- Filtre de note actif : $_isRatingFilterActive');
+    if (_isRatingFilterActive) {
+      print('- Plage de notes : ${_minRating.toStringAsFixed(1)} - ${_maxRating.toStringAsFixed(1)}');
+    }
 
     List<Restaurant> filteredRestaurants;
 
@@ -180,19 +237,33 @@ class FilterBarState extends State<FilterBar> {
       filteredRestaurants = await CallEndpointService()
           .getRestaurantsByTagsAndWorkspaces(filterTags, workspaceIds);
       print('Restaurants filtrés depuis Xano : ${filteredRestaurants.length}');
+
+      // Appliquer le filtre de note si actif
+      if (_isRatingFilterActive) {
+        print('Application du filtre de note...');
+        filteredRestaurants = filteredRestaurants.where((restaurant) {
+          // Vérifier si le restaurant a une note valide
+          if (restaurant.ratings > 0) {
+            final bool isInRange = restaurant.ratings >= _minRating && restaurant.ratings <= _maxRating;
+            print('Restaurant ${restaurant.name}: Note ${restaurant.ratings} - Dans la plage: $isInRange');
+            return isInRange;
+          }
+          return false; // Exclure les restaurants sans note
+        }).toList();
+        print('Après filtre de note : ${filteredRestaurants.length} restaurants');
+      }
+
     } catch (e) {
       print('Erreur lors du filtrage des restaurants : $e');
       filteredRestaurants = [];
     }
 
-    if (workspaceIds.isEmpty && filterTags.isEmpty) {
+    // Mettre à jour filterIsOn en fonction de tous les filtres actifs
+    if (workspaceIds.isEmpty && filterTags.isEmpty && !_isRatingFilterActive) {
       filterIsOn.value = false;
     } else {
       filterIsOn.value = true;
     }
-
-    print(
-        'Résultat du filtrage : ${filteredRestaurants.length} restaurants trouvés');
 
     if (MarkerManager.context != null) {
       print('Mise à jour des marqueurs sur la carte');
@@ -517,6 +588,82 @@ class FilterBarState extends State<FilterBar> {
     );
   }
 
+  Widget _buildRatingFilterButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: filterIsOn,
+        builder: (context, isFilterOn, child) {
+          final isActive = _isRatingFilterActive && isFilterOn;
+          return ElevatedButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return RatingFilterModal(
+                    initialMinRating: _minRating,
+                    initialMaxRating: _maxRating,
+                    onApply: (min, max) async {
+                      if (mounted) {
+                        setState(() {
+                          _minRating = min;
+                          _maxRating = max;
+                          _isRatingFilterActive = (min > 1.0 || max < 5.0);
+                        });
+                        if (_isRatingFilterActive) {
+                          filterIsOn.value = true;
+                        }
+                      }
+                      await generalFilter();
+                    },
+                  );
+                },
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isActive ? AppColors.orangeButton : Colors.white,
+              foregroundColor: isActive ? Colors.white : AppColors.darkGrey,
+              elevation: 2,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(
+                  color: isActive ? AppColors.orangeButton : AppColors.darkGrey,
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.star,
+                  size: 18,
+                  color: isActive ? Colors.white : AppColors.darkGrey,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  isActive ? '${_minRating.toStringAsFixed(1)}-${_maxRating.toStringAsFixed(1)}' : 'Note',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: isActive ? Colors.white : AppColors.darkGrey,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  bool _hasActiveFilters() {
+    return widget.selectedTagIdsNotifier.value.isNotEmpty ||
+        widget.selectedWorkspacesNotifier.value.isNotEmpty ||
+        _isRatingFilterActive;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -537,9 +684,7 @@ class FilterBarState extends State<FilterBar> {
                         ? AppColors.orangeButton
                         : AppColors.darkGrey,
                   ),
-                  onPressed: () async {
-                    await generalFilter();
-                  },
+                  onPressed: isFilterOn ? resetFilters : null,
                 );
               },
             ),
@@ -561,7 +706,7 @@ class FilterBarState extends State<FilterBar> {
                         }
                         return const SizedBox.shrink();
                       }),
-                      // Bouton Comptes Suivis
+                      _buildRatingFilterButton(),
                       ValueListenableBuilder<bool>(
                         valueListenable: FilterBar.showFollowedAccounts,
                         builder: (context, show, child) {

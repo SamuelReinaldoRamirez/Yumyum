@@ -3,9 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:yummap/helper/bottom_sheet_helper.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
-import 'package:yummap/constant/global.dart';
-import 'package:yummap/helper/map_helper.dart';
 import 'package:yummap/service/mixpanel_service.dart';
+import 'package:yummap/widget/filter_bar.dart';
+import 'package:yummap/helper/map_helper.dart';
+import 'package:yummap/constant/global.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/constant/theme.dart';
 import 'package:yummap/model/workspace.dart';
@@ -100,6 +101,13 @@ class _SearchBarState extends State<SearchBar> {
               _clearSearch(context);
               MarkerManager.resetMarkers();
               filterIsOn.value = false;
+              // Reset les filtres de notes
+              if (context.mounted) {
+                final filterBarState = context.findAncestorStateOfType<FilterBarState>();
+                if (filterBarState != null) {
+                  filterBarState.resetFilters();
+                }
+              }
             },
           ),
         ),
