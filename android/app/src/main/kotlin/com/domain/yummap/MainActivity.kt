@@ -1,4 +1,4 @@
-package com.example.yummap
+package com.domain.yummap
 
 import io.flutter.embedding.android.FlutterActivity
 
