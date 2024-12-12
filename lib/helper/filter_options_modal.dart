@@ -36,30 +36,13 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
     selectedTagIds = Set.from(widget.initialSelectedTagIds);
   }
 
-  List<Widget> _buildTagList() {
-    return widget.tags.map((tag) {
-      return CheckboxListTile(
-        title: Text(tag.tag),
-        value: selectedTagIds.contains(tag.id),
-        onChanged: (bool? value) {
-          setState(() {
-            if (value == true) {
-              selectedTagIds.add(tag.id);
-            } else {
-              selectedTagIds.remove(tag.id);
-            }
-          });
-        },
-      );
-    }).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -67,26 +50,87 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
               Text(
                 widget.filterType ?? 'Filtres',
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              TextButton(
-                onPressed: () {
-                  widget.onApply(selectedTagIds.toList());
-                  Navigator.of(context).pop();
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.orangeButton,
-                ),
-                child: const Text('Appliquer'),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView(
-              children: _buildTagList(),
+            child: widget.tags.isEmpty
+                ? Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(16),
+                    child: const Text(
+                      'Aucun filtre disponible',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: widget.tags.length,
+                    itemBuilder: (context, index) {
+                      final tag = widget.tags[index];
+                      final isSelected = selectedTagIds.contains(tag.id);
+
+                      return ListTile(
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 16),
+                        title: Text(tag.tag),
+                        trailing: Checkbox(
+                          value: isSelected,
+                          activeColor: AppColors.orangeButton,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (value == true) {
+                                selectedTagIds.add(tag.id);
+                              } else {
+                                selectedTagIds.remove(tag.id);
+                              }
+                            });
+                          },
+                        ),
+                        onTap: () {
+                          setState(() {
+                            if (isSelected) {
+                              selectedTagIds.remove(tag.id);
+                            } else {
+                              selectedTagIds.add(tag.id);
+                            }
+                          });
+                        },
+                      );
+                    },
+                  ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.orangeButton,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () {
+              widget.onApply(selectedTagIds.toList());
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Appliquer',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
