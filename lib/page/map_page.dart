@@ -70,7 +70,8 @@ class MapPageState extends State<MapPage> {
 
   void _startLocationUpdates() {
     // Mise à jour régulière de la position toutes les 3 secondes
-    _locationUpdateTimer = Timer.periodic(Duration(seconds: 3), (_) async {
+    _locationUpdateTimer =
+        Timer.periodic(const Duration(seconds: 3), (_) async {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
       setState(() {
@@ -145,9 +146,9 @@ class MapPageState extends State<MapPage> {
             right: 16.0,
             child: FloatingActionButton(
               onPressed: _centercamera,
-              child: Icon(Icons.my_location),
               backgroundColor: Colors.white,
               foregroundColor: Colors.black,
+              child: const Icon(Icons.my_location),
             ),
           ),
         ],

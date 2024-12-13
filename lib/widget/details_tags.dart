@@ -1,5 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
 import 'package:yummap/model/restaurant.dart';

@@ -1,13 +1,9 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
 import 'package:yummap/constant/global.dart';
 import 'package:yummap/helper/map_helper.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/constant/theme.dart';
-import 'package:yummap/helper/workspace_options_modal.dart';
 import 'package:yummap/model/tag.dart';
 import 'package:yummap/model/workspace.dart';
 import '../helper/filter_options_modal.dart';
@@ -52,12 +48,13 @@ class FilterBarState extends State<FilterBar> {
   final LocalDataService _localDataService = LocalDataService();
   bool _isLoading = true;
   Map<String, List<Tag>> _tagsByType = {};
-  Map<String, bool> _loadingStates = {};
+  final Map<String, bool> _loadingStates = {};
   bool _isLoadingWorkspaces = false;
   List<int> _tempSelectedWorkspaces = [];
   double _minRating = 1.0;
   double _maxRating = 5.0;
   bool _isRatingFilterActive = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -65,16 +62,9 @@ class FilterBarState extends State<FilterBar> {
     _loadInitialState();
   }
 
-  Future<void> _loadInitialState() async {
-    await _localDataService.loadFollowedWorkspaces();
-    _loadTags();
-    _loadInitialRestaurants();
-    _localDataService.tagsNotifier.addListener(_onTagsChanged);
-    widget.selectedTagIdsNotifier.addListener(_onSelectedTagsChanged);
-  }
-
   @override
   void dispose() {
+    _scrollController.dispose();
     _localDataService.tagsNotifier.removeListener(_onTagsChanged);
     widget.selectedTagIdsNotifier.removeListener(_onSelectedTagsChanged);
     super.dispose();
@@ -95,26 +85,29 @@ class FilterBarState extends State<FilterBar> {
       setState(() {
         _tagsByType = _localDataService.getTagsByType();
         _isLoading = false;
-        _tagsByType.keys.forEach((type) {
+        for (var type in _tagsByType.keys) {
           _loadingStates[type] = false;
-        });
+        }
       });
     }
   }
 
+  Future<void> _loadInitialState() async {
+    await _localDataService.loadFollowedWorkspaces();
+    _loadTags();
+    _loadInitialRestaurants();
+    _localDataService.tagsNotifier.addListener(_onTagsChanged);
+    widget.selectedTagIdsNotifier.addListener(_onSelectedTagsChanged);
+  }
+
   Future<void> _loadInitialRestaurants() async {
     try {
-      print('Chargement des restaurants initiaux...');
       final restaurants = await CallEndpointService().getRestaurantsFromXanos();
-      print('${restaurants.length} restaurants chargés');
 
       if (mounted) {
-        print('Mise à jour du LocalDataService avec les restaurants');
         _localDataService.setRestaurants(restaurants);
       }
-    } catch (e) {
-      print('Erreur lors du chargement des restaurants: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> _loadTags() async {
@@ -129,9 +122,9 @@ class FilterBarState extends State<FilterBar> {
         setState(() {
           _tagsByType = _localDataService.getTagsByType();
           _isLoading = false;
-          _tagsByType.keys.forEach((type) {
+          for (var type in _tagsByType.keys) {
             _loadingStates[type] = false;
-          });
+          }
         });
       }
     } catch (e) {
@@ -147,36 +140,6 @@ class FilterBarState extends State<FilterBar> {
     setState(() {});
   }
 
-  Future<void> _lookPref() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      List<String> aliasList = prefs.getStringList('workspaceAliases') ?? [];
-      FilterBar.showFollowedAccounts.value = aliasList.isNotEmpty;
-    });
-  }
-
-  void _resetFilters() {
-    setState(() {
-      // Reset rating filter
-      _isRatingFilterActive = false;
-      _minRating = 1.0;
-      _maxRating = 5.0;
-      
-      // Reset other filters
-      widget.selectedTagIdsNotifier.value = [];
-      widget.selectedWorkspacesNotifier.value = [];
-      
-      // Reset loading states
-      _tagsByType.keys.forEach((type) {
-        _loadingStates[type] = false;
-      });
-      _isLoadingWorkspaces = false;
-    });
-    
-    // Update filters
-    generalFilter();
-  }
-
   // Méthode publique pour réinitialiser les filtres
   void resetFilters() {
     setState(() {
@@ -184,23 +147,23 @@ class FilterBarState extends State<FilterBar> {
       _isRatingFilterActive = false;
       _minRating = 1.0;
       _maxRating = 5.0;
-      
+
       // Reset other filters
       widget.selectedTagIdsNotifier.value = [];
       widget.selectedWorkspacesNotifier.value = [];
-      
+
       // Reset loading states
-      _tagsByType.keys.forEach((type) {
+      for (var type in _tagsByType.keys) {
         _loadingStates[type] = false;
-      });
+      }
       _isLoadingWorkspaces = false;
-      
+
       // Reset filter state
       filterIsOn.value = false;
-      
+
       // Force UI update
       setState(() {});
-      
+
       // Update filters
       generalFilter();
     });
@@ -210,13 +173,7 @@ class FilterBarState extends State<FilterBar> {
     List<int> filterTags = widget.selectedTagIdsNotifier.value;
     List<int> workspaceIds = widget.selectedWorkspacesNotifier.value;
 
-    print('Application des filtres :');
-    print('- Tags sélectionnés : $filterTags');
-    print('- Workspaces sélectionnés : $workspaceIds');
-    print('- Filtre de note actif : $_isRatingFilterActive');
-    if (_isRatingFilterActive) {
-      print('- Plage de notes : ${_minRating.toStringAsFixed(1)} - ${_maxRating.toStringAsFixed(1)}');
-    }
+    if (_isRatingFilterActive) {}
 
     List<Restaurant> filteredRestaurants;
 
@@ -224,39 +181,31 @@ class FilterBarState extends State<FilterBar> {
     if (workspaceIds.contains(-1)) {
       // Utiliser la liste locale des workspaces suivis
       final followedWorkspaces = _localDataService.getFollowedWorkspaces();
-      print('Workspaces suivis locaux : ${followedWorkspaces.length}');
 
       // Extraire les IDs des workspaces suivis
       final followedIds = followedWorkspaces.map((w) => w.id).toList();
       workspaceIds.remove(-1);
       workspaceIds.addAll(followedIds);
-
-      print('Workspaces après ajout des suivis : $workspaceIds');
     }
 
     // Utiliser l'endpoint pour récupérer les restaurants filtrés
     try {
       filteredRestaurants = await CallEndpointService()
           .getRestaurantsByTagsAndWorkspaces(filterTags, workspaceIds);
-      print('Restaurants filtrés depuis Xano : ${filteredRestaurants.length}');
 
       // Appliquer le filtre de note si actif
       if (_isRatingFilterActive) {
-        print('Application du filtre de note...');
         filteredRestaurants = filteredRestaurants.where((restaurant) {
           // Vérifier si le restaurant a une note valide
           if (restaurant.ratings > 0) {
-            final bool isInRange = restaurant.ratings >= _minRating && restaurant.ratings <= _maxRating;
-            print('Restaurant ${restaurant.name}: Note ${restaurant.ratings} - Dans la plage: $isInRange');
+            final bool isInRange = restaurant.ratings >= _minRating &&
+                restaurant.ratings <= _maxRating;
             return isInRange;
           }
           return false; // Exclure les restaurants sans note
         }).toList();
-        print('Après filtre de note : ${filteredRestaurants.length} restaurants');
       }
-
     } catch (e) {
-      print('Erreur lors du filtrage des restaurants : $e');
       filteredRestaurants = [];
     }
 
@@ -267,10 +216,7 @@ class FilterBarState extends State<FilterBar> {
       filterIsOn.value = true;
     }
 
-    if (MarkerManager.context != null) {
-      print('Mise à jour des marqueurs sur la carte');
-      MarkerManager.createFull(MarkerManager.context, filteredRestaurants);
-    }
+    MarkerManager.createFull(MarkerManager.context, filteredRestaurants);
 
     return filteredRestaurants;
   }
@@ -325,6 +271,7 @@ class FilterBarState extends State<FilterBar> {
                       initialSelectedTagIds:
                           widget.selectedTagIdsNotifier.value,
                       onApply: (selectedIds) async {
+                        _scrollToStart();
                         setState(() {
                           _loadingStates[type] = true;
                           widget.selectedTagIdsNotifier.value = selectedIds;
@@ -457,9 +404,11 @@ class FilterBarState extends State<FilterBar> {
                                       shrinkWrap: true,
                                       itemCount: followedWorkspaces.length,
                                       itemBuilder: (context, index) {
-                                        final workspace = followedWorkspaces[index];
-                                        final isSelected = _tempSelectedWorkspaces
-                                            .contains(workspace.id);
+                                        final workspace =
+                                            followedWorkspaces[index];
+                                        final isSelected =
+                                            _tempSelectedWorkspaces
+                                                .contains(workspace.id);
 
                                         return ListTile(
                                           contentPadding:
@@ -511,6 +460,7 @@ class FilterBarState extends State<FilterBar> {
                               ),
                             ),
                             onPressed: () async {
+                              _scrollToStart();
                               setState(() {
                                 _isLoadingWorkspaces = true;
                               });
@@ -600,7 +550,7 @@ class FilterBarState extends State<FilterBar> {
           if (!isFilterOn && _isRatingFilterActive) {
             _isRatingFilterActive = false;
           }
-          
+
           return ElevatedButton(
             onPressed: () {
               showModalBottomSheet(
@@ -617,6 +567,7 @@ class FilterBarState extends State<FilterBar> {
                       });
                       if (_isRatingFilterActive) {
                         filterIsOn.value = true;
+                        _scrollToStart();
                       }
                       await generalFilter();
                     },
@@ -625,14 +576,18 @@ class FilterBarState extends State<FilterBar> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: _isRatingFilterActive ? AppColors.orangeButton : Colors.white,
-              foregroundColor: _isRatingFilterActive ? Colors.white : AppColors.darkGrey,
+              backgroundColor:
+                  _isRatingFilterActive ? AppColors.orangeButton : Colors.white,
+              foregroundColor:
+                  _isRatingFilterActive ? Colors.white : AppColors.darkGrey,
               elevation: 2,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
-                  color: _isRatingFilterActive ? AppColors.orangeButton : AppColors.darkGrey,
+                  color: _isRatingFilterActive
+                      ? AppColors.orangeButton
+                      : AppColors.darkGrey,
                   width: 1,
                 ),
               ),
@@ -643,15 +598,20 @@ class FilterBarState extends State<FilterBar> {
                 Icon(
                   Icons.star,
                   size: 18,
-                  color: _isRatingFilterActive ? Colors.white : AppColors.darkGrey,
+                  color:
+                      _isRatingFilterActive ? Colors.white : AppColors.darkGrey,
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  _isRatingFilterActive ? '${_minRating.toStringAsFixed(1)}-${_maxRating.toStringAsFixed(1)}' : 'Note',
+                  _isRatingFilterActive
+                      ? '${_minRating.toStringAsFixed(1)}-${_maxRating.toStringAsFixed(1)}'
+                      : 'Note',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: _isRatingFilterActive ? Colors.white : AppColors.darkGrey,
+                    color: _isRatingFilterActive
+                        ? Colors.white
+                        : AppColors.darkGrey,
                   ),
                 ),
               ],
@@ -663,9 +623,25 @@ class FilterBarState extends State<FilterBar> {
   }
 
   bool _hasActiveFilters() {
+    bool hasLoadingState = _loadingStates.values.any((isLoading) => isLoading) || _isLoadingWorkspaces;
     return widget.selectedTagIdsNotifier.value.isNotEmpty ||
         widget.selectedWorkspacesNotifier.value.isNotEmpty ||
-        _isRatingFilterActive;
+        _isRatingFilterActive ||
+        hasLoadingState;
+  }
+
+  void _scrollToStart() {
+    if (_scrollController.hasClients) {
+      // Calculer la position du premier filtre actif
+      double targetPosition = _scrollController.position.minScrollExtent;
+      
+      // Défiler complètement à gauche
+      _scrollController.animateTo(
+        targetPosition,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   @override
@@ -673,7 +649,7 @@ class FilterBarState extends State<FilterBar> {
     return SafeArea(
       top: false,
       bottom: false,
-      child: Container(
+      child: SizedBox(
         height: kToolbarHeight,
         child: Row(
           children: [
@@ -681,24 +657,34 @@ class FilterBarState extends State<FilterBar> {
             ValueListenableBuilder<bool>(
               valueListenable: filterIsOn,
               builder: (context, isFilterOn, child) {
-                return IconButton(
-                  icon: Icon(
-                    Icons.filter_list,
-                    color: isFilterOn
-                        ? AppColors.orangeButton
-                        : AppColors.darkGrey,
-                  ),
-                  onPressed: isFilterOn ? resetFilters : null,
+                return Icon(
+                  Icons.filter_list,
+                  color:
+                      isFilterOn ? AppColors.orangeButton : AppColors.darkGrey,
                 );
               },
             ),
             if (!_isLoading)
               Expanded(
                 child: SingleChildScrollView(
+                  controller: _scrollController,
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
                       const SizedBox(width: 10),
+                      // Boutons actifs en premier
+                      if (_isRatingFilterActive) 
+                        _buildRatingFilterButton(),
+                      if (widget.selectedWorkspacesNotifier.value.isNotEmpty)
+                        ValueListenableBuilder<bool>(
+                          valueListenable: FilterBar.showFollowedAccounts,
+                          builder: (context, show, child) {
+                            if (show) {
+                              return _buildWorkspaceButton();
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
                       // Boutons de type avec des tags sélectionnés (filtres actifs)
                       ..._tagsByType.entries.map((entry) {
                         final selectedTagsForType = entry.value
@@ -710,16 +696,19 @@ class FilterBarState extends State<FilterBar> {
                         }
                         return const SizedBox.shrink();
                       }),
-                      _buildRatingFilterButton(),
-                      ValueListenableBuilder<bool>(
-                        valueListenable: FilterBar.showFollowedAccounts,
-                        builder: (context, show, child) {
-                          if (show) {
-                            return _buildWorkspaceButton();
-                          }
-                          return const SizedBox.shrink();
-                        },
-                      ),
+                      // Boutons inactifs ensuite
+                      if (!_isRatingFilterActive) 
+                        _buildRatingFilterButton(),
+                      if (widget.selectedWorkspacesNotifier.value.isEmpty)
+                        ValueListenableBuilder<bool>(
+                          valueListenable: FilterBar.showFollowedAccounts,
+                          builder: (context, show, child) {
+                            if (show) {
+                              return _buildWorkspaceButton();
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
                       // Boutons de type sans tags sélectionnés
                       ..._tagsByType.entries.map((entry) {
                         final selectedTagsForType = entry.value

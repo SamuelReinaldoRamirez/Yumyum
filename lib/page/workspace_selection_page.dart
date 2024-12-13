@@ -1,5 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
@@ -8,7 +6,6 @@ import 'package:yummap/helper/map_helper.dart';
 import 'package:yummap/model/workspace.dart'; // Importez le modèle de données Workspace si nécessaire
 import 'package:yummap/model/restaurant.dart'; // Importez le modèle de données Restaurant si nécessaire
 import '../constant/theme.dart'; // Importez les thèmes
-import 'package:yummap/widget/filter_bar.dart';
 import 'package:yummap/service/local_data_service.dart';
 
 class WorkspaceSelectionPage extends StatelessWidget {
@@ -151,7 +148,6 @@ class WorkspaceItem extends StatefulWidget {
 
 class _WorkspaceItemState extends State<WorkspaceItem> {
   late Future<List<String>> _aliasListFuture;
-  bool _isLoading = false;
   final LocalDataService _localDataService = LocalDataService();
   final CallEndpointService _callEndpointService = CallEndpointService();
 
@@ -180,7 +176,8 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
 
   Future<void> _handleFollowToggle(Workspace workspace) async {
     try {
-      final isCurrentlyFollowed = _localDataService.followedWorkspacesNotifier.value
+      final isCurrentlyFollowed = _localDataService
+          .followedWorkspacesNotifier.value
           .any((w) => w.id == workspace.id);
 
       if (isCurrentlyFollowed) {
@@ -214,7 +211,7 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
           return Text('Erreur: ${snapshot.error}');
         }
         List<String> aliasList = snapshot.data ?? [];
-        bool isFollowing = aliasList.contains(widget.workspace.alias);
+        aliasList.contains(widget.workspace.alias);
 
         return InkWell(
           onTap: () {
@@ -260,8 +257,9 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                     TextButton(
                       onPressed: () async {
                         List<Restaurant> restaurants =
-                            await _callEndpointService.getRestaurantsByTagsAndWorkspaces(
-                                [], [widget.workspace.id]);
+                            await _callEndpointService
+                                .getRestaurantsByTagsAndWorkspaces(
+                                    [], [widget.workspace.id]);
                         if (restaurants.isNotEmpty) {
                           // Afficher les restaurants sur la carte
                           MarkerManager.createFull(
@@ -283,8 +281,8 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                       },
                       style: ButtonStyle(
                         elevation:
-                            MaterialStateProperty.all(15.0), // Ajout d'élévation
-                        shape: MaterialStateProperty.all(
+                            WidgetStateProperty.all(15.0), // Ajout d'élévation
+                        shape: WidgetStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                             side: BorderSide(
@@ -301,12 +299,18 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                     const SizedBox(width: 10.0),
                     IconButton(
                       icon: Icon(
-                        widget.workspace.isFollowed ? Icons.check_circle : Icons.add_circle_outline,
-                        color: widget.workspace.isFollowed ? AppColors.orangeButton : Colors.white,
+                        widget.workspace.isFollowed
+                            ? Icons.check_circle
+                            : Icons.add_circle_outline,
+                        color: widget.workspace.isFollowed
+                            ? AppColors.orangeButton
+                            : Colors.white,
                         size: 28,
                       ),
                       onPressed: () => _handleFollowToggle(widget.workspace),
-                      tooltip: widget.workspace.isFollowed ? 'Ne plus suivre' : 'Suivre',
+                      tooltip: widget.workspace.isFollowed
+                          ? 'Ne plus suivre'
+                          : 'Suivre',
                     ),
                   ],
                 ),

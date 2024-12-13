@@ -1,5 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:yummap/helper/bottom_sheet_helper.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
@@ -85,13 +83,13 @@ class _SearchBarState extends State<SearchBar> {
                       shape: BoxShape.circle,
                       color: AppColors.orangeButton, // Fond orange
                     )
-                  : null, // Pas de bordure si non pressé
+                  : null,
+              padding:
+                  const EdgeInsets.all(4.0), // Pas de bordure si non pressé
               child: Icon(
                 Icons.clear,
                 color: filterIsOn.value ? Colors.white : AppColors.greenishGrey,
-              ),
-              padding:
-                  EdgeInsets.all(4.0), // Espace entre l'icône et la bordure
+              ), // Espace entre l'icône et la bordure
             ),
             onPressed: () async {
               setState(() {
@@ -103,7 +101,8 @@ class _SearchBarState extends State<SearchBar> {
               filterIsOn.value = false;
               // Reset les filtres de notes
               if (context.mounted) {
-                final filterBarState = context.findAncestorStateOfType<FilterBarState>();
+                final filterBarState =
+                    context.findAncestorStateOfType<FilterBarState>();
                 if (filterBarState != null) {
                   filterBarState.resetFilters();
                 }
@@ -221,27 +220,6 @@ class _SearchBarState extends State<SearchBar> {
     } else if (selectedItem != null && selectedItem is Workspace) {
       _handleWorkspaceSelection(selectedItem);
     }
-  }
-
-  void _showAliasAlert(
-      BuildContext context, List<String> aliasList, String title) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(aliasList.join(', ')),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _handleWorkspaceSelection(Workspace workspace) async {

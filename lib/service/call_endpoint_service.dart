@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
@@ -31,21 +33,21 @@ class CallEndpointService {
   void init() {
     //on devrait regarder les prefs de l'utilisateur pour savoir s'il est en prod ou en dev avant de setter
     rootUrl = "https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX";
-    baseUrl = rootUrl + '/restaurants';
-    allTagsUrl = rootUrl + '/tags';
+    baseUrl = '$rootUrl/restaurants';
+    allTagsUrl = '$rootUrl/tags';
   }
 
   // Méthode pour changer l'URL en fonction de l'environnement
   static Future<void> switchToEnv(String envId) async {
-    final String endpoint = rootUrl + "/env/$envId";
+    final String endpoint = "$rootUrl/env/$envId";
 
     try {
       final response = await http.get(Uri.parse(endpoint));
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = json.decode(response.body);
         rootUrl = jsonData['xano_endpoint'];
-        baseUrl = rootUrl + '/restaurants';
-        allTagsUrl = rootUrl + '/tags';
+        baseUrl = '$rootUrl/restaurants';
+        allTagsUrl = '$rootUrl/tags';
         logger.d("Switched to environment: $envId, rootUrl: $rootUrl");
       } else {
         throw Exception('Failed to switch environment');
@@ -89,7 +91,7 @@ class CallEndpointService {
   }
 
   Future<List<Hotel>> getHotelsFromXano() async {
-    final String hotelsUrl =
+    const String hotelsUrl =
         "https://x8ki-letl-twmt.n7.xano.io/api:LYxWamUX/hotels";
 
     try {
@@ -138,12 +140,12 @@ class CallEndpointService {
   }
 
   Future<List<Review>> getReviewsByRestaurantAndWorkspaces(
-      int restaurant_id, List<int> workspace_ids) async {
-    final String url = '$rootUrl/review/restaurant/workspaces/$restaurant_id';
+      int restaurantId, List<int> workspaceIds) async {
+    final String url = '$rootUrl/review/restaurant/workspaces/$restaurantId';
     try {
       // Préparation du corps de la requête
       final Map<String, List<int>> body = {
-        'workspaces_ids': workspace_ids,
+        'workspaces_ids': workspaceIds,
       };
 
       // Envoi de la requête POST
@@ -397,7 +399,7 @@ class CallEndpointService {
       throw Exception('Service not initialized. Call init() first.');
     }
 
-    String url = '$rootUrl/workspace/follow';  
+    String url = '$rootUrl/workspace/follow';
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -410,8 +412,9 @@ class CallEndpointService {
       );
 
       if (response.statusCode != 200) {
-        final errorMessage = response.body.isNotEmpty 
-            ? json.decode(response.body)['message'] ?? 'Failed to add workspace to followed'
+        final errorMessage = response.body.isNotEmpty
+            ? json.decode(response.body)['message'] ??
+                'Failed to add workspace to followed'
             : 'Failed to add workspace to followed';
         throw Exception(errorMessage);
       }
@@ -426,7 +429,7 @@ class CallEndpointService {
       throw Exception('Service not initialized. Call init() first.');
     }
 
-    String url = '$rootUrl/workspace/unfollow';  
+    String url = '$rootUrl/workspace/unfollow';
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -439,8 +442,9 @@ class CallEndpointService {
       );
 
       if (response.statusCode != 200) {
-        final errorMessage = response.body.isNotEmpty 
-            ? json.decode(response.body)['message'] ?? 'Failed to remove workspace from followed'
+        final errorMessage = response.body.isNotEmpty
+            ? json.decode(response.body)['message'] ??
+                'Failed to remove workspace from followed'
             : 'Failed to remove workspace from followed';
         throw Exception(errorMessage);
       }
