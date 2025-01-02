@@ -1,16 +1,15 @@
 import 'package:flutter/foundation.dart'; // pour kReleaseMode
-//import 'package:device_info_plus/device_info_plus.dart';
+// import 'package:device_info_plus/device_info_plus.dart'; // Commenté pour le web
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
 
 class MixpanelService {
-  static late Mixpanel _mixpanel;
+  static Mixpanel? _mixpanel;
 
   static Future<void> initialize(String token) async {
     // Initialiser le stockage sécurisé partagé
     const storage = FlutterSecureStorage();
-    //final bool isEmulator = await _isRunningOnEmulator();
     const bool isDebugMode = kDebugMode;
 
     // Récupérer l'ID aléatoire sauvegardé localement, ou en générer un nouveau
@@ -26,21 +25,21 @@ class MixpanelService {
     }
 
     // Initialiser Mixpanel avec l'ID distinct
+    print('Initializing Mixpanel with distinct ID: $distinctId');
     _mixpanel = await Mixpanel.init(
       token,
       trackAutomaticEvents: false,
     );
+    print('Mixpanel initialized successfully.');
 
-    _mixpanel.identify(distinctId);
+    _mixpanel!.identify(distinctId);
+
   }
 
-  // static Future<bool> _isRunningOnEmulator() async {
-  //   final deviceInfo = DeviceInfoPlugin();
-  //   final androidInfo = await deviceInfo.androidInfo;
-  //   final iosInfo = await deviceInfo.iosInfo; // Si l'information est indisponible
-
-  //   return !(androidInfo.isPhysicalDevice || iosInfo.isPhysicalDevice);
-  // }
-
-  static Mixpanel get instance => _mixpanel;
+  static Mixpanel get instance {
+    if (_mixpanel == null) {
+      throw Exception('Mixpanel not initialized.');
+    }
+    return _mixpanel!;
+  }
 }

@@ -13,12 +13,19 @@ import 'package:yummap/widget/filter_bar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    print('Initializing MixpanelService...');
+    await MixpanelService.initialize(mixpanelToken);
+    print('MixpanelService initialized.');
+  } catch (e) {
+    print('Error initializing MixpanelService: $e');
+  }
 
-  await MixpanelService.initialize(mixpanelToken);
-
+  print('Fetching restaurants from Xano...');
   List<Restaurant> restaurantList =
       (await CallEndpointService().getRestaurantsFromXanos())
           .cast<Restaurant>();
+  print('Fetched ${restaurantList.length} restaurants.');
   runApp(MyApp(restaurantList: restaurantList));
 }
 
@@ -41,6 +48,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    print('MyAppState initialized.');
     _mixpanel = MixpanelService.instance;
     WidgetsBinding.instance.addObserver(this);
     // Envoyer un événement de "Session Start" lorsque l'application est démarrée
@@ -49,12 +57,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    print('MyAppState disposed.');
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('App lifecycle state changed: $state');
     if (state == AppLifecycleState.paused) {
       // Envoyer un événement de "Session End" lorsque l'application est en pause
       _mixpanel.track('Session End');
