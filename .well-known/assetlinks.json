@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.domain.yummap",
+    "sha256_cert_fingerprints": ["E8:82:8B:93:C0:98:96:38:38:F3:4A:BA:CE:A5:95:6F:73:44:C6:FC:46:0B:57:E5:0A:1A:3D:F2:C0:D0:7C:5D"]
+  }
+}]

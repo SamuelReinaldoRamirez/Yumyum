@@ -2,27 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-<key>MGLMapboxAccessToken</key>
-<string>sk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHMxbTBuOWowZXJjMmtwYzhscGY2cmNpIn0.ed9zA-2oOqkrEGMm3SX1jg</string>
-    <!-- Autres clés du dictionnaire Info.plist -->
-
-<key>CFBundleIcons</key>
-<array>
-    <string>Icon-20x20@1x.png</string>
-    <string>Icon-29x29@2x.png</string>
-    <string>Icon-29x29@3x.png</string>
-    <string>Icon-40x40@2x.png</string>
-    <string>Icon-40x40@3x.png</string>
-    <string>Icon-60x60@2x.png</string>
-    <string>Icon-60x60@3x.png</string>
-    <string>Icon-76x76@1x.png</string>
-    <string>Icon-76x76@2x.png</string>
-    <string>Icon-83.5@2x.png</string>
-</array>
-
-
-    <!-- Autres clés du dictionnaire Info.plist -->
-    
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
@@ -66,16 +45,16 @@
     <true/>
     <key>UIApplicationSupportsIndirectInputEvents</key>
     <true/>
-    <key>UIStatusBarHidden</key>
-    <false/>
-
-<!-- Autorisation d'accès à la localisation -->
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>Yummap a besoin d'accéder à votre position pour afficher les adresses autour de vous !</string>
-<key>NSLocationAlwaysUsageDescription</key>
-<string>Cette application utilise votre localisation en arrière-plan pour fournir des fonctionnalités supplémentaires, même lorsque vous ne l'utilisez pas activement.</string>
-<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>Cette application utilise votre localisation en premier plan et en arrière-plan pour des fonctionnalités critiques, telles que la navigation et les alertes de proximité.</string>
-
+    
+    <!-- Deep link configuration -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>yummap</string>
+            </array>
+        </dict>
+    </array>
 </dict>
 </plist>

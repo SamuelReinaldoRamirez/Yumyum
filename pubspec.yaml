@@ -10,6 +10,7 @@ flutter:
     - assets/splash.png
     - assets/custom_map.json
     - assets/i18n/ # Dossier contenant les fichiers de traduction
+    - assets/yummap-bicolor.png
 
   fonts:
     - family: Poppins
@@ -34,7 +35,7 @@ dependencies:
   flutter_map_marker_cluster: ^1.1.1
   chewie: ^1.2.2
   video_player: ^2.4.2
-  geolocator: '>=7.1.0 <10.0.0'
+  geolocator: ^13.0.2
   logger: ^2.0.2+1
   glassmorphism: ^3.0.0
   url_launcher: ^6.2.5
@@ -47,10 +48,11 @@ dependencies:
   uuid: ^4.4.0
   mixpanel_analytics: ^2.1.1
   carousel_slider: ^5.0.0
-  device_info_plus: ^10.1.0
+  device_info_plus: ^11.2.0
   easy_localization: ^3.0.0
   simplytranslate: ^1.2.2 # faut essayer d el'enlever, je crois qu'on n'en a pas besoin
   path_provider: ^2.0.11
+  app_links: ^6.3.3
 
   # flutter_map_location_marker: ^6.0.0 # ATTENTION ERROR
   # flutter_webview_plugin: ^0.4.0 # ATTENTION ERROR
@@ -59,7 +61,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^5.0.0
 
 flutter_native_splash:
   color: "#ffffff"

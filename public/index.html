@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Base href for serving the web app from a specific path -->
+  <base href="/">
+
+  <!-- Meta tags -->
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Yummap">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Page Title -->
+  <title>Yummap</title>
+</head>
+<body>
+  <!-- Flutter Bootstrap -->
+  <script src="main.dart.js"></script>
+  <script src="flutter_bootstrap.js" async></script>
+
+  <!-- Mixpanel Analytics Script -->
+  <script type="text/javascript">
+    (function (c, a) {
+      window.mixpanel = a;
+      a._i = [];
+      a.init = function (b, d, e) {
+        function f(c, h) {
+          var a = h.split(".");
+          if (a.length === 2) {
+            b[a[0]] = b[a[0]] || {};
+            b[a[0]][a[1]] = c;
+          } else {
+            b[a[0]] = c;
+          }
+        }
+        a._i.push([b, d, e]);
+      };
+      a.set = function (b, d) {
+        f(b, d);
+      };
+    })(document, window.mixpanel || []);
+    
+    mixpanel.init("5070afa7d4765226a35ce4895068eeb1"); 
+  </script>
+</body>
+</html>

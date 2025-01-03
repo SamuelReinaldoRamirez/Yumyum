@@ -8,8 +8,27 @@
     ],
     "rewrites": [
       {
+        "source": "/.well-known/**",
+        "destination": "/.well-known/**"
+      },
+      {
+        "source": "/explore/**",
+        "destination": "/explore.html"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "/.well-known/**",
+        "headers": [
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "*"
+          }
+        ]
       }
     ]
   }

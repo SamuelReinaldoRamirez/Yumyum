@@ -1,5 +1,5 @@
-import UIKit
 import Flutter
+import UIKit
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -7,7 +7,6 @@ import Flutter
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    // GMSServices.provideAPIKey("AIzaSyBM05T0u8LoAKr2MtbTIjXtFmrU-06ye6U") // Supprimez ou commentez cette ligne
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }

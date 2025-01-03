@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yummap</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        #downloadApp {
+            background-color: #FF6B00;
+            color: white;
+        }
+
+        #downloadApp:hover {
+            background-color: #FF8533;
+        }
+
+        .text-button {
+            background: none;
+            border: none;
+            color: #666;
+            padding: 10px;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 14px;
+        }
+
+        .text-button:hover {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://app.yummap.xyz/assets/assets/yummap-bicolor.png" alt="Yummap Logo" style="width: 100px; margin-bottom: 20px; border-radius: 10px;">
+        <h1>Welcome to Yummap</h1>
+        <p id="accountName"></p>
+        <a id="downloadApp" class="button">Download App</a>
+        <button id="continueWeb" class="text-button">Continue with Web Browser</button>
+    </div>
+
+    <script>
+        // Fonction pour tenter d'ouvrir l'application native
+        function openNativeApp(account) {
+            if (/android/i.test(navigator.userAgent)) {
+                const intentUrl = `intent://map/${account}#Intent;scheme=yummap;package=com.domain.yummap;end`;
+                window.location.href = intentUrl;
+            } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+                const deepLink = `yummap://map/${account}`;
+                window.location.href = deepLink;
+            } else {
+                const deepLink = `yummap://map/${account}`;
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = deepLink;
+                document.body.appendChild(iframe);
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                }, 2000);
+            }
+        }
+
+        // Au chargement de la page
+        window.onload = function() {
+            const currentPath = window.location.pathname;
+            const account = currentPath.split('/explore/')[1] || '';
+            
+            // Afficher le nom de l'account
+            document.getElementById('accountName').textContent = `Find the restaurant recommendations of @${account}`;
+            
+            // Tenter d'ouvrir l'application native
+            openNativeApp(account);
+            
+            // Configurer le bouton de téléchargement selon l'OS
+            const downloadAppButton = document.getElementById('downloadApp');
+            if (/android/i.test(navigator.userAgent)) {
+                downloadAppButton.onclick = function() {
+                    window.location.href = 'https://play.google.com/store/apps/details?id=com.domain.yummap';
+                };
+            } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+                downloadAppButton.onclick = function() {
+                    window.location.href = 'https://apps.apple.com/us/app/yummap/id6479711235';
+                };
+            }
+            
+            // Gérer le clic sur le bouton "Continue with Web Browser"
+            document.getElementById('continueWeb').onclick = function() {
+                window.location.href = `https://app.yummap.xyz/map/${account}`;
+            };
+        };
+    </script>
+</body>
+</html>
