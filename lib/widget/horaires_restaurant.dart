@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:yummap/constant/theme.dart';
 
 class HorairesRestaurant extends StatefulWidget {
   final Map<String, List<String>> schedule;
@@ -93,7 +94,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                       Positioned.fill(
                         child: Center(
                           child: Text(
-                            allDaysEmpty ? 'Horaires indisponibles' : 'Fermé',
+                            allDaysEmpty ? 'Horaires indisponibles' : _getClosedText(_selectedDay),
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -128,11 +129,25 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
     ][index - 1];
   }
 
+  String _getClosedText(String day) {
+    if (widget.schedule[day] != null && widget.schedule[day]!.contains('Closed')) {
+      return 'Fermé';
+    } else if (widget.schedule[day] != null && widget.schedule[day]!.contains('Fermé')) {
+      return 'Fermé';
+    } else if (widget.schedule[day] != null && widget.schedule[day]!.contains('Sunday: Closed')) {
+      return 'Sunday: Fermé';
+    } else {
+      return 'Fermé';
+    }
+  }
+
+  static const double SAFETY_MARGIN = 8.0; // Marge de sécurité en pixels
+
   Widget _buildOpeningHoursBox(double containerWidth) {
     List<String> times = widget.schedule[_selectedDay] ?? [];
     times.sort((a, b) {
-      var startTimeA = a.split(' – ')[0];
-      var startTimeB = b.split(' – ')[0];
+      var startTimeA = a.split(' - ')[0];
+      var startTimeB = b.split(' - ')[0];
       return _convertToMinutes(startTimeA)
           .compareTo(_convertToMinutes(startTimeB));
     });
@@ -198,16 +213,34 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
     );
 
     if (startTimeLabel != '11:59 PM' && startTimeLabel != '12:00 AM') {
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: startTimeLabel,
+          style: const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout(); // Calcule les dimensions du texte
+      double textWidth = textPainter.width;
+
+      double leftPosition = startPercentage * containerWidth / 100 - 20;
+      if (leftPosition < SAFETY_MARGIN) {
+        leftPosition = SAFETY_MARGIN;
+      }
+
       labels.add(
         Positioned(
-          left: (startPercentage / 100) * containerWidth - 15,
-          bottom: 30,
-          child: Text(
-            startTimeLabel,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
+          left: leftPosition,
+          top: 0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: Text(
+              startTimeLabel,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12),
             ),
           ),
         ),
@@ -215,17 +248,36 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
     }
 
     if (endTimeLabel != '11:59 PM' && endTimeLabel != '12:00 AM') {
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: endTimeLabel,
+          style: TextStyle(
+              color: AppColors.orangeButton,
+              fontWeight: FontWeight.bold,
+              fontSize: 12),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout(); // Calcule les dimensions du texte
+      double textWidth = textPainter.width;
+
+      double rightPosition = (100 - endPercentage) * containerWidth / 100 - 20;
+      if (rightPosition + textWidth > containerWidth - SAFETY_MARGIN) {
+        rightPosition = containerWidth - textWidth - SAFETY_MARGIN;
+      }
+
       labels.add(
         Positioned(
-          left:
-              ((startPercentage + widthPercentage) / 100) * containerWidth - 15,
-          bottom: 3,
-          child: Text(
-            endTimeLabel,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Color(0xFFFFFF00),
-              fontWeight: FontWeight.w700,
+          right: rightPosition,
+          bottom: 0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: Text(
+              endTimeLabel,
+              style: const TextStyle(
+                  color: Colors.yellowAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12),
             ),
           ),
         ),
@@ -233,24 +285,19 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
     }
   }
 
-  int _convertToMinutes(String time) {
-    try {
-      var parts = time.split(' ');
-      var timeParts = parts[0].split(':');
-      var hours = int.parse(timeParts[0]);
-      var minutes = int.parse(timeParts[1]);
-      var period = parts[1];
+  int _convertToMinutes(String timeStr) {
+    // Exemple de format: "12:00 AM" ou "1:00 PM"
+    final parts = timeStr.split(' ');
+    final timeParts = parts[0].split(':');
+    int hour = int.parse(timeParts[0]);
+    int minute = int.parse(timeParts[1]);
 
-      if (period == 'PM' && hours != 12) {
-        hours += 12;
-      } else if (period == 'AM' && hours == 12) {
-        hours = 0;
-      }
-
-      return hours * 60 + minutes;
-    } catch (e) {
-      print('Erreur de conversion: $e');
-      return 0; // Valeur par défaut en cas d'erreur
+    if (parts.length > 1 && parts[1] == 'PM' && hour != 12) {
+      hour += 12; // Convertir PM en format 24h
+    } else if (parts.length > 1 && parts[1] == 'AM' && hour == 12) {
+      hour = 0; // Convertir 12 AM en 0h
     }
+
+    return hour * 60 + minute; // Retourne le temps en minutes
   }
 }
