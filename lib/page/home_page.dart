@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
         restaurantList = restaurants;
         print("---------------------");
         print("---------------------");
-        print(restaurants);
+        print("restaurants");
       });
     } catch (e) {
       // Gérer l'erreur ici (afficher un message, etc.)

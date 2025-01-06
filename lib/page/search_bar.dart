@@ -35,88 +35,92 @@ class SearchBar extends StatefulWidget implements PreferredSizeWidget {
 class _SearchBarState extends State<SearchBar> {
   final TextEditingController _searchController = TextEditingController();
   int lastShakeTimestamp = 0;
-  // static bool _filterIsOn = false;
+  VoidCallback? _listener;
 
-  @override
-  void dispose() {
-    // Ne pas oublier de retirer l'écouteur lors de la destruction du widget
-    filterIsOn.removeListener(() {});
-    super.dispose();
+  void listener() {
+    setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
+    _listener = listener;
+    filterIsOn.addListener(_listener!);
+  }
 
-    // Écouter les changements de filterIsOn
-    filterIsOn.addListener(() {
-      setState(() {});
-    });
+  @override
+  void dispose() {
+    filterIsOn.removeListener(_listener!);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      automaticallyImplyLeading: false, // Retire la flèche de retour
       backgroundColor: AppColors.backgroundColor,
-      title: Container(
-        alignment: Alignment.center, // Centre le contenu verticalement
-        child: TextField(
-          controller: _searchController,
-          onSubmitted: (value) {
-            _handleSubmitted(value);
-          },
-          style: AppTextStyles.paragraphDarkStyle.copyWith(
-            color: AppColors.textColor, // Couleur du texte
+      title: TextField(
+        controller: _searchController,
+        onSubmitted: (value) {
+          _handleSubmitted(value);
+        },
+        style: AppTextStyles.paragraphDarkStyle.copyWith(
+          color: AppColors.textColor, // Couleur du texte
+        ),
+        decoration: InputDecoration(
+          hintText: 'Rechercher dans Yummap',
+          hintStyle: AppTextStyles.hintTextDarkStyle.copyWith(
+            color: AppColors.textColor
+                .withOpacity(0.5), // Couleur du texte d'indice
           ),
-          decoration: InputDecoration(
-            hintText: 'Rechercher dans Yummap',
-            hintStyle: AppTextStyles.hintTextDarkStyle.copyWith(
-              color: AppColors.textColor.withOpacity(0.5), // Couleur du texte d'indice
-            ),
-            border: InputBorder.none,
-            prefixIcon: const Icon(
-              Icons.search,
-              color: AppColors.textColor, // Couleur de l'icône de recherche
-            ),
-            suffixIcon: IconButton(
-              icon: Container(
-                decoration: filterIsOn.value
-                    ? BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.secondaryColor, // Fond orange si actif
-                      )
-                    : null,
-                padding: const EdgeInsets.all(4.0), // Pas de bordure si non pressé
-                child: Icon(
-                  Icons.clear,
-                  color: filterIsOn.value
-                      ? Colors.white
-                      : AppColors.textColor, // Couleur de l'icône de suppression
-                ),
+          border: InputBorder.none,
+          prefixIcon: const Icon(
+            Icons.search,
+            color: AppColors.textColor, // Couleur de l'icône de recherche
+          ),
+          suffixIcon: IconButton(
+            icon: Container(
+              decoration: filterIsOn.value
+                  ? BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.secondaryColor, // Fond orange si actif
+                    )
+                  : null,
+              padding:
+                  const EdgeInsets.all(4.0), // Pas de bordure si non pressé
+              child: Icon(
+                Icons.clear,
+                color: filterIsOn.value
+                    ? Colors.white
+                    : AppColors.textColor, // Couleur de l'icône de suppression
               ),
-              onPressed: () async {
-                setState(() {
-                  widget.selectedWorkspacesNotifier.value = [];
-                  widget.selectedTagIdsNotifier.value = [];
-                });
-                _clearSearch(context);
-                MarkerManager.resetMarkers();
-                filterIsOn.value = false;
-                // Reset les filtres de notes
-                if (context.mounted) {
-                  final filterBarState =
-                      context.findAncestorStateOfType<FilterBarState>();
-                  if (filterBarState != null) {
-                    filterBarState.resetFilters();
-                  }
-                }
-              },
             ),
-            filled: true,
-            fillColor: AppColors.backgroundColor,
-            contentPadding: const EdgeInsets.symmetric(vertical: 15.0), // Ajustez la valeur pour centrer le texte
+            onPressed: () async {
+              setState(() {
+                // Réinitialisation des workspaces et tags
+                widget.selectedWorkspacesNotifier.value = [];
+                widget.selectedTagIdsNotifier.value = [];
+              });
+
+              // Nettoyage de la recherche
+              _clearSearch(context);
+
+              // Réinitialisation des marqueurs
+              MarkerManager.resetMarkers();
+
+              // Désactivation du flag de filtre
+              filterIsOn.value = false;
+
+              if (context.mounted) {
+                final filterBarState =
+                    context.findAncestorStateOfType<FilterBarState>();
+                if (filterBarState != null) {
+                  filterBarState.resetFilters(); // Appeler la méthode correcte
+                }
+              }
+            },
           ),
+          filled: true,
+          fillColor: AppColors.backgroundColor,
         ),
       ),
     );
@@ -245,10 +249,20 @@ class _SearchBarState extends State<SearchBar> {
     MarkerManager.resetMarkers();
   }
 
-  void _clearSearch(context) {
-    MixpanelService.instance.track('ClearSearch');
+  void _clearSearch(BuildContext context) {
     _searchController.clear();
-    widget.onSearchChanged('');
-    FocusScope.of(context).requestFocus(FocusNode());
+
+    // Réinitialiser les ValueNotifier
+    widget.selectedTagIdsNotifier.value = [];
+    widget.selectedWorkspacesNotifier.value = [];
+
+    // Réinitialiser l'état des filtres
+    final filterBarState = context.findAncestorStateOfType<FilterBarState>();
+    if (filterBarState != null) {
+      filterBarState.resetFilters();
+    }
+
+    // Mettre à jour l'état global
+    filterIsOn.value = false;
   }
 }

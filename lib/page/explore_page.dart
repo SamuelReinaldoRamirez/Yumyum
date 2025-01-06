@@ -8,23 +8,15 @@ import 'package:yummap/helper/context_helper.dart';
 
 class ExplorePage extends StatelessWidget {
   final List<Restaurant> restaurantList;
+  final ValueNotifier<List<int>> selectedTagIdsNotifier = ValueNotifier<List<int>>([]);
+  final ValueNotifier<List<int>> selectedWorkspacesNotifier = ValueNotifier<List<int>>([]);
 
   ExplorePage({Key? key, required this.restaurantList}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Définition des hauteurs fixes
-    const double searchBarHeight =
-        50.0; // hauteur fixe pour la barre de recherche
-    const double filterBarHeight =
-        50.0; // hauteur fixe pour la barre de filtres
-
-    // Calcul de la hauteur disponible pour la carte
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double mapHeight = screenHeight - searchBarHeight - filterBarHeight;
-
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppColors.backgroundColor, // Couleur de fond
       body: SingleChildScrollView(
         child: Align(
           alignment: Alignment.topCenter,
@@ -32,25 +24,25 @@ class ExplorePage extends StatelessWidget {
             children: [
               // Barre de recherche
               SizedBox(
-                height: searchBarHeight,
+                height: MediaQuery.of(ContextHelper.context).size.height * 0.10,
                 child: CustomSearchBar.SearchBar(
                   onSearchChanged: (value) {},
                   restaurantList: restaurantList,
-                  selectedTagIdsNotifier: ValueNotifier<List<int>>([]),
-                  selectedWorkspacesNotifier: ValueNotifier<List<int>>([]),
+                  selectedTagIdsNotifier: selectedTagIdsNotifier,
+                  selectedWorkspacesNotifier: selectedWorkspacesNotifier,
                 ),
               ),
               // Barre de filtre
               SizedBox(
-                height: filterBarHeight,
+                height: MediaQuery.of(ContextHelper.context).size.height * 0.06,
                 child: FilterBar(
-                  selectedTagIdsNotifier: ValueNotifier<List<int>>([]),
-                  selectedWorkspacesNotifier: ValueNotifier<List<int>>([]),
+                  selectedTagIdsNotifier: selectedTagIdsNotifier,
+                  selectedWorkspacesNotifier: selectedWorkspacesNotifier,
                 ),
               ),
               // Carte
               SizedBox(
-                height: mapHeight,
+                height: MediaQuery.of(ContextHelper.context).size.height * 0.84,
                 child: MapPage(restaurantList: restaurantList),
               ),
             ],

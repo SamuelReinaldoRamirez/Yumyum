@@ -53,7 +53,9 @@ class FilterBarState extends State<FilterBar> {
   List<int> _tempSelectedWorkspaces = [];
   double _minRating = 1.0;
   double _maxRating = 5.0;
-  bool _isRatingFilterActive = false;
+  ValueNotifier<bool> _isRatingFilterActive = ValueNotifier<bool>(false);
+  ValueNotifier<bool> _isPeopleFilterActive = ValueNotifier<bool>(false);
+  int? selectedPeopleCount;
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -67,6 +69,8 @@ class FilterBarState extends State<FilterBar> {
     _scrollController.dispose();
     _localDataService.tagsNotifier.removeListener(_onTagsChanged);
     widget.selectedTagIdsNotifier.removeListener(_onSelectedTagsChanged);
+    _isRatingFilterActive.dispose();
+    _isPeopleFilterActive.dispose();
     super.dispose();
   }
 
@@ -144,7 +148,9 @@ class FilterBarState extends State<FilterBar> {
   void resetFilters() {
     setState(() {
       // Reset rating filter
-      _isRatingFilterActive = false;
+      _isRatingFilterActive.value = false;
+      _isPeopleFilterActive.value = false;
+      selectedPeopleCount = null;
       _minRating = 1.0;
       _maxRating = 5.0;
 
@@ -158,14 +164,8 @@ class FilterBarState extends State<FilterBar> {
       }
       _isLoadingWorkspaces = false;
 
-      // Reset filter state
+      // Force la mise à jour de l'état visuel
       filterIsOn.value = false;
-
-      // Force UI update
-      setState(() {});
-
-      // Update filters
-      generalFilter();
     });
   }
 
@@ -173,7 +173,7 @@ class FilterBarState extends State<FilterBar> {
     List<int> filterTags = widget.selectedTagIdsNotifier.value;
     List<int> workspaceIds = widget.selectedWorkspacesNotifier.value;
 
-    if (_isRatingFilterActive) {}
+    if (_isRatingFilterActive.value) {}
 
     List<Restaurant> filteredRestaurants;
 
@@ -194,7 +194,7 @@ class FilterBarState extends State<FilterBar> {
           .getRestaurantsByTagsAndWorkspaces(filterTags, workspaceIds);
 
       // Appliquer le filtre de note si actif
-      if (_isRatingFilterActive) {
+      if (_isRatingFilterActive.value) {
         filteredRestaurants = filteredRestaurants.where((restaurant) {
           // Vérifier si le restaurant a une note valide
           if (restaurant.ratings > 0) {
@@ -210,7 +210,7 @@ class FilterBarState extends State<FilterBar> {
     }
 
     // Mettre à jour filterIsOn en fonction de tous les filtres actifs
-    if (workspaceIds.isEmpty && filterTags.isEmpty && !_isRatingFilterActive) {
+    if (workspaceIds.isEmpty && filterTags.isEmpty && !_isRatingFilterActive.value) {
       filterIsOn.value = false;
     } else {
       filterIsOn.value = true;
@@ -323,7 +323,6 @@ class FilterBarState extends State<FilterBar> {
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
                 color: selectedCount > 0 ? Colors.white : AppColors.textColor,
-                fontFamily: 'SourceSansPro',
               ),
             ),
             if (isLoading) ...[
@@ -373,7 +372,7 @@ class FilterBarState extends State<FilterBar> {
                                 'Comptes Suivis',
                                 style: TextStyle(
                                   fontSize: 18,
-                                  fontFamily: 'SourceSansPro',
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                               IconButton(
@@ -528,17 +527,17 @@ class FilterBarState extends State<FilterBar> {
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.people,
                     size: 18,
-                    color: selectedCount > 0 ? Colors.white : AppColors.textColor,
+                    color: AppColors.textColor,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     'Comptes Suivis${selectedCount > 0 ? ' ($selectedCount)' : ''}',
                     style: TextStyle(
                       fontSize: 14,
-                      fontFamily: 'SourceSansPro',
+                      fontWeight: FontWeight.w500,
                       color: selectedCount > 0
                           ? Colors.white
                           : AppColors.textColor,
@@ -557,8 +556,8 @@ class FilterBarState extends State<FilterBar> {
         valueListenable: filterIsOn,
         builder: (context, isFilterOn, child) {
           // Si filterIsOn est false, on force _isRatingFilterActive à false aussi
-          if (!isFilterOn && _isRatingFilterActive) {
-            _isRatingFilterActive = false;
+          if (!isFilterOn && _isRatingFilterActive.value) {
+            _isRatingFilterActive.value = false;
           }
 
           return ElevatedButton(
@@ -573,9 +572,9 @@ class FilterBarState extends State<FilterBar> {
                       setState(() {
                         _minRating = min;
                         _maxRating = max;
-                        _isRatingFilterActive = (min > 1.0 || max < 5.0);
+                        _isRatingFilterActive.value = (min > 1.0 || max < 5.0);
                       });
-                      if (_isRatingFilterActive) {
+                      if (_isRatingFilterActive.value) {
                         filterIsOn.value = true;
                         _scrollToStart();
                       }
@@ -586,17 +585,17 @@ class FilterBarState extends State<FilterBar> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: _isRatingFilterActive
+              backgroundColor: _isRatingFilterActive.value
                   ? AppColors.secondaryColor
                   : Colors.white, // Fond blanc pour le bouton
               foregroundColor:
-                  _isRatingFilterActive ? Colors.white : AppColors.textColor,
+                  _isRatingFilterActive.value ? Colors.white : AppColors.textColor,
               elevation: 2,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
-                  color: _isRatingFilterActive
+                  color: _isRatingFilterActive.value
                       ? AppColors.secondaryColor
                       : AppColors.textColor,
                   width: 1,
@@ -609,22 +608,21 @@ class FilterBarState extends State<FilterBar> {
                 Icon(
                   Icons.star,
                   size: 18,
-                  color: _isRatingFilterActive
+                  color: _isRatingFilterActive.value
                       ? Colors.white
                       : AppColors.textColor,
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  _isRatingFilterActive
+                  _isRatingFilterActive.value
                       ? '${_minRating.toStringAsFixed(1)}-${_maxRating.toStringAsFixed(1)}'
                       : 'Note',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: _isRatingFilterActive
+                    color: _isRatingFilterActive.value
                         ? Colors.white
                         : AppColors.textColor,
-                    fontFamily: 'SourceSansPro',
                   ),
                 ),
               ],
@@ -641,7 +639,7 @@ class FilterBarState extends State<FilterBar> {
             _isLoadingWorkspaces;
     return widget.selectedTagIdsNotifier.value.isNotEmpty ||
         widget.selectedWorkspacesNotifier.value.isNotEmpty ||
-        _isRatingFilterActive ||
+        _isRatingFilterActive.value ||
         hasLoadingState;
   }
 
@@ -657,6 +655,12 @@ class FilterBarState extends State<FilterBar> {
         curve: Curves.easeOut,
       );
     }
+  }
+
+  bool get isRatingFilterActive => _isRatingFilterActive.value;
+
+  void activateRatingFilter() {
+    _isRatingFilterActive.value = true;
   }
 
   @override
@@ -691,7 +695,7 @@ class FilterBarState extends State<FilterBar> {
                       children: [
                         const SizedBox(width: 10),
                         // Boutons actifs en premier
-                        if (_isRatingFilterActive) _buildRatingFilterButton(),
+                        if (_isRatingFilterActive.value) _buildRatingFilterButton(),
                         if (widget.selectedWorkspacesNotifier.value.isNotEmpty)
                           ValueListenableBuilder<bool>(
                             valueListenable: FilterBar.showFollowedAccounts,
@@ -716,7 +720,7 @@ class FilterBarState extends State<FilterBar> {
                           return const SizedBox.shrink();
                         }),
                         // Boutons inactifs ensuite
-                        if (!_isRatingFilterActive) _buildRatingFilterButton(),
+                        if (!_isRatingFilterActive.value) _buildRatingFilterButton(),
                         if (widget.selectedWorkspacesNotifier.value.isEmpty)
                           ValueListenableBuilder<bool>(
                             valueListenable: FilterBar.showFollowedAccounts,
