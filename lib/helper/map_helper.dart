@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:yummap/constant/theme.dart';
 import 'package:yummap/helper/bottom_sheet_helper.dart';
 import 'package:yummap/model/hotel.dart';
 import 'package:yummap/model/restaurant.dart';
@@ -160,14 +161,14 @@ class MapHelper {
               padding: EdgeInsets.all(2),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Color(0xFF95A472),
+                  color: AppColors.secondaryColor,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: Icon(
                     Icons.local_dining_outlined,
                     size: 24,
-                    color: Color(0xFFDDFCAD),
+                    color: AppColors.appPrimary,
                   ),
                 ),
               ),

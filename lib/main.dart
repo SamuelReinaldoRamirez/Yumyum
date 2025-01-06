@@ -1,19 +1,14 @@
 // ignore_for_file: library_private_types_in_public_api
+// ignore: library_prefixes
 
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
+import 'package:yummap/page/home_page.dart';
+import 'package:yummap/page/splash_screen.dart';
+import 'package:yummap/helper/context_helper.dart'; // Importer le ContextHelper
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
-import 'package:yummap/page/map_page.dart';
-import 'package:yummap/service/call_endpoint_service.dart';
-import 'package:yummap/model/restaurant.dart';
-import 'package:yummap/constant/keys_data.dart';
-import 'package:yummap/service/mixpanel_service.dart';
-// ignore: library_prefixes
-import 'package:yummap/page/search_bar.dart' as CustomSearchBar;
-import 'package:yummap/widget/filter_bar.dart';
 import 'package:app_links/app_links.dart';
-import 'dart:async';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:yummap/service/mixpanel_service.dart';
+import 'package:yummap/constant/keys_data.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,28 +20,18 @@ void main() async {
     print('Error initializing MixpanelService: $e');
   }
 
-  print('Fetching restaurants from Xano...');
-  List<Restaurant> restaurantList =
-      (await CallEndpointService().getRestaurantsFromXanos())
-          .cast<Restaurant>();
-  print('Fetched ${restaurantList.length} restaurants.');
-  runApp(MyApp(restaurantList: restaurantList));
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
-  final List<Restaurant> restaurantList;
-
-  const MyApp({Key? key, required this.restaurantList}) : super(key: key);
-
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  String? currentAccount;
-  late AppLinks _appLinks;
   late Mixpanel _mixpanel;
-  String? mapAccount;
+  late AppLinks _appLinks;
+  String mapAccount = '';
 
   @override
   void initState() {
@@ -123,76 +108,17 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    print('Building app with mapAccount: $mapAccount');
+    // Définir le contexte global
+    ContextHelper.setContext(context);
     return MaterialApp(
       title: 'Yummap',
+      initialRoute: '/',
+      routes: {
+        '/': (context) => SplashScreen(),
+        '/home': (context) => HomePage(),
+      },
       theme: ThemeData(
         primarySwatch: Colors.blue,
-      ),
-      home: mapAccount != null
-          ? Scaffold(
-              appBar: AppBar(
-                title: Text('Hello World'),
-                leading: IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  onPressed: () {
-                    setState(() {
-                      mapAccount = null;
-                    });
-                  },
-                ),
-              ),
-              body: Center(
-                child: Text(
-                  'Hello World ${mapAccount ?? ''}',
-                  style: TextStyle(fontSize: 24),
-                ),
-              ),
-            )
-          : HomePage(restaurantList: widget.restaurantList),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  final List<Restaurant> restaurantList;
-
-  const HomePage({
-    Key? key,
-    required this.restaurantList,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Column(
-            children: [
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.10,
-                child: CustomSearchBar.SearchBar(
-                  onSearchChanged: (value) {},
-                  restaurantList: restaurantList,
-                  selectedTagIdsNotifier: ValueNotifier<List<int>>([]),
-                  selectedWorkspacesNotifier: ValueNotifier<List<int>>([]),
-                ),
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.06,
-                child: FilterBar(
-                  selectedTagIdsNotifier: ValueNotifier<List<int>>([]),
-                  selectedWorkspacesNotifier: ValueNotifier<List<int>>([]),
-                ),
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.84,
-                child: MapPage(restaurantList: restaurantList),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -292,7 +292,7 @@ class FilterBarState extends State<FilterBar> {
               },
         style: ElevatedButton.styleFrom(
           backgroundColor:
-              selectedCount > 0 ? AppColors.orangeButton : Colors.white,
+              selectedCount > 0 ? AppColors.secondaryColor : Colors.white,
           foregroundColor:
               selectedCount > 0 ? Colors.white : AppColors.darkGrey,
           elevation: 2,
@@ -301,7 +301,7 @@ class FilterBarState extends State<FilterBar> {
             borderRadius: BorderRadius.circular(20),
             side: BorderSide(
               color: selectedCount > 0
-                  ? AppColors.orangeButton
+                  ? AppColors.secondaryColor
                   : AppColors.darkGrey,
               width: 1,
             ),
@@ -417,7 +417,8 @@ class FilterBarState extends State<FilterBar> {
                                           title: Text(workspace.name),
                                           trailing: Checkbox(
                                             value: isSelected,
-                                            activeColor: AppColors.orangeButton,
+                                            activeColor:
+                                                AppColors.secondaryColor,
                                             onChanged: (bool? value) {
                                               setModalState(() {
                                                 if (value ?? false) {
@@ -453,7 +454,7 @@ class FilterBarState extends State<FilterBar> {
                           const SizedBox(height: 16),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.orangeButton,
+                              backgroundColor: AppColors.secondaryColor,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -495,7 +496,7 @@ class FilterBarState extends State<FilterBar> {
               },
         style: ElevatedButton.styleFrom(
           backgroundColor:
-              selectedCount > 0 ? AppColors.orangeButton : Colors.white,
+              selectedCount > 0 ? AppColors.secondaryColor : Colors.white,
           foregroundColor:
               selectedCount > 0 ? Colors.white : AppColors.darkGrey,
           elevation: 2,
@@ -504,7 +505,7 @@ class FilterBarState extends State<FilterBar> {
             borderRadius: BorderRadius.circular(20),
             side: BorderSide(
               color: selectedCount > 0
-                  ? AppColors.orangeButton
+                  ? AppColors.secondaryColor
                   : AppColors.darkGrey,
               width: 1,
             ),
@@ -576,8 +577,9 @@ class FilterBarState extends State<FilterBar> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  _isRatingFilterActive ? AppColors.orangeButton : Colors.white,
+              backgroundColor: _isRatingFilterActive
+                  ? AppColors.secondaryColor
+                  : Colors.white,
               foregroundColor:
                   _isRatingFilterActive ? Colors.white : AppColors.darkGrey,
               elevation: 2,
@@ -586,7 +588,7 @@ class FilterBarState extends State<FilterBar> {
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
                   color: _isRatingFilterActive
-                      ? AppColors.orangeButton
+                      ? AppColors.secondaryColor
                       : AppColors.darkGrey,
                   width: 1,
                 ),
@@ -623,7 +625,9 @@ class FilterBarState extends State<FilterBar> {
   }
 
   bool _hasActiveFilters() {
-    bool hasLoadingState = _loadingStates.values.any((isLoading) => isLoading) || _isLoadingWorkspaces;
+    bool hasLoadingState =
+        _loadingStates.values.any((isLoading) => isLoading) ||
+            _isLoadingWorkspaces;
     return widget.selectedTagIdsNotifier.value.isNotEmpty ||
         widget.selectedWorkspacesNotifier.value.isNotEmpty ||
         _isRatingFilterActive ||
@@ -634,7 +638,7 @@ class FilterBarState extends State<FilterBar> {
     if (_scrollController.hasClients) {
       // Calculer la position du premier filtre actif
       double targetPosition = _scrollController.position.minScrollExtent;
-      
+
       // Défiler complètement à gauche
       _scrollController.animateTo(
         targetPosition,
@@ -659,8 +663,9 @@ class FilterBarState extends State<FilterBar> {
               builder: (context, isFilterOn, child) {
                 return Icon(
                   Icons.filter_list,
-                  color:
-                      isFilterOn ? AppColors.orangeButton : AppColors.darkGrey,
+                  color: isFilterOn
+                      ? AppColors.secondaryColor
+                      : AppColors.darkGrey,
                 );
               },
             ),
@@ -673,8 +678,7 @@ class FilterBarState extends State<FilterBar> {
                     children: [
                       const SizedBox(width: 10),
                       // Boutons actifs en premier
-                      if (_isRatingFilterActive) 
-                        _buildRatingFilterButton(),
+                      if (_isRatingFilterActive) _buildRatingFilterButton(),
                       if (widget.selectedWorkspacesNotifier.value.isNotEmpty)
                         ValueListenableBuilder<bool>(
                           valueListenable: FilterBar.showFollowedAccounts,
@@ -697,8 +701,7 @@ class FilterBarState extends State<FilterBar> {
                         return const SizedBox.shrink();
                       }),
                       // Boutons inactifs ensuite
-                      if (!_isRatingFilterActive) 
-                        _buildRatingFilterButton(),
+                      if (!_isRatingFilterActive) _buildRatingFilterButton(),
                       if (widget.selectedWorkspacesNotifier.value.isEmpty)
                         ValueListenableBuilder<bool>(
                           valueListenable: FilterBar.showFollowedAccounts,

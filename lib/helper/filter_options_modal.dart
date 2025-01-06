@@ -84,7 +84,7 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
                         title: Text(tag.tag),
                         trailing: Checkbox(
                           value: isSelected,
-                          activeColor: AppColors.orangeButton,
+                          activeColor: AppColors.secondaryColor,
                           onChanged: (bool? value) {
                             setState(() {
                               if (value == true) {
@@ -111,7 +111,7 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
           const SizedBox(height: 16),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.orangeButton,
+              backgroundColor: AppColors.secondaryColor,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),

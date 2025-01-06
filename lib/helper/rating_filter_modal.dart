@@ -23,7 +23,8 @@ class _RatingFilterModalState extends State<RatingFilterModal> {
   @override
   void initState() {
     super.initState();
-    _currentRangeValues = RangeValues(widget.initialMinRating, widget.initialMaxRating);
+    _currentRangeValues =
+        RangeValues(widget.initialMinRating, widget.initialMaxRating);
   }
 
   String _formatRating(double value) {
@@ -73,11 +74,11 @@ class _RatingFilterModalState extends State<RatingFilterModal> {
           const SizedBox(height: 16),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              activeTrackColor: AppColors.orangeButton,
+              activeTrackColor: AppColors.secondaryColor,
               inactiveTrackColor: Colors.grey[300],
-              thumbColor: AppColors.orangeButton,
-              overlayColor: AppColors.orangeButton.withOpacity(0.2),
-              valueIndicatorColor: AppColors.orangeButton,
+              thumbColor: AppColors.secondaryColor,
+              overlayColor: AppColors.secondaryColor.withOpacity(0.2),
+              valueIndicatorColor: AppColors.secondaryColor,
               valueIndicatorTextStyle: const TextStyle(color: Colors.white),
             ),
             child: RangeSlider(
@@ -99,14 +100,15 @@ class _RatingFilterModalState extends State<RatingFilterModal> {
           const SizedBox(height: 32),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.orangeButton,
+              backgroundColor: AppColors.secondaryColor,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
             onPressed: () {
-              widget.onApply(_currentRangeValues.start, _currentRangeValues.end);
+              widget.onApply(
+                  _currentRangeValues.start, _currentRangeValues.end);
               Navigator.pop(context);
             },
             child: const Text(

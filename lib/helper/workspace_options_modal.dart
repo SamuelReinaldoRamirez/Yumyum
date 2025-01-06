@@ -116,7 +116,7 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
                         ),
                         value: selectedTagIds.contains(workspace.id),
                         checkColor: Colors.white,
-                        activeColor: AppColors.greenishGrey,
+                        activeColor: AppColors.backgroundColor,
                         onChanged: (bool? value) {
                           setState(() {
                             if (value != null && value) {

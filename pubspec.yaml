@@ -11,6 +11,8 @@ flutter:
     - assets/custom_map.json
     - assets/i18n/ # Dossier contenant les fichiers de traduction
     - assets/yummap-bicolor.png
+    - assets/logo/logo_new.png
+    - assets/illustrations/Baker-pana.svg
 
   fonts:
     - family: Poppins
@@ -22,6 +24,18 @@ flutter:
     - family: Sifonn
       fonts:
         - asset: assets/fonts/sifonn/SIFONN_PRO.otf
+    - family: PlayfairDisplay
+      fonts:
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-Regular.ttf
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-Bold.ttf
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-Italic.ttf
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-BoldItalic.ttf
+    - family: SourceSansPro
+      fonts:
+        - asset: assets/fonts/Source_Sans_3/static/SourceSans3-Regular.ttf
+        - asset: assets/fonts/Source_Sans_3/static/SourceSans3-Bold.ttf
+        - asset: assets/fonts/Source_Sans_3/static/SourceSans3-Italic.ttf
+        - asset: assets/fonts/Source_Sans_3/static/SourceSans3-BoldItalic.ttf
 
 dependencies:
   flutter:
@@ -50,9 +64,11 @@ dependencies:
   carousel_slider: ^5.0.0
   device_info_plus: ^11.2.0
   easy_localization: ^3.0.0
-  simplytranslate: ^1.2.2 # faut essayer d el'enlever, je crois qu'on n'en a pas besoin
+  neubrutalism_ui: ^2.0.2
+  # simplytranslate peut être supprimé si inutile
   path_provider: ^2.0.11
   app_links: ^6.3.3
+  flutter_svg: ^2.0.9
 
   # flutter_map_location_marker: ^6.0.0 # ATTENTION ERROR
   # flutter_webview_plugin: ^0.4.0 # ATTENTION ERROR

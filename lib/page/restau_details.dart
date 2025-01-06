@@ -14,6 +14,7 @@ import 'package:yummap/constant/theme.dart';
 import '../model/restaurant.dart';
 import '../widget/reviews_details.dart';
 import '../widget/horaires_restaurant.dart';
+import '../widget/neu_brutalism_container.dart'; // Importer le fichier qui contient la classe NeuBrutalismContainer
 
 class RestaurantDetailsWidget extends StatefulWidget {
   const RestaurantDetailsWidget({Key? key, required this.restaurant})
@@ -201,7 +202,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
 
     // Ajouter les étoiles pleines
     for (int i = 0; i < fullStars; i++) {
-      stars.add(Icon(Icons.star, color: AppColors.orangeBG));
+      stars.add(Icon(Icons.star, color: AppColors.primaryColor));
     }
 
     // Ajouter l'étoile partiellement remplie si nécessaire
@@ -212,10 +213,10 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
           children: <Widget>[
             ClipRect(
               clipper: FractionalClipper(convertFraction(fraction)),
-              child: Icon(Icons.star, size: 25, color: AppColors.orangeBG),
+              child: Icon(Icons.star, size: 25, color: AppColors.primaryColor),
             ),
             Icon(Icons.star,
-                size: 25, color: AppColors.orangeBG.withOpacity(0.3))
+                size: 25, color: AppColors.primaryColor.withOpacity(0.3))
           ],
         ),
       ));
@@ -223,7 +224,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
 
     // Ajouter les étoiles vides pour compléter la note sur 5
     for (int i = stars.length; i < 5; i++) {
-      stars.add(Icon(Icons.star, color: AppColors.orangeBG.withOpacity(0.3)));
+      stars.add(
+          Icon(Icons.star, color: AppColors.primaryColor.withOpacity(0.3)));
     }
 
     return stars;
@@ -236,94 +238,149 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     required Restaurant restaurant,
     required bool isGoogleReview,
   }) {
-    // Détermine si on doit afficher le message "Avis indisponibles"
-    final showUnavailableMessage = isGoogleReview && reviews.isEmpty;
-
-    // Détermine si on doit afficher le bouton "Voir plus d'avis"
-    final showSeeMoreButton = reviews.length > 1;
+    // Vérifiez si des avis sont disponibles
+    final hasReviews = reviews.isNotEmpty;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.black, width: 2),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black,
+            offset: Offset(4, 4),
+            blurRadius: 0,
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Titre
-          if (reviews.isNotEmpty || showUnavailableMessage) ...[
-            Text(title, style: AppTextStyles.titleDarkStyle),
-            const SizedBox(height: 10),
-          ],
+          // En-tête avec le titre et l'icône Google
+          if (hasReviews) // Afficher l'en-tête seulement s'il y a des avis
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  if (isGoogleReview) const SizedBox(width: 8),
+                  Text(
+                    isGoogleReview
+                        ? 'Avis Google'
+                        : title, // Remplacer le titre ici
+                    style: AppTextStyles.titleDarkStyle.copyWith(
+                      color: AppColors.secondaryColor,
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
-          // Gestion de l'affichage selon les avis disponibles
-          if (reviews.isNotEmpty) ...[
-            // Affiche le premier avis dans une carte
-            Card(
-              margin: const EdgeInsets.symmetric(vertical: 8.0),
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // Liste des avis
+          if (hasReviews) // Afficher la liste des avis seulement s'il y a des avis
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: reviews.length > 3 ? 3 : reviews.length,
+              itemBuilder: (context, index) {
+                final review = reviews[index];
+                return Container(
+                  margin: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.black, width: 1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildStarRating(reviews[0]
-                            .rating), // Ajoute la fonction pour les étoiles
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: AppColors.secondaryColor,
+                              child: Text(
+                                review.author[0].toUpperCase(),
+                                style: AppTextStyles.titleDarkStyle.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    review.author,
+                                    style:
+                                        AppTextStyles.titleDarkStyle.copyWith(
+                                      color: AppColors.textColor,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  Row(
+                                    children: buildStarRating(
+                                        review.rating.toDouble()),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (review.comment.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            review.comment,
+                            style: AppTextStyles.paragraphDarkStyle,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ],
                     ),
-                    const SizedBox(height: 8.0),
-                    Text(
-                      reviews[0].comment,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                        fontFamily: 'Poppins',
+                  ),
+                );
+              },
+            ),
+
+          // Bouton "Voir plus"
+          if (reviews.length > 3)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: InkWell(
+                onTap: () =>
+                    _navigateToReviewDetails(context, restaurant, reviews),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondaryColor,
+                    border: Border.all(color: Colors.black, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black,
+                        offset: Offset(2, 2),
+                        blurRadius: 0,
                       ),
+                    ],
+                  ),
+                  child: Text(
+                    'Voir plus d\'avis',
+                    style: AppTextStyles.titleDarkStyle.copyWith(
+                      color: Colors.white,
+                      fontSize: 16,
                     ),
-                    const SizedBox(height: 16.0),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: Text(
-                        reviews[0].author,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    ),
-                  ],
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
             ),
-            // Affiche le bouton "Voir plus d'avis" s'il y a plus d'un avis et si c'est nécessaire
-            if (showSeeMoreButton) ...[
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  _navigateToReviewDetails(context, restaurant,
-                      reviews); // Fonction pour voir plus d'avis
-                },
-                child: const Text(
-                  'Voir plus d\'avis',
-                  style: AppTextStyles.paragraphDarkStyle,
-                ),
-              ),
-            ],
-          ] else if (showUnavailableMessage) ...[
-            // Affiche un message si les avis Google sont indisponibles
-            const Row(
-              children: [
-                Icon(Icons.chat_outlined),
-                SizedBox(width: 10),
-                Text(
-                  'Avis Google indisponibles',
-                  style: AppTextStyles.paragraphDarkStyle,
-                ),
-              ],
-            ),
-          ],
         ],
       ),
     );
@@ -339,265 +396,349 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
       },
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: AppColors.backgroundColor,
+          centerTitle: true,
           title: Text(
             widget.restaurant.name,
-            style: AppTextStyles.titleDarkStyle,
+            style: AppTextStyles.titleBlueStyle.copyWith(
+              color: AppColors.primaryColor,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          elevation: 0,
         ),
+        backgroundColor: AppColors.backgroundColor,
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Stack(
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        Image.network(
-                          _photoReference,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: 200,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      // Image with overlay
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 2),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black,
+                              offset: Offset(4, 4),
+                              blurRadius: 0,
+                            ),
+                          ],
                         ),
-                        Positioned.fill(
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                                colors: [
-                                  Color.fromRGBO(0, 0, 0, 0.5),
-                                  Colors.transparent,
+                        child: Stack(
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            Image.network(
+                              _photoReference,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 200,
+                            ),
+                            Positioned.fill(
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.bottomCenter,
+                                    end: Alignment.topCenter,
+                                    colors: [
+                                      Colors.black,
+                                      Colors.transparent,
+                                    ],
+                                    stops: [0.0, 0.45],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 15,
+                              child: Container(
+                                width: MediaQuery.of(context)
+                                    .size
+                                    .width, // Prendre toute la largeur de l'écran
+                                child: Text(
+                                  widget.restaurant.name,
+                                  style: AppTextStyles.titleWhiteStyle.copyWith(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines:
+                                      2, // Permet d'afficher jusqu'à 2 lignes
+                                  overflow: TextOverflow
+                                      .visible, // Ne pas couper le texte
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Ratings
+                      Container(
+                        margin: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.black, width: 2),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black,
+                              offset: Offset(4, 4),
+                              blurRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                                children: buildStarRating(
+                                    double.parse(_noteMoyenne))),
+                            const SizedBox(width: 8),
+                            Text(
+                              '$_noteMoyenne ($_userRatingsTotal avis)',
+                              style: AppTextStyles.paragraphDarkStyle,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Additional Information
+                      NeuBrutalismContainer(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Informations :',
+                              style: AppTextStyles.titleDarkStyle,
+                            ),
+                            const SizedBox(height: 10),
+                            Visibility(
+                              visible: _price !=
+                                  0, // Rendre le widget visible si _price est valide
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.payment,
+                                    color: AppColors.textColor,
+                                  ), // Icône de paiement
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    '€' *
+                                        _price, // Affichage du symbole € selon la valeur de price
+                                    style: AppTextStyles.paragraphDarkStyle,
+                                  ),
                                 ],
                               ),
                             ),
-                            padding: const EdgeInsets.only(
-                                bottom: 15), // Ajout de la marge en bas
-                            alignment:
-                                Alignment.bottomCenter, // Alignement en bas
-                            child: Text(
-                              widget.restaurant.name,
-                              style: AppTextStyles.titleWhiteStyle,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          //const Icon(Icons.star, color: Colors.amber),
-                          Row(
-                              children:
-                                  buildStarRating(double.parse(_noteMoyenne))),
-                          const SizedBox(width: 5),
-                          Text(
-                            '$_noteMoyenne ($_userRatingsTotal avis)',
-                            style: AppTextStyles.paragraphDarkStyle,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Informations :',
-                            style: AppTextStyles.titleDarkStyle,
-                          ),
-                          const SizedBox(height: 10),
-                          Visibility(
-                            visible: _price !=
-                                0, // Rendre le widget visible si _price est valide
-                            child: Row(
+                            const SizedBox(height: 5),
+                            Row(
                               children: [
-                                const Icon(Icons.payment), // Icône de paiement
+                                const Icon(Icons.local_dining,
+                                    color: AppColors
+                                        .textColor), // Icône de la cuisine
                                 const SizedBox(width: 5),
                                 Text(
-                                  '€' *
-                                      _price, // Affichage du symbole € selon la valeur de price
+                                  _cuisine ??
+                                      'Cuisine non spécifiée', // Exemple de type de cuisine
                                   style: AppTextStyles.paragraphDarkStyle,
                                 ),
                               ],
                             ),
-                          ),
-                          const SizedBox(height: 5),
-                          Row(
-                            children: [
-                              const Icon(
-                                  Icons.local_dining), // Icône de la cuisine
-                              const SizedBox(width: 5),
-                              Text(
-                                _cuisine ??
-                                    'Cuisine non spécifiée', // Exemple de type de cuisine
-                                style: AppTextStyles.paragraphDarkStyle,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          Row(
-                            children: [
-                              Icon(widget.restaurant.handicap
-                                  ? Icons
-                                      .accessibility // Si accessible aux personnes à mobilité réduite
-                                  : Icons
-                                      .not_accessible), // Si non accessible aux personnes à mobilité réduite
-                              const SizedBox(width: 5),
-                              Text(
-                                widget.restaurant.handicap
-                                    ? 'Adapté à la mobilité réduite'
-                                    : 'Non adapté à la mobilité réduite',
-                                style: AppTextStyles.paragraphDarkStyle,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          Visibility(
-                            visible: widget.restaurant
-                                .vege, // Masquer le widget si vege est false
-                            child: const Row(
+                            const SizedBox(height: 5),
+                            Row(
                               children: [
-                                Icon(Icons.eco), // Afficher l'icône eco
-                                SizedBox(width: 5),
+                                Icon(
+                                    widget.restaurant.handicap
+                                        ? Icons
+                                            .accessibility // Si accessible aux personnes à mobilité réduite
+                                        : Icons.not_accessible,
+                                    color: AppColors
+                                        .textColor), // Si non accessible aux personnes à mobilité réduite
+                                const SizedBox(width: 5),
                                 Text(
-                                  'Propose des plats végétariens',
+                                  widget.restaurant.handicap
+                                      ? 'Adapté à la mobilité réduite'
+                                      : 'Non adapté à la mobilité réduite',
                                   style: AppTextStyles.paragraphDarkStyle,
                                 ),
                               ],
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            height: 130,
-                            child: HorairesRestaurant(
-                              schedule:
-                                  _schedule!, // Utilisation de l'opérateur ?? pour fournir une valeur par défaut
+                            const SizedBox(height: 5),
+                            Visibility(
+                              visible: widget.restaurant
+                                  .vege, // Masquer le widget si vege est false
+                              child: const Row(
+                                children: [
+                                  Icon(Icons.eco,
+                                      color: AppColors
+                                          .textColor), // Afficher l'icône eco
+                                  SizedBox(width: 5),
+                                  Text(
+                                    'Propose des plats végétariens',
+                                    style: AppTextStyles.paragraphDarkStyle,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 20),
-                          Card(
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  leading: const Icon(Icons.menu_book),
-                                  title: const Text(
-                                    'Menu',
-                                    style: AppTextStyles.paragraphDarkStyle,
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              height: 130,
+                              child: HorairesRestaurant(
+                                schedule:
+                                    _schedule!, // Utilisation de l'opérateur ?? pour fournir une valeur par défaut
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Card(
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(color: Colors.black, width: 2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    leading: const Icon(
+                                      Icons.menu_book,
+                                      color: AppColors.secondaryColor,
+                                    ),
+                                    title: Text(
+                                      'Menu',
+                                      style:
+                                          AppTextStyles.titleDarkStyle.copyWith(
+                                        fontSize: 18,
+                                        color: AppColors.secondaryColor,
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      openURL(context, _siteInternet);
+                                    },
                                   ),
-                                  onTap: () {
-                                    openURL(context, _siteInternet);
-                                  },
-                                ),
-                                const Divider(),
-                                ListTile(
-                                  leading: const Icon(Icons.phone),
-                                  title: Text(
-                                    widget.restaurant.phoneNumber.isNotEmpty
-                                        ? widget.restaurant.phoneNumber
-                                        : 'Indisponible',
-                                    style: AppTextStyles.paragraphDarkStyle,
+                                  const Divider(),
+                                  ListTile(
+                                    leading: const Icon(
+                                      Icons.phone,
+                                      color: AppColors.secondaryColor,
+                                    ),
+                                    title: Text(
+                                      widget.restaurant.phoneNumber.isNotEmpty
+                                          ? widget.restaurant.phoneNumber
+                                          : 'Indisponible',
+                                      style:
+                                          AppTextStyles.titleDarkStyle.copyWith(
+                                        fontSize: 18,
+                                        color: AppColors.secondaryColor,
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      if (widget
+                                          .restaurant.phoneNumber.isNotEmpty) {
+                                        launch(
+                                            'tel://${widget.restaurant.phoneNumber}');
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Numéro de téléphone non disponible'),
+                                          ),
+                                        );
+                                      }
+                                    },
                                   ),
-                                  onTap: () {
-                                    if (widget
-                                        .restaurant.phoneNumber.isNotEmpty) {
-                                      launch(
-                                          'tel://${widget.restaurant.phoneNumber}');
-                                    } else {
+                                  const Divider(),
+                                  ListTile(
+                                    leading: const Icon(
+                                      Icons.location_on,
+                                      color: AppColors.secondaryColor,
+                                    ),
+                                    title: Text(
+                                      widget.restaurant.address,
+                                      style:
+                                          AppTextStyles.titleDarkStyle.copyWith(
+                                        fontSize: 18,
+                                        color: AppColors.secondaryColor,
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      Clipboard.setData(ClipboardData(
+                                          text: widget.restaurant.address));
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         const SnackBar(
                                           content: Text(
-                                              'Numéro de téléphone non disponible'),
+                                              'Adresse copiée dans le presse-papiers'),
                                         ),
                                       );
-                                    }
-                                  },
-                                ),
-                                const Divider(),
-                                ListTile(
-                                  leading: const Icon(Icons.location_on),
-                                  title: Text(
-                                    widget.restaurant.address,
-                                    style: AppTextStyles.paragraphDarkStyle,
+                                    },
                                   ),
-                                  onTap: () {
-                                    Clipboard.setData(ClipboardData(
-                                        text: widget.restaurant.address));
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            'Adresse copiée dans le presse-papiers'),
+                                  SizedBox(
+                                    height: 200,
+                                    child: FlutterMap(
+                                      options: MapOptions(
+                                        center: _position,
+                                        zoom: 18,
+                                        maxZoom: 18.4,
+                                        minZoom: 1,
                                       ),
-                                    );
-                                  },
-                                ),
-                                SizedBox(
-                                  height: 200,
-                                  child: FlutterMap(
-                                    options: MapOptions(
-                                      center: _position,
-                                      zoom: 18,
-                                      maxZoom: 18.4,
-                                      minZoom: 1,
+                                      children: [
+                                        TileLayer(
+                                          urlTemplate:
+                                              "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                                          subdomains: const ['a', 'b', 'c'],
+                                        ),
+                                        MarkerLayer(markers: [
+                                          Marker(
+                                            point: lat2.LatLng(
+                                                widget.restaurant.latitude,
+                                                widget.restaurant.longitude),
+                                            builder: (ctx) => Container(
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFF95A472),
+                                                borderRadius:
+                                                    BorderRadius.circular(20.0),
+                                              ),
+                                              child: const Icon(
+                                                Icons.location_on,
+                                                color: Colors.white,
+                                                size: 30.0,
+                                              ),
+                                            ),
+                                          )
+                                        ])
+                                      ],
                                     ),
-                                    children: [
-                                      TileLayer(
-                                        urlTemplate:
-                                            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                                        subdomains: const ['a', 'b', 'c'],
-                                      ),
-                                      MarkerLayer(markers: [
-                                        Marker(
-                                          point: lat2.LatLng(
-                                              widget.restaurant.latitude,
-                                              widget.restaurant.longitude),
-                                          builder: (ctx) => Container(
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFF95A472),
-                                              borderRadius:
-                                                  BorderRadius.circular(20.0),
-                                            ),
-                                            child: const Icon(
-                                              Icons.location_on,
-                                              color: Colors.white,
-                                              size: 30.0,
-                                            ),
-                                          ),
-                                        )
-                                      ])
-                                    ],
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
+                            const SizedBox(height: 20),
+                          ],
+                        ),
                       ),
-                    ),
-                    buildReviewContainer(
-                      context: context,
-                      title: 'Avis des Hôtels :',
-                      reviews: _workspaceReviews,
-                      restaurant: widget.restaurant,
-                      isGoogleReview: false,
-                    ),
-                    buildReviewContainer(
-                      context: context,
-                      title: 'Avis Google :',
-                      reviews: _reviews,
-                      restaurant: widget.restaurant,
-                      isGoogleReview: true,
-                    ),
-                    const SizedBox(height: 30),
-                  ],
+                      if (_workspaceReviews
+                          .isNotEmpty) // Afficher la section des avis des hôtels seulement s'il y a des avis
+                        buildReviewContainer(
+                          context: context,
+                          title: 'Avis des Hôtels :',
+                          reviews: _workspaceReviews,
+                          restaurant: widget.restaurant,
+                          isGoogleReview: false,
+                        ),
+                      buildReviewContainer(
+                        context: context,
+                        title: 'Avis Google :',
+                        reviews: _reviews,
+                        restaurant: widget.restaurant,
+                        isGoogleReview: true,
+                      ),
+                      const SizedBox(height: 30),
+                    ],
+                  ),
                 ),
               ),
       ),

@@ -69,26 +69,27 @@ class _SearchBarState extends State<SearchBar> {
           border: InputBorder.none,
           prefixIcon: const Icon(
             Icons.search,
-            color: AppColors.greenishGrey,
+            color: AppColors.backgroundColor,
           ),
           suffixIcon: IconButton(
             // icon: const Icon(
             //   Icons.clear,
-            //   // color: AppColors.greenishGrey,
+            //   // color: AppColors.backgroundColor,
             //   color: Colors.blueAccent,
             // ),
             icon: Container(
               decoration: filterIsOn.value
                   ? BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.orangeButton, // Fond orange
+                      color: AppColors.secondaryColor, // Fond orange
                     )
                   : null,
               padding:
                   const EdgeInsets.all(4.0), // Pas de bordure si non pressé
               child: Icon(
                 Icons.clear,
-                color: filterIsOn.value ? Colors.white : AppColors.greenishGrey,
+                color:
+                    filterIsOn.value ? Colors.white : AppColors.backgroundColor,
               ), // Espace entre l'icône et la bordure
             ),
             onPressed: () async {

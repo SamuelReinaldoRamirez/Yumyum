@@ -32,7 +32,8 @@ class WorkspaceSelectionPage extends StatelessWidget {
               height: 40.0,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.orangeButton, // Fond vert clair pour le cercle
+                color:
+                    AppColors.secondaryColor, // Fond vert clair pour le cercle
               ),
               child: IconButton(
                 icon: const Icon(
@@ -121,7 +122,7 @@ class WorkspaceSelectionPage extends StatelessWidget {
         child: Row(
           children: [
             const Icon(Icons.restaurant,
-                color: AppColors.lightGreen), // Icône en vert clair
+                color: AppColors.primaryColor), // Icône en vert clair
             const SizedBox(width: 10.0),
             Expanded(
               child: Text(
@@ -303,7 +304,7 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
                             ? Icons.check_circle
                             : Icons.add_circle_outline,
                         color: widget.workspace.isFollowed
-                            ? AppColors.orangeButton
+                            ? AppColors.secondaryColor
                             : Colors.white,
                         size: 28,
                       ),

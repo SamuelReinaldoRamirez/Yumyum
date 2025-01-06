@@ -4,134 +4,145 @@ import 'package:yummap/service/mixpanel_service.dart';
 import 'package:yummap/page/restau_details.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/widget/video_carousel.dart';
+import 'package:yummap/widgets/neu_widgets.dart';
 import '../constant/theme.dart';
 
 class BottomSheetHelper {
   static void showBottomSheet(BuildContext context, Restaurant restaurant) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.black,
+              width: 3.0,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Container(), // Première colonne vide
-                    ),
-                    Expanded(
-                      flex: 4,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 8.0),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(20),
+            ),
+          ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header Section
+                  Row(
+                    children: [
+                      Expanded(flex: 1, child: Container()),
+                      Expanded(
+                        flex: 4,
                         child: Column(
                           children: [
+                            // Restaurant Name
                             Text(
                               restaurant.name,
                               textAlign: TextAlign.center,
-                              style: AppTextStyles.titleDarkStyle,
+                              style: AppTextStyles.titleDarkStyle.copyWith(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
                               maxLines: 1,
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.star,
-                                  color:
-                                      AppColors.orangeBG, // Couleur de l'étoile
-                                ),
-                                Text(
-                                    restaurant.ratings
-                                        .toString(), // Affichage de la note du restaurant
-                                    style: AppTextStyles.hintTextDarkStyle),
-                              ],
+                            const SizedBox(height: 8),
+                            // Rating
+                            Container(
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.star,
+                                    color: Colors.amber,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    restaurant.ratings.toString(),
+                                    style: AppTextStyles.hintTextDarkStyle
+                                        .copyWith(
+                                      color: Colors.amber,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                            // Cuisine
                             Container(
                               margin: const EdgeInsets.only(top: 8),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors
-                                    .darkGrey, // Couleur de la pastille
-                                borderRadius: BorderRadius.circular(3),
+                                horizontal: 12,
+                                vertical: 8,
                               ),
-                              child: Text(restaurant.cuisine,
-                                  style: AppTextStyles.hintTextWhiteStyle),
+                              decoration: BoxDecoration(
+                                color: AppColors.darkGrey,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                restaurant.cuisine,
+                                style:
+                                    AppTextStyles.hintTextWhiteStyle.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                      ), // Deuxième colonne avec champ texte
-                    ),
-
-                    // FloatingActionButton(
-                    //   onPressed: () {
-                    //     _navigateToTags(context, restaurant);
-                    //   },
-                    //   backgroundColor: const Color(0xFF95A472),
-                    //   child: const Icon(
-                    //     Icons.info_outline,
-                    //     color: Colors.white, // Couleur de l'icône en blanc
-                    //     size: 30, // Ajuste la taille de l'icône si nécessaire
-                    //   ),
-                    // ),
-
-                    FloatingActionButton(
-                      onPressed: () {
-                        _navigateToTags(context, restaurant);
-                      },
-                      backgroundColor: const Color(0xFF95A472),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            50), // Définit le bouton comme rond
                       ),
-                      child: const Icon(
-                        Icons.info_outline,
-                        color: Colors.white, // Couleur de l'icône en blanc
-                        size: 30, // Ajuste la taille de l'icône si nécessaire
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const SizedBox(height: 16),
-                VideoCarousel(videoLinks: restaurant.videoLinks),
-                const SizedBox(height: 30),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        _navigateToRestaurant(restaurant);
-                      },
-                      style: AppButtonStyles.elevatedButtonStyle,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text("Y aller"),
-                          const SizedBox(
-                              width: 8), // Espacement entre l'icône et le texte
+                      // Info Button
+                      FloatingActionButton(
+                        onPressed: () {
+                          _navigateToTags(context, restaurant);
+                        },
+                        backgroundColor: AppColors.secondaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              50), // Définit le bouton comme rond
+                        ),
+                        child: const Icon(
+                          Icons.info_outline,
+                          color: Colors.white, // Couleur de l'icône en blanc
+                          size: 30, // Ajuste la taille de l'icône si nécessaire
+                        ),
+                      )
+                    ],
+                  ),
 
-                          Transform.rotate(
-                            angle: 90 * 3.141592653589793 / 180,
-                            child: const Icon(
-                              Icons.navigation,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
+                  const SizedBox(height: 16),
+
+                  // Video Carousel
+                  VideoCarousel(videoLinks: restaurant.videoLinks),
+
+                  const SizedBox(height: 30),
+
+                  // "Y Aller" Button
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CustomNeuButton(
+                        onPressed: () {
+                          _navigateToRestaurant(restaurant);
+                        },
+                        text: "Y aller",
+                        icon: Icons.navigation,
+                        buttonColor: AppColors.primaryColor,
+                        textColor: Colors.black,
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
             ),
           ),
         );
@@ -160,7 +171,7 @@ class BottomSheetHelper {
       if (await canLaunchUrl(fallbackUri)) {
         await launchUrl(fallbackUri);
       } else {
-        //print('Could not launch the map.');
+        // Handle error if URL cannot be launched
       }
     }
   }
@@ -173,10 +184,8 @@ class BottomSheetHelper {
     Navigator.push(
       context,
       MaterialPageRoute(
-          // builder: (context) => RestaurantDetailsWidget()),
-          builder: (context) =>
-              RestaurantDetailsWidget(restaurant: restaurant)),
-      // builder: (context) => DetailsTags(restaurant: restaurant)),
+        builder: (context) => RestaurantDetailsWidget(restaurant: restaurant),
+      ),
     );
   }
 }

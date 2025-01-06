@@ -49,28 +49,32 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                         _selectedDay = dayName;
                       });
                     },
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8.0),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? const Color(0xFF95A472)
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          child: Text(
-                            dayName.substring(
-                                0, 3), // Utilisation des 3 premières lettres
-                            style: TextStyle(
-                              color: isSelected
-                                  ? Colors.white
-                                  : const Color(0xFF646165),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppColors.primaryColor : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.textColor,
+                          width: 2,
                         ),
-                      ],
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black,
+                                  offset: Offset(4, 4),
+                                  blurRadius: 0,
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Text(
+                        dayName.substring(0, 3),
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : AppColors.textColor,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
                     ),
                   );
                 },
@@ -94,7 +98,9 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                       Positioned.fill(
                         child: Center(
                           child: Text(
-                            allDaysEmpty ? 'Horaires indisponibles' : _getClosedText(_selectedDay),
+                            allDaysEmpty
+                                ? 'Horaires indisponibles'
+                                : _getClosedText(_selectedDay),
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -130,11 +136,14 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
   }
 
   String _getClosedText(String day) {
-    if (widget.schedule[day] != null && widget.schedule[day]!.contains('Closed')) {
+    if (widget.schedule[day] != null &&
+        widget.schedule[day]!.contains('Closed')) {
       return 'Fermé';
-    } else if (widget.schedule[day] != null && widget.schedule[day]!.contains('Fermé')) {
+    } else if (widget.schedule[day] != null &&
+        widget.schedule[day]!.contains('Fermé')) {
       return 'Fermé';
-    } else if (widget.schedule[day] != null && widget.schedule[day]!.contains('Sunday: Closed')) {
+    } else if (widget.schedule[day] != null &&
+        widget.schedule[day]!.contains('Sunday: Closed')) {
       return 'Sunday: Fermé';
     } else {
       return 'Fermé';
@@ -207,7 +216,8 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
         child: Container(
           width: widthPercentage * containerWidth / 100,
           height: 50.0,
-          color: const Color(0xFF95A472),
+          // Remplacer par la couleur principale de l'application
+          color: AppColors.primaryColor,
         ),
       ),
     );
@@ -252,7 +262,7 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
         text: TextSpan(
           text: endTimeLabel,
           style: TextStyle(
-              color: AppColors.orangeButton,
+              color: AppColors.secondaryColor,
               fontWeight: FontWeight.bold,
               fontSize: 12),
         ),
