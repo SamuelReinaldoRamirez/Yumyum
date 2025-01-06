@@ -21,67 +21,78 @@ class WorkspaceSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        automaticallyImplyLeading:
-            false, // Enlève la flèche de retour par défaut
-        backgroundColor: AppColors.darkGrey, // Fond de l'app bar en gris foncé
+        automaticallyImplyLeading: false,
+        backgroundColor: AppColors.backgroundColor,
+        elevation: 0,
         title: Row(
           children: [
             Container(
-              width: 40.0,
-              height: 40.0,
+              width: 50.0, // Taille du container pour la flèche
+              height: 50.0, // Taille du container pour la flèche
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color:
-                    AppColors.secondaryColor, // Fond vert clair pour le cercle
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back, // Icône de flèche de retour
-                  color: Colors.white, // Couleur de l'icône
+                color: Colors.white,
+                border: Border.all(
+                  color: Colors.black,
+                  width: 3.0,
                 ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black,
+                    offset: Offset(4, 4),
+                    blurRadius: 0,
+                  ),
+                ],
+              ),
+              child: Center(
+                // Centrer l'icône à l'intérieur du container
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
+                    size: 30,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                ),
               ),
             ),
-            const SizedBox(width: 10.0),
+            const SizedBox(
+                width: 16), // Espacement entre la flèche et "Résultats"
             Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
-                decoration: BoxDecoration(
-                  color: AppColors.darkGrey, // Fond gris foncé pour le titre
-                  borderRadius: BorderRadius.circular(10.0),
+              child: Text(
+                'Résultats',
+                style: AppTextStyles.titleDarkStyle.copyWith(
+                  color: Colors.black,
+                  fontSize: 22,
                 ),
-                child: Center(
-                  child: Text(
-                    'Résultats',
-                    style: AppTextStyles.titleDarkStyle.copyWith(
-                      color: Colors.white,
-                    ), // Utilise le style de titre avec la couleur définie
-                    textAlign: TextAlign.center, // Centre le texte
-                  ),
-                ),
+                textAlign: TextAlign.center, // Centrer le texte "Résultats"
               ),
             ),
           ],
         ),
       ),
       body: Container(
-        color: Colors.white, // Fond vert clair
+        color: AppColors.backgroundColor,
         child: ListView(
+          padding: const EdgeInsets.all(16),
           children: [
             _buildSectionTitle(context, 'Profils publics'),
-            Column(
-              children: workspaces
-                  .map((workspace) => WorkspaceItem(workspace: workspace))
-                  .toList(),
-            ),
-            if (restaurants != null && restaurants!.isNotEmpty)
+            const SizedBox(height: 8),
+            ...workspaces.map((workspace) => Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: WorkspaceItem(workspace: workspace),
+                )),
+            if (restaurants != null && restaurants!.isNotEmpty) ...[
+              const SizedBox(height: 16),
               _buildSectionTitle(context, 'Restaurants'),
-            ...(restaurants?.map((restaurant) =>
-                    _buildRestaurantItem(context, restaurant)) ??
-                []),
+              const SizedBox(height: 8),
+              ...restaurants!.map((restaurant) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _buildRestaurantItem(context, restaurant),
+                  )),
+            ],
           ],
         ),
       ),
@@ -89,49 +100,101 @@ class WorkspaceSelectionPage extends StatelessWidget {
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.secondaryColor,
+        border: Border.all(
+          color: Colors.black,
+          width: 3.0,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black,
+            offset: Offset(4, 4),
+            blurRadius: 0,
+          ),
+        ],
+      ),
       child: Text(
         title,
-        style: AppTextStyles.titleDarkStyle.copyWith(color: AppColors.darkGrey),
+        style: AppTextStyles.titleDarkStyle.copyWith(
+          color: Colors.white,
+          fontSize: 20,
+        ),
       ),
     );
   }
 
   Widget _buildRestaurantItem(BuildContext context, Restaurant restaurant) {
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context,
-            restaurant); // Retourne le restaurant sélectionné à la page précédente
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-        padding: const EdgeInsets.all(15.0),
-        decoration: BoxDecoration(
-          color: Colors.black87, // Fond gris foncé
-          borderRadius: BorderRadius.circular(10.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(
+          color: Colors.black,
+          width: 3.0,
         ),
-        child: Row(
-          children: [
-            const Icon(Icons.restaurant,
-                color: AppColors.primaryColor), // Icône en vert clair
-            const SizedBox(width: 10.0),
-            Expanded(
-              child: Text(
-                restaurant.name,
-                style: AppTextStyles
-                    .paragraphWhiteStyle, // Utilise le style de texte pour les paragraphes
-              ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black,
+            offset: Offset(4, 4),
+            blurRadius: 0,
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(9),
+          onTap: () => Navigator.pop(context, restaurant),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor,
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 2.0,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.restaurant,
+                    color: Colors.black,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        restaurant.name,
+                        style: AppTextStyles.titleDarkStyle.copyWith(
+                          fontSize: 18,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        restaurant.cuisine,
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -214,108 +277,91 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
         List<String> aliasList = snapshot.data ?? [];
         aliasList.contains(widget.workspace.alias);
 
-        return InkWell(
-          onTap: () {
-            // Navigator.pop(context, widget.workspace); // Retourne le workspace sélectionné à la page précédente
-          },
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-            padding: const EdgeInsets.all(15.0),
-            decoration: BoxDecoration(
-              color: AppColors.darkGrey, // Fond gris foncé
-              borderRadius: BorderRadius.circular(10.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: const Offset(0, 3),
-                ),
-              ],
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.black,
+              width: 3.0,
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black,
+                offset: Offset(4, 4),
+                blurRadius: 0,
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(9),
+              onTap: () {
+                // Navigator.pop(context, widget.workspace); // Retourne le workspace sélectionné à la page précédente
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Icon(Icons.business,
-                        color: Colors.white), // Icône en vert clair
-                    const SizedBox(width: 10.0),
-                    SizedBox(
-                      width: 100,
-                      child: Text(
-                        widget.workspace.name,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2, // Limite à une seule ligne
-                        style: AppTextStyles
-                            .paragraphWhiteStyle, // Utilise le style de texte pour les paragraphes
-                      ),
-                    )
-                  ],
-                ),
-                Row(
-                  children: [
-                    TextButton(
-                      onPressed: () async {
-                        List<Restaurant> restaurants =
-                            await _callEndpointService
-                                .getRestaurantsByTagsAndWorkspaces(
-                                    [], [widget.workspace.id]);
-                        if (restaurants.isNotEmpty) {
-                          // Afficher les restaurants sur la carte
-                          MarkerManager.createFull(
-                              MarkerManager.context, restaurants);
-                          //SI l'hotel recommande TOUS les restos de notre bdd, la croix sera entourée mais le veut-on?!
-                          //quand on clique sur voir les recommandations de l'hotel, ne faudrait-il pas que ca le coche dans les workspaces filtres si on est déjà abonné?
-                          filterIsOn.value = true;
-                        } else {
-                          ScaffoldMessenger.of(MarkerManager.context)
-                              .showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Aucun restaurant trouvé pour ce workspace'),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryColor,
+                            border: Border.all(
+                              color: Colors.black,
+                              width: 2.0,
                             ),
-                          );
-                        }
-                        Navigator.pop(context, widget.workspace);
-                        // Action pour le bouton "Voir"
-                      },
-                      style: ButtonStyle(
-                        elevation:
-                            WidgetStateProperty.all(15.0), // Ajout d'élévation
-                        shape: WidgetStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            side: BorderSide(
-                                color: Colors.white
-                                    .withOpacity(0.5)), // Bordure plus claire
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.business,
+                            color: Colors.black,
+                            size: 24,
                           ),
                         ),
-                      ),
-                      child: const Text(
-                        'Voir',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                        const SizedBox(width: 16),
+                        SizedBox(
+                          width: 150,
+                          child: Text(
+                            widget.workspace.name,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2, // Limite à une seule ligne
+                            style: AppTextStyles.titleBlackStyle.copyWith(
+                              fontSize: 18,
+                              color: Colors.black,
+                            ), // Utilise le style de texte pour les paragraphes
+                          ),
+                        )
+                      ],
                     ),
-                    const SizedBox(width: 10.0),
-                    IconButton(
-                      icon: Icon(
-                        widget.workspace.isFollowed
-                            ? Icons.check_circle
-                            : Icons.add_circle_outline,
-                        color: widget.workspace.isFollowed
-                            ? AppColors.secondaryColor
-                            : Colors.white,
-                        size: 28,
-                      ),
-                      onPressed: () => _handleFollowToggle(widget.workspace),
-                      tooltip: widget.workspace.isFollowed
-                          ? 'Ne plus suivre'
-                          : 'Suivre',
+                    Row(
+                      children: [
+                        const SizedBox(width: 10.0),
+                        IconButton(
+                          icon: Icon(
+                            widget.workspace.isFollowed
+                                ? Icons.check_circle
+                                : Icons.add_circle_outline,
+                            color: widget.workspace.isFollowed
+                                ? AppColors.secondaryColor
+                                : Colors.black,
+                            size: 28,
+                          ),
+                          onPressed: () =>
+                              _handleFollowToggle(widget.workspace),
+                          tooltip: widget.workspace.isFollowed
+                              ? 'Ne plus suivre'
+                              : 'Suivre',
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         );
