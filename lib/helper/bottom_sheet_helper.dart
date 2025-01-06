@@ -8,143 +8,144 @@ import 'package:yummap/widgets/neu_widgets.dart';
 import '../constant/theme.dart';
 
 class BottomSheetHelper {
-  static void showBottomSheet(BuildContext context, Restaurant restaurant) {
+  static void showDraggableBottomSheet(
+      BuildContext context, Restaurant restaurant) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(
-              color: Colors.black,
-              width: 3.0,
-            ),
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(20),
-            ),
-          ),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header Section
-                  Row(
+        return DraggableScrollableSheet(
+          initialChildSize: 0.55,
+          minChildSize: 0.4,
+          maxChildSize: 0.60,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(
+                  color: Colors.black,
+                  width: 3.0,
+                ),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+              ),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(flex: 1, child: Container()),
-                      Expanded(
-                        flex: 4,
-                        child: Column(
-                          children: [
-                            // Restaurant Name
-                            Text(
-                              restaurant.name,
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.titleDarkStyle.copyWith(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              maxLines: 1,
-                            ),
-                            const SizedBox(height: 8),
-                            // Rating
-                            Container(
-                              margin: const EdgeInsets.symmetric(vertical: 8),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.star,
-                                    color: Colors.amber,
-                                    size: 20,
+                      // Barre draggable
+                      Container(
+                        width: 50,
+                        height: 5,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2.5),
+                        ),
+                      ),
+
+                      // Header Section
+                      Row(
+                        children: [
+                          Expanded(flex: 1, child: Container()),
+                          Expanded(
+                            flex: 4,
+                            child: Column(
+                              children: [
+                                Text(
+                                  restaurant.name,
+                                  textAlign: TextAlign.center,
+                                  style: AppTextStyles.titleDarkStyle.copyWith(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    restaurant.ratings.toString(),
-                                    style: AppTextStyles.hintTextDarkStyle
-                                        .copyWith(
+                                  maxLines: 1,
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.star,
                                       color: Colors.amber,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      restaurant.ratings.toString(),
+                                      style: AppTextStyles.hintTextDarkStyle
+                                          .copyWith(
+                                        color: Colors.amber,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Container(
+                                  margin: const EdgeInsets.only(top: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.darkGrey,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    restaurant.cuisine,
+                                    style: AppTextStyles.hintTextWhiteStyle
+                                        .copyWith(
+                                      color: Colors.white,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                            // Cuisine
-                            Container(
-                              margin: const EdgeInsets.only(top: 8),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.darkGrey,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                restaurant.cuisine,
-                                style:
-                                    AppTextStyles.hintTextWhiteStyle.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                          FloatingActionButton(
+                            onPressed: () {
+                              _navigateToTags(context, restaurant);
+                            },
+                            backgroundColor: AppColors.secondaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: const Icon(
+                              Icons.info_outline,
+                              color: Colors.white,
+                              size: 30,
+                            ),
+                          ),
+                        ],
                       ),
-                      // Info Button
-                      FloatingActionButton(
-                        onPressed: () {
-                          _navigateToTags(context, restaurant);
-                        },
-                        backgroundColor: AppColors.secondaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              50), // Définit le bouton comme rond
-                        ),
-                        child: const Icon(
-                          Icons.info_outline,
-                          color: Colors.white, // Couleur de l'icône en blanc
-                          size: 30, // Ajuste la taille de l'icône si nécessaire
-                        ),
-                      )
+                      const SizedBox(height: 16),
+                      VideoCarousel(videoLinks: restaurant.videoLinks),
+                      const SizedBox(height: 30),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CustomNeuButton(
+                            onPressed: () {
+                              _navigateToRestaurant(restaurant);
+                            },
+                            text: "Y aller",
+                            icon: Icons.navigation,
+                            buttonColor: AppColors.primaryColor,
+                            textColor: Colors.black,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
                     ],
                   ),
-
-                  const SizedBox(height: 16),
-
-                  // Video Carousel
-                  VideoCarousel(videoLinks: restaurant.videoLinks),
-
-                  const SizedBox(height: 30),
-
-                  // "Y Aller" Button
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CustomNeuButton(
-                        onPressed: () {
-                          _navigateToRestaurant(restaurant);
-                        },
-                        text: "Y aller",
-                        icon: Icons.navigation,
-                        buttonColor: AppColors.primaryColor,
-                        textColor: Colors.black,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     ).whenComplete(() {

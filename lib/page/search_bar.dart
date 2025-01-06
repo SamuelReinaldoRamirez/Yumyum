@@ -203,7 +203,7 @@ class _SearchBarState extends State<SearchBar> {
           final latitude = restaurant.latitude;
           final longitude = restaurant.longitude;
 
-          BottomSheetHelper.showBottomSheet(MarkerManager.context, restaurant);
+          BottomSheetHelper.showDraggableBottomSheet(MarkerManager.context, restaurant);
           MarkerManager.mapPageState?.mapController
               .move(lat2.LatLng(latitude, longitude), 15);
           MarkerManager.resetMarkers();
@@ -243,7 +243,7 @@ class _SearchBarState extends State<SearchBar> {
   }
 
   void _handleRestaurantSelection(Restaurant restaurant) {
-    BottomSheetHelper.showBottomSheet(MarkerManager.context, restaurant);
+    BottomSheetHelper.showDraggableBottomSheet(MarkerManager.context, restaurant);
     MarkerManager.mapPageState?.mapController
         .move(lat2.LatLng(restaurant.latitude, restaurant.longitude), 15);
     MarkerManager.resetMarkers();

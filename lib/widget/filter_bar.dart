@@ -210,7 +210,9 @@ class FilterBarState extends State<FilterBar> {
     }
 
     // Mettre à jour filterIsOn en fonction de tous les filtres actifs
-    if (workspaceIds.isEmpty && filterTags.isEmpty && !_isRatingFilterActive.value) {
+    if (workspaceIds.isEmpty &&
+        filterTags.isEmpty &&
+        !_isRatingFilterActive.value) {
       filterIsOn.value = false;
     } else {
       filterIsOn.value = true;
@@ -264,28 +266,80 @@ class FilterBarState extends State<FilterBar> {
             : () {
                 showModalBottomSheet<void>(
                   context: context,
+                  isScrollControlled:
+                      true, // Permet une BottomSheet ajustée au contenu
+                  backgroundColor:
+                      Colors.transparent, // Pour un contour stylisé
                   builder: (BuildContext context) {
-                    return FilterOptionsModal(
-                      filterType: type,
-                      tags: _localDataService.getTagsByTypeSync(type),
-                      initialSelectedTagIds:
-                          widget.selectedTagIdsNotifier.value,
-                      onApply: (selectedIds) async {
-                        _scrollToStart();
-                        setState(() {
-                          _loadingStates[type] = true;
-                          widget.selectedTagIdsNotifier.value = selectedIds;
-                        });
+                    return DraggableScrollableSheet(
+                      initialChildSize: 0.6,
+                      minChildSize: 0.4,
+                      maxChildSize: 0.8,
+                      builder: (context, scrollController) {
+                        return Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 8.0),
+                          padding: const EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
+                            border: Border.all(
+                              color: Colors.black,
+                              width: 2.0,
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black26,
+                                offset: Offset(6, 6),
+                                blurRadius: 0,
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              // Barre draggable
+                              Container(
+                                width: 50,
+                                height: 5,
+                                margin: const EdgeInsets.only(bottom: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade300,
+                                  borderRadius: BorderRadius.circular(2.5),
+                                ),
+                              ),
+                              // Contenu existant conservé
+                              Expanded(
+                                child: FilterOptionsModal(
+                                  filterType: type,
+                                  tags:
+                                      _localDataService.getTagsByTypeSync(type),
+                                  initialSelectedTagIds:
+                                      widget.selectedTagIdsNotifier.value,
+                                  onApply: (selectedIds) async {
+                                    _scrollToStart();
+                                    setState(() {
+                                      _loadingStates[type] = true;
+                                      widget.selectedTagIdsNotifier.value =
+                                          selectedIds;
+                                    });
 
-                        await generalFilter();
+                                    await generalFilter();
 
-                        if (mounted) {
-                          setState(() {
-                            _loadingStates[type] = false;
-                          });
-                        }
+                                    if (mounted) {
+                                      setState(() {
+                                        _loadingStates[type] = false;
+                                      });
+                                    }
+                                  },
+                                  parentState: this,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       },
-                      parentState: this,
                     );
                   },
                 );
@@ -356,143 +410,179 @@ class FilterBarState extends State<FilterBar> {
                 _tempSelectedWorkspaces =
                     List<int>.from(widget.selectedWorkspacesNotifier.value);
 
-                showModalBottomSheet(
+                showModalBottomSheet<void>(
                   context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
                   builder: (BuildContext context) {
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Comptes Suivis',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.close),
-                                onPressed: () => Navigator.pop(context),
+                    return DraggableScrollableSheet(
+                      initialChildSize: 0.5,
+                      minChildSize: 0.4,
+                      maxChildSize: 0.8,
+                      builder: (context, scrollController) {
+                        return Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 8.0),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
+                            border: Border.all(
+                              color: Colors.black,
+                              width: 2.0,
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black26,
+                                offset: Offset(6, 6),
+                                blurRadius: 0,
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
-                          Expanded(
-                            child: ValueListenableBuilder<List<Workspace>>(
-                              valueListenable:
-                                  _localDataService.followedWorkspacesNotifier,
-                              builder: (context, followedWorkspaces, child) {
-                                if (followedWorkspaces.isEmpty) {
-                                  return Container(
-                                    alignment: Alignment.center,
-                                    padding: const EdgeInsets.all(16),
-                                    child: const Text(
-                                      'Aucun compte suivi',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  );
-                                }
-
-                                return StatefulBuilder(
-                                  builder: (context, setModalState) {
-                                    return ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount: followedWorkspaces.length,
-                                      itemBuilder: (context, index) {
-                                        final workspace =
-                                            followedWorkspaces[index];
-                                        final isSelected =
-                                            _tempSelectedWorkspaces
-                                                .contains(workspace.id);
-
-                                        return ListTile(
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 16),
-                                          title: Text(workspace.name),
-                                          trailing: Checkbox(
-                                            value: isSelected,
-                                            activeColor:
-                                                AppColors.secondaryColor,
-                                            onChanged: (bool? value) {
-                                              setModalState(() {
-                                                if (value ?? false) {
-                                                  _tempSelectedWorkspaces
-                                                      .add(workspace.id);
-                                                } else {
-                                                  _tempSelectedWorkspaces
-                                                      .remove(workspace.id);
-                                                }
-                                              });
-                                            },
+                          child: Column(
+                            children: [
+                              // Barre draggable
+                              Container(
+                                width: 50,
+                                height: 5,
+                                margin: const EdgeInsets.only(bottom: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade300,
+                                  borderRadius: BorderRadius.circular(2.5),
+                                ),
+                              ),
+                              // Contenu principal
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    'Comptes Suivis',
+                                    style: AppTextStyles.titleDarkStyle,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Expanded(
+                                child: ValueListenableBuilder<List<Workspace>>(
+                                  valueListenable: _localDataService
+                                      .followedWorkspacesNotifier,
+                                  builder:
+                                      (context, followedWorkspaces, child) {
+                                    if (followedWorkspaces.isEmpty) {
+                                      return Container(
+                                        alignment: Alignment.center,
+                                        padding: const EdgeInsets.all(16),
+                                        child: const Text(
+                                          'Aucun compte suivi',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey,
                                           ),
-                                          onTap: () {
-                                            setModalState(() {
-                                              if (_tempSelectedWorkspaces
-                                                  .contains(workspace.id)) {
+                                        ),
+                                      );
+                                    }
+
+                                    return StatefulBuilder(
+                                      builder: (context, setModalState) {
+                                        return ListView.builder(
+                                          controller:
+                                              scrollController, // Pour le scroll draggable
+                                          shrinkWrap: true,
+                                          itemCount: followedWorkspaces.length,
+                                          itemBuilder: (context, index) {
+                                            final workspace =
+                                                followedWorkspaces[index];
+                                            final isSelected =
                                                 _tempSelectedWorkspaces
-                                                    .remove(workspace.id);
-                                              } else {
-                                                _tempSelectedWorkspaces
-                                                    .add(workspace.id);
-                                              }
-                                            });
+                                                    .contains(workspace.id);
+
+                                            return ListTile(
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 16),
+                                              title: Text(workspace.name),
+                                              trailing: Checkbox(
+                                                value: isSelected,
+                                                activeColor:
+                                                    AppColors.secondaryColor,
+                                                onChanged: (bool? value) {
+                                                  setModalState(() {
+                                                    if (value ?? false) {
+                                                      _tempSelectedWorkspaces
+                                                          .add(workspace.id);
+                                                    } else {
+                                                      _tempSelectedWorkspaces
+                                                          .remove(workspace.id);
+                                                    }
+                                                  });
+                                                },
+                                              ),
+                                              onTap: () {
+                                                setModalState(() {
+                                                  if (_tempSelectedWorkspaces
+                                                      .contains(workspace.id)) {
+                                                    _tempSelectedWorkspaces
+                                                        .remove(workspace.id);
+                                                  } else {
+                                                    _tempSelectedWorkspaces
+                                                        .add(workspace.id);
+                                                  }
+                                                });
+                                              },
+                                            );
                                           },
                                         );
                                       },
                                     );
                                   },
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.secondaryColor,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
-                            ),
-                            onPressed: () async {
-                              _scrollToStart();
-                              setState(() {
-                                _isLoadingWorkspaces = true;
-                              });
-
-                              try {
-                                widget.selectedWorkspacesNotifier.value =
-                                    _tempSelectedWorkspaces;
-                                await generalFilter();
-                              } finally {
-                                if (mounted) {
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.secondaryColor,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  minimumSize: Size(double.infinity,
+                                      0), // Prendre toute la largeur
+                                ),
+                                onPressed: () async {
+                                  _scrollToStart();
                                   setState(() {
-                                    _isLoadingWorkspaces = false;
+                                    _isLoadingWorkspaces = true;
                                   });
-                                }
-                                Navigator.pop(context);
-                              }
-                            },
-                            child: const Text(
-                              'Appliquer',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+
+                                  try {
+                                    widget.selectedWorkspacesNotifier.value =
+                                        _tempSelectedWorkspaces;
+                                    await generalFilter();
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() {
+                                        _isLoadingWorkspaces = false;
+                                      });
+                                    }
+                                    Navigator.pop(context);
+                                  }
+                                },
+                                child: const Text(
+                                  'Appliquer',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     );
                   },
                 );
@@ -564,22 +654,38 @@ class FilterBarState extends State<FilterBar> {
             onPressed: () {
               showModalBottomSheet(
                 context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
                 builder: (BuildContext context) {
-                  return RatingFilterModal(
-                    initialMinRating: _minRating,
-                    initialMaxRating: _maxRating,
-                    onApply: (min, max) async {
-                      setState(() {
-                        _minRating = min;
-                        _maxRating = max;
-                        _isRatingFilterActive.value = (min > 1.0 || max < 5.0);
-                      });
-                      if (_isRatingFilterActive.value) {
-                        filterIsOn.value = true;
-                        _scrollToStart();
-                      }
-                      await generalFilter();
-                    },
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
+                      border: Border.all(
+                        color: Colors
+                            .black, // Contour noir autour de la BottomSheet
+                        width: 2.0,
+                      ),
+                    ),
+                    child: RatingFilterModal(
+                      initialMinRating: _minRating,
+                      initialMaxRating: _maxRating,
+                      onApply: (min, max) async {
+                        setState(() {
+                          _minRating = min;
+                          _maxRating = max;
+                          _isRatingFilterActive.value =
+                              (min > 1.0 || max < 5.0);
+                        });
+                        if (_isRatingFilterActive.value) {
+                          filterIsOn.value = true;
+                          _scrollToStart();
+                        }
+                        await generalFilter();
+                      },
+                    ),
                   );
                 },
               );
@@ -588,8 +694,9 @@ class FilterBarState extends State<FilterBar> {
               backgroundColor: _isRatingFilterActive.value
                   ? AppColors.secondaryColor
                   : Colors.white, // Fond blanc pour le bouton
-              foregroundColor:
-                  _isRatingFilterActive.value ? Colors.white : AppColors.textColor,
+              foregroundColor: _isRatingFilterActive.value
+                  ? Colors.white
+                  : AppColors.textColor,
               elevation: 2,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               shape: RoundedRectangleBorder(
@@ -695,7 +802,8 @@ class FilterBarState extends State<FilterBar> {
                       children: [
                         const SizedBox(width: 10),
                         // Boutons actifs en premier
-                        if (_isRatingFilterActive.value) _buildRatingFilterButton(),
+                        if (_isRatingFilterActive.value)
+                          _buildRatingFilterButton(),
                         if (widget.selectedWorkspacesNotifier.value.isNotEmpty)
                           ValueListenableBuilder<bool>(
                             valueListenable: FilterBar.showFollowedAccounts,
@@ -720,7 +828,8 @@ class FilterBarState extends State<FilterBar> {
                           return const SizedBox.shrink();
                         }),
                         // Boutons inactifs ensuite
-                        if (!_isRatingFilterActive.value) _buildRatingFilterButton(),
+                        if (!_isRatingFilterActive.value)
+                          _buildRatingFilterButton(),
                         if (widget.selectedWorkspacesNotifier.value.isEmpty)
                           ValueListenableBuilder<bool>(
                             valueListenable: FilterBar.showFollowedAccounts,

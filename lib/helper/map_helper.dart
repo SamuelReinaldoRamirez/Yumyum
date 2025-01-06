@@ -114,7 +114,7 @@ class MapHelper {
   }
 
   static void _showMarkerInfo(BuildContext context, Restaurant restaurant) {
-    BottomSheetHelper.showBottomSheet(context, restaurant);
+    BottomSheetHelper.showDraggableBottomSheet(context, restaurant);
   }
 
   static List<Marker> createMarkers(

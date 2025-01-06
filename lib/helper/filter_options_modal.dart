@@ -42,18 +42,12 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 widget.filterType ?? 'Filtres',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
+                style: AppTextStyles.titleDarkStyle,
+                textAlign: TextAlign.center,
               ),
             ],
           ),

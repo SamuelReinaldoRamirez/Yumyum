@@ -165,7 +165,7 @@ class MapPageState extends State<MapPage> {
 
     mapController.move(lat2.LatLng(restaurant.latitude, restaurant.longitude),
         mapController.zoom);
-    BottomSheetHelper.showBottomSheet(context, restaurant);
+    BottomSheetHelper.showDraggableBottomSheet(context, restaurant);
   }
 
   @override
