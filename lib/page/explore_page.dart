@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yummap/constant/theme.dart';
 import 'map_page.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/page/search_bar.dart' as CustomSearchBar;
@@ -12,7 +13,18 @@ class ExplorePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Définition des hauteurs fixes
+    const double searchBarHeight =
+        50.0; // hauteur fixe pour la barre de recherche
+    const double filterBarHeight =
+        50.0; // hauteur fixe pour la barre de filtres
+
+    // Calcul de la hauteur disponible pour la carte
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double mapHeight = screenHeight - searchBarHeight - filterBarHeight;
+
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
       body: SingleChildScrollView(
         child: Align(
           alignment: Alignment.topCenter,
@@ -20,7 +32,7 @@ class ExplorePage extends StatelessWidget {
             children: [
               // Barre de recherche
               SizedBox(
-                height: MediaQuery.of(ContextHelper.context).size.height * 0.10,
+                height: searchBarHeight,
                 child: CustomSearchBar.SearchBar(
                   onSearchChanged: (value) {},
                   restaurantList: restaurantList,
@@ -30,7 +42,7 @@ class ExplorePage extends StatelessWidget {
               ),
               // Barre de filtre
               SizedBox(
-                height: MediaQuery.of(ContextHelper.context).size.height * 0.06,
+                height: filterBarHeight,
                 child: FilterBar(
                   selectedTagIdsNotifier: ValueNotifier<List<int>>([]),
                   selectedWorkspacesNotifier: ValueNotifier<List<int>>([]),
@@ -38,7 +50,7 @@ class ExplorePage extends StatelessWidget {
               ),
               // Carte
               SizedBox(
-                height: MediaQuery.of(ContextHelper.context).size.height * 0.84,
+                height: mapHeight,
                 child: MapPage(restaurantList: restaurantList),
               ),
             ],

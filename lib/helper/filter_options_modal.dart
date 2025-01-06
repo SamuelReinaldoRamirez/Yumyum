@@ -42,18 +42,14 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                widget.filterType ?? 'Filtres',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              Center(
+                child: Text(
+                  widget.filterType ?? 'Filtres',
+                  style: AppTextStyles.titleDarkStyle,
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
               ),
             ],
           ),
@@ -81,7 +77,8 @@ class _FilterOptionsModalState extends State<FilterOptionsModal> {
                       return ListTile(
                         contentPadding:
                             const EdgeInsets.symmetric(horizontal: 16),
-                        title: Text(tag.tag),
+                        title: Text(tag.tag,
+                            style: AppTextStyles.paragraphDarkStyle),
                         trailing: Checkbox(
                           value: isSelected,
                           activeColor: AppColors.secondaryColor,

@@ -291,10 +291,11 @@ class FilterBarState extends State<FilterBar> {
                 );
               },
         style: ElevatedButton.styleFrom(
-          backgroundColor:
-              selectedCount > 0 ? AppColors.secondaryColor : Colors.white,
+          backgroundColor: selectedCount > 0
+              ? AppColors.secondaryColor
+              : Colors.white, // Fond blanc pour le bouton
           foregroundColor:
-              selectedCount > 0 ? Colors.white : AppColors.darkGrey,
+              selectedCount > 0 ? Colors.white : AppColors.textColor,
           elevation: 2,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           shape: RoundedRectangleBorder(
@@ -302,7 +303,7 @@ class FilterBarState extends State<FilterBar> {
             side: BorderSide(
               color: selectedCount > 0
                   ? AppColors.secondaryColor
-                  : AppColors.darkGrey,
+                  : AppColors.textColor,
               width: 1,
             ),
           ),
@@ -313,13 +314,16 @@ class FilterBarState extends State<FilterBar> {
             Icon(
               _getIconForType(type),
               size: 18,
+              color: selectedCount > 0 ? Colors.white : AppColors.textColor,
             ),
             const SizedBox(width: 4),
             Text(
               '$type${selectedCount > 0 ? ' ($selectedCount)' : ''}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
+                color: selectedCount > 0 ? Colors.white : AppColors.textColor,
+                fontFamily: 'SourceSansPro',
               ),
             ),
             if (isLoading) ...[
@@ -330,7 +334,7 @@ class FilterBarState extends State<FilterBar> {
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    selectedCount > 0 ? Colors.white : AppColors.darkGrey,
+                    selectedCount > 0 ? Colors.white : AppColors.textColor,
                   ),
                 ),
               ),
@@ -369,7 +373,7 @@ class FilterBarState extends State<FilterBar> {
                                 'Comptes Suivis',
                                 style: TextStyle(
                                   fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'SourceSansPro',
                                 ),
                               ),
                               IconButton(
@@ -495,10 +499,11 @@ class FilterBarState extends State<FilterBar> {
                 );
               },
         style: ElevatedButton.styleFrom(
-          backgroundColor:
-              selectedCount > 0 ? AppColors.secondaryColor : Colors.white,
+          backgroundColor: selectedCount > 0
+              ? AppColors.secondaryColor
+              : Colors.white, // Fond blanc pour le bouton
           foregroundColor:
-              selectedCount > 0 ? Colors.white : AppColors.darkGrey,
+              selectedCount > 0 ? Colors.white : AppColors.textColor,
           elevation: 2,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           shape: RoundedRectangleBorder(
@@ -506,7 +511,7 @@ class FilterBarState extends State<FilterBar> {
             side: BorderSide(
               color: selectedCount > 0
                   ? AppColors.secondaryColor
-                  : AppColors.darkGrey,
+                  : AppColors.textColor,
               width: 1,
             ),
           ),
@@ -523,16 +528,20 @@ class FilterBarState extends State<FilterBar> {
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.people,
                     size: 18,
+                    color: selectedCount > 0 ? Colors.white : AppColors.textColor,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     'Comptes Suivis${selectedCount > 0 ? ' ($selectedCount)' : ''}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                      fontFamily: 'SourceSansPro',
+                      color: selectedCount > 0
+                          ? Colors.white
+                          : AppColors.textColor,
                     ),
                   ),
                 ],
@@ -579,9 +588,9 @@ class FilterBarState extends State<FilterBar> {
             style: ElevatedButton.styleFrom(
               backgroundColor: _isRatingFilterActive
                   ? AppColors.secondaryColor
-                  : Colors.white,
+                  : Colors.white, // Fond blanc pour le bouton
               foregroundColor:
-                  _isRatingFilterActive ? Colors.white : AppColors.darkGrey,
+                  _isRatingFilterActive ? Colors.white : AppColors.textColor,
               elevation: 2,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               shape: RoundedRectangleBorder(
@@ -589,7 +598,7 @@ class FilterBarState extends State<FilterBar> {
                 side: BorderSide(
                   color: _isRatingFilterActive
                       ? AppColors.secondaryColor
-                      : AppColors.darkGrey,
+                      : AppColors.textColor,
                   width: 1,
                 ),
               ),
@@ -600,8 +609,9 @@ class FilterBarState extends State<FilterBar> {
                 Icon(
                   Icons.star,
                   size: 18,
-                  color:
-                      _isRatingFilterActive ? Colors.white : AppColors.darkGrey,
+                  color: _isRatingFilterActive
+                      ? Colors.white
+                      : AppColors.textColor,
                 ),
                 const SizedBox(width: 4),
                 Text(
@@ -613,7 +623,8 @@ class FilterBarState extends State<FilterBar> {
                     fontWeight: FontWeight.w500,
                     color: _isRatingFilterActive
                         ? Colors.white
-                        : AppColors.darkGrey,
+                        : AppColors.textColor,
+                    fontFamily: 'SourceSansPro',
                   ),
                 ),
               ],
@@ -650,84 +661,91 @@ class FilterBarState extends State<FilterBar> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      bottom: false,
-      child: SizedBox(
-        height: kToolbarHeight,
-        child: Row(
-          children: [
-            const SizedBox(width: 10),
-            ValueListenableBuilder<bool>(
-              valueListenable: filterIsOn,
-              builder: (context, isFilterOn, child) {
-                return Icon(
-                  Icons.filter_list,
-                  color: isFilterOn
-                      ? AppColors.secondaryColor
-                      : AppColors.darkGrey,
-                );
-              },
-            ),
-            if (!_isLoading)
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 10),
-                      // Boutons actifs en premier
-                      if (_isRatingFilterActive) _buildRatingFilterButton(),
-                      if (widget.selectedWorkspacesNotifier.value.isNotEmpty)
-                        ValueListenableBuilder<bool>(
-                          valueListenable: FilterBar.showFollowedAccounts,
-                          builder: (context, show, child) {
-                            if (show) {
-                              return _buildWorkspaceButton();
-                            }
-                            return const SizedBox.shrink();
-                          },
-                        ),
-                      // Boutons de type avec des tags sélectionnés (filtres actifs)
-                      ..._tagsByType.entries.map((entry) {
-                        final selectedTagsForType = entry.value
-                            .where((tag) => widget.selectedTagIdsNotifier.value
-                                .contains(tag.id))
-                            .toList();
-                        if (selectedTagsForType.isNotEmpty) {
-                          return _buildTypeFilterButton(entry.key, entry.value);
-                        }
-                        return const SizedBox.shrink();
-                      }),
-                      // Boutons inactifs ensuite
-                      if (!_isRatingFilterActive) _buildRatingFilterButton(),
-                      if (widget.selectedWorkspacesNotifier.value.isEmpty)
-                        ValueListenableBuilder<bool>(
-                          valueListenable: FilterBar.showFollowedAccounts,
-                          builder: (context, show, child) {
-                            if (show) {
-                              return _buildWorkspaceButton();
-                            }
-                            return const SizedBox.shrink();
-                          },
-                        ),
-                      // Boutons de type sans tags sélectionnés
-                      ..._tagsByType.entries.map((entry) {
-                        final selectedTagsForType = entry.value
-                            .where((tag) => widget.selectedTagIdsNotifier.value
-                                .contains(tag.id))
-                            .toList();
-                        if (selectedTagsForType.isEmpty) {
-                          return _buildTypeFilterButton(entry.key, entry.value);
-                        }
-                        return const SizedBox.shrink();
-                      }),
-                    ],
+    return Container(
+      color: AppColors.backgroundColor, // Couleur de fond du thème
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: SizedBox(
+          height: kToolbarHeight,
+          child: Row(
+            children: [
+              const SizedBox(width: 10),
+              ValueListenableBuilder<bool>(
+                valueListenable: filterIsOn,
+                builder: (context, isFilterOn, child) {
+                  return Icon(
+                    Icons.filter_list,
+                    color: isFilterOn
+                        ? AppColors.secondaryColor
+                        : AppColors.textColor,
+                  );
+                },
+              ),
+              if (!_isLoading)
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 10),
+                        // Boutons actifs en premier
+                        if (_isRatingFilterActive) _buildRatingFilterButton(),
+                        if (widget.selectedWorkspacesNotifier.value.isNotEmpty)
+                          ValueListenableBuilder<bool>(
+                            valueListenable: FilterBar.showFollowedAccounts,
+                            builder: (context, show, child) {
+                              if (show) {
+                                return _buildWorkspaceButton();
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
+                        // Boutons de type avec des tags sélectionnés (filtres actifs)
+                        ..._tagsByType.entries.map((entry) {
+                          final selectedTagsForType = entry.value
+                              .where((tag) => widget
+                                  .selectedTagIdsNotifier.value
+                                  .contains(tag.id))
+                              .toList();
+                          if (selectedTagsForType.isNotEmpty) {
+                            return _buildTypeFilterButton(
+                                entry.key, entry.value);
+                          }
+                          return const SizedBox.shrink();
+                        }),
+                        // Boutons inactifs ensuite
+                        if (!_isRatingFilterActive) _buildRatingFilterButton(),
+                        if (widget.selectedWorkspacesNotifier.value.isEmpty)
+                          ValueListenableBuilder<bool>(
+                            valueListenable: FilterBar.showFollowedAccounts,
+                            builder: (context, show, child) {
+                              if (show) {
+                                return _buildWorkspaceButton();
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
+                        // Boutons de type sans tags sélectionnés
+                        ..._tagsByType.entries.map((entry) {
+                          final selectedTagsForType = entry.value
+                              .where((tag) => widget
+                                  .selectedTagIdsNotifier.value
+                                  .contains(tag.id))
+                              .toList();
+                          if (selectedTagsForType.isEmpty) {
+                            return _buildTypeFilterButton(
+                                entry.key, entry.value);
+                          }
+                          return const SizedBox.shrink();
+                        }),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

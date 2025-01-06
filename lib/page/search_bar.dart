@@ -57,58 +57,65 @@ class _SearchBarState extends State<SearchBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: TextField(
-        controller: _searchController,
-        onSubmitted: (value) {
-          _handleSubmitted(value);
-        },
-        style: AppTextStyles.paragraphDarkStyle,
-        decoration: InputDecoration(
-          hintText: 'Rechercher dans Yummap',
-          hintStyle: AppTextStyles.hintTextDarkStyle,
-          border: InputBorder.none,
-          prefixIcon: const Icon(
-            Icons.search,
-            color: AppColors.backgroundColor,
+      automaticallyImplyLeading: false, // Retire la flèche de retour
+      backgroundColor: AppColors.backgroundColor,
+      title: Container(
+        alignment: Alignment.center, // Centre le contenu verticalement
+        child: TextField(
+          controller: _searchController,
+          onSubmitted: (value) {
+            _handleSubmitted(value);
+          },
+          style: AppTextStyles.paragraphDarkStyle.copyWith(
+            color: AppColors.textColor, // Couleur du texte
           ),
-          suffixIcon: IconButton(
-            // icon: const Icon(
-            //   Icons.clear,
-            //   // color: AppColors.backgroundColor,
-            //   color: Colors.blueAccent,
-            // ),
-            icon: Container(
-              decoration: filterIsOn.value
-                  ? BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.secondaryColor, // Fond orange
-                    )
-                  : null,
-              padding:
-                  const EdgeInsets.all(4.0), // Pas de bordure si non pressé
-              child: Icon(
-                Icons.clear,
-                color:
-                    filterIsOn.value ? Colors.white : AppColors.backgroundColor,
-              ), // Espace entre l'icône et la bordure
+          decoration: InputDecoration(
+            hintText: 'Rechercher dans Yummap',
+            hintStyle: AppTextStyles.hintTextDarkStyle.copyWith(
+              color: AppColors.textColor.withOpacity(0.5), // Couleur du texte d'indice
             ),
-            onPressed: () async {
-              setState(() {
-                widget.selectedWorkspacesNotifier.value = [];
-                widget.selectedTagIdsNotifier.value = [];
-              });
-              _clearSearch(context);
-              MarkerManager.resetMarkers();
-              filterIsOn.value = false;
-              // Reset les filtres de notes
-              if (context.mounted) {
-                final filterBarState =
-                    context.findAncestorStateOfType<FilterBarState>();
-                if (filterBarState != null) {
-                  filterBarState.resetFilters();
+            border: InputBorder.none,
+            prefixIcon: const Icon(
+              Icons.search,
+              color: AppColors.textColor, // Couleur de l'icône de recherche
+            ),
+            suffixIcon: IconButton(
+              icon: Container(
+                decoration: filterIsOn.value
+                    ? BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.secondaryColor, // Fond orange si actif
+                      )
+                    : null,
+                padding: const EdgeInsets.all(4.0), // Pas de bordure si non pressé
+                child: Icon(
+                  Icons.clear,
+                  color: filterIsOn.value
+                      ? Colors.white
+                      : AppColors.textColor, // Couleur de l'icône de suppression
+                ),
+              ),
+              onPressed: () async {
+                setState(() {
+                  widget.selectedWorkspacesNotifier.value = [];
+                  widget.selectedTagIdsNotifier.value = [];
+                });
+                _clearSearch(context);
+                MarkerManager.resetMarkers();
+                filterIsOn.value = false;
+                // Reset les filtres de notes
+                if (context.mounted) {
+                  final filterBarState =
+                      context.findAncestorStateOfType<FilterBarState>();
+                  if (filterBarState != null) {
+                    filterBarState.resetFilters();
+                  }
                 }
-              }
-            },
+              },
+            ),
+            filled: true,
+            fillColor: AppColors.backgroundColor,
+            contentPadding: const EdgeInsets.symmetric(vertical: 15.0), // Ajustez la valeur pour centrer le texte
           ),
         ),
       ),
