@@ -10,9 +10,10 @@ flutter:
     - assets/splash.png
     - assets/custom_map.json
     - assets/i18n/ # Dossier contenant les fichiers de traduction
-    - assets/yummap-bicolor.png
-    - assets/logo/logo_new.png
+    - assets/custom_map.json
     - assets/illustrations/Baker-pana.svg
+    - assets/logo/logo_new.png
+    - assets/logo/yummap-cremeBG.png
 
   fonts:
     - family: Poppins
@@ -80,21 +81,16 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.13.1
 
-flutter_native_splash:
-  color: "#ffffff"
-  image: assets/splash.png
-  ios: true
+flutter_icons:
   android: true
-
-flutter_launcher_icons:
-  android: "launcher_icon"
   ios: true
-  image_path: "assets/yummap-format.png"
-  web:
-    generate: true
-    image_path: "assets/yummap-format.png"
-    background_color: "#ffffff"
-    theme_color: "#ffffff"
-  macos:
-    generate: true
-    image_path: "assets/yummap-format.png"
+  image_path: "assets/logo/yummap-cremeBG.png"
+  adaptive_icon_background: "#F1E8D2"
+  adaptive_icon_foreground: "assets/logo/yummap-cremeBG.png"
+
+flutter_native_splash:
+  color: "#F1E8D2"
+  image: "assets/logo/yummap-cremeBG.png"
+  android_12:
+    image: "assets/logo/yummap-cremeBG.png"
+    color: "#F1E8D2"
