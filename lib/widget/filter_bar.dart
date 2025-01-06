@@ -617,10 +617,10 @@ class FilterBarState extends State<FilterBar> {
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.people,
                     size: 18,
-                    color: AppColors.textColor,
+                    color: selectedCount > 0 ? Colors.white : AppColors.textColor,
                   ),
                   const SizedBox(width: 4),
                   Text(
