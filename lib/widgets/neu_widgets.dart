@@ -16,12 +16,12 @@ class CustomNeuButton extends StatefulWidget {
     required this.text,
     required this.onPressed,
     this.icon,
-    this.buttonColor = Colors.yellow,
+    this.buttonColor = AppColors.primaryColor,
     this.textColor = Colors.white,
   });
 
   @override
-  _CustomNeuButtonState createState() => _CustomNeuButtonState();
+  State<CustomNeuButton> createState() => _CustomNeuButtonState();
 }
 
 class _CustomNeuButtonState extends State<CustomNeuButton>

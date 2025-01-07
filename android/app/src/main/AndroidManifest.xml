@@ -7,7 +7,7 @@
         android:name="${applicationName}"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="YumMap"
+        android:label="Yummap"
         android:launchMode="singleTask"
         android:taskAffinity=""
         android:theme="@style/LaunchTheme"

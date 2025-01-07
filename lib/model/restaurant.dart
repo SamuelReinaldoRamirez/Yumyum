@@ -1,3 +1,4 @@
+// ignore: unused_import
 import 'package:logger/logger.dart';
 import 'package:yummap/model/review_interface.dart';
 
@@ -47,7 +48,6 @@ class Restaurant {
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
-    var logger = Logger();
     Map<String, List<String>> schedule = {
       'Monday': [],
       'Tuesday': [],

@@ -49,9 +49,12 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                       });
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.primaryColor : Colors.transparent,
+                        color: isSelected
+                            ? AppColors.primaryColor
+                            : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: AppColors.textColor,
@@ -70,8 +73,10 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
                       child: Text(
                         dayName.substring(0, 3),
                         style: TextStyle(
-                          color: isSelected ? Colors.white : AppColors.textColor,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color:
+                              isSelected ? Colors.white : AppColors.textColor,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
                     ),
@@ -231,7 +236,6 @@ class _HorairesRestaurantState extends State<HorairesRestaurant> {
         textDirection: TextDirection.ltr,
       );
       textPainter.layout(); // Calcule les dimensions du texte
-      double textWidth = textPainter.width;
 
       double leftPosition = startPercentage * containerWidth / 100 - 20;
       if (leftPosition < SAFETY_MARGIN) {

@@ -620,7 +620,8 @@ class FilterBarState extends State<FilterBar> {
                   Icon(
                     Icons.people,
                     size: 18,
-                    color: selectedCount > 0 ? Colors.white : AppColors.textColor,
+                    color:
+                        selectedCount > 0 ? Colors.white : AppColors.textColor,
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -738,16 +739,6 @@ class FilterBarState extends State<FilterBar> {
         },
       ),
     );
-  }
-
-  bool _hasActiveFilters() {
-    bool hasLoadingState =
-        _loadingStates.values.any((isLoading) => isLoading) ||
-            _isLoadingWorkspaces;
-    return widget.selectedTagIdsNotifier.value.isNotEmpty ||
-        widget.selectedWorkspacesNotifier.value.isNotEmpty ||
-        _isRatingFilterActive.value ||
-        hasLoadingState;
   }
 
   void _scrollToStart() {

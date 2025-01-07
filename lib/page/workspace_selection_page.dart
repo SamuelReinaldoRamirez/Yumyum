@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:yummap/service/call_endpoint_service.dart';
 import 'package:yummap/model/workspace.dart'; // Importez le modèle de données Workspace si nécessaire
 import 'package:yummap/model/restaurant.dart'; // Importez le modèle de données Restaurant si nécessaire
 import '../constant/theme.dart'; // Importez les thèmes
@@ -211,7 +210,6 @@ class WorkspaceItem extends StatefulWidget {
 class _WorkspaceItemState extends State<WorkspaceItem> {
   late Future<List<String>> _aliasListFuture;
   final LocalDataService _localDataService = LocalDataService();
-  final CallEndpointService _callEndpointService = CallEndpointService();
 
   @override
   void initState() {

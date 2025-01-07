@@ -1,7 +1,7 @@
-# YumMap - La carte aux trésors du Paris culinaire 🗺️🍽️
+# Yummap - La carte aux trésors du Paris culinaire 🗺️🍽️
 
 ## Description
-YumMap est une application mobile développée avec Flutter qui permet aux utilisateurs de découvrir les meilleurs restaurants de Paris. L'application offre une expérience interactive avec une carte personnalisée et des fonctionnalités de géolocalisation pour trouver facilement les trésors culinaires de la capitale française.
+Yummap est une application mobile développée avec Flutter qui permet aux utilisateurs de découvrir les meilleurs restaurants de Paris. L'application offre une expérience interactive avec une carte personnalisée et des fonctionnalités de géolocalisation pour trouver facilement les trésors culinaires de la capitale française.
 
 ## Version
 Version actuelle : 3.1.0

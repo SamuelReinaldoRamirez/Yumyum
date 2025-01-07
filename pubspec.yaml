@@ -76,6 +76,7 @@ dependencies:
   riverpod: ^2.6.1
   flutter_riverpod: ^2.6.1
   go_router: ^14.6.3
+  dotted_border: ^2.1.0
 
   # flutter_map_location_marker: ^6.0.0 # ATTENTION ERROR
   # flutter_webview_plugin: ^0.4.0 # ATTENTION ERROR

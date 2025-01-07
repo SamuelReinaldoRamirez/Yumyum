@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yummap/page/explore_page.dart';
 import 'package:yummap/services/cache_manager.dart';
-import 'package:yummap/services/monitoring_service.dart';
 import 'package:yummap/widgets/neu_widgets.dart';
 import 'package:yummap/constant/theme.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
@@ -19,7 +18,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  static const String RESTAURANT_STREAM_KEY = 'restaurant_updates';
   static const String cacheKey = 'restaurants'; // Ajouter la clé de cache
   List<Restaurant> restaurantList = [];
   StreamSubscription?

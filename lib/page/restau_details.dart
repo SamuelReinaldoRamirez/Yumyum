@@ -11,10 +11,15 @@ import 'package:yummap/service/call_endpoint_service.dart';
 import 'package:yummap/model/review.dart';
 import 'package:yummap/model/review_interface.dart';
 import 'package:yummap/constant/theme.dart';
+import 'package:yummap/widget/booking/booking_step_one.dart';
+import 'package:yummap/widget/booking/booking_step_three.dart';
+import 'package:yummap/widget/booking/booking_step_two.dart';
+import 'package:yummap/widgets/neu_widgets.dart';
 import '../model/restaurant.dart';
 import '../widget/reviews_details.dart';
 import '../widget/horaires_restaurant.dart';
 import '../widget/neu_brutalism_container.dart'; // Importer le fichier qui contient la classe NeuBrutalismContainer
+import '../models/booking_data.dart'; // Importation de BookingData
 
 class RestaurantDetailsWidget extends StatefulWidget {
   const RestaurantDetailsWidget({super.key, required this.restaurant});
@@ -54,6 +59,23 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   List<ReviewRestau> _reviews = [];
   List<Review> _workspaceReviews = [];
   lat2.LatLng? _position;
+  final PageController _pageController = PageController();
+  late BookingData bookingData;
+
+  void _nextPage() {
+    _pageController.nextPage(
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _previousPage() {
+    _pageController.previousPage(
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
   double convertFraction(double fraction) {
     fraction = (fraction * 10).roundToDouble();
     if (fraction < 1) {
@@ -85,6 +107,19 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   @override
   void initState() {
     super.initState();
+    bookingData = BookingData(
+      covers: 2,
+      date: DateTime.now(),
+      timeSlot: '12:00 (Disponible)',
+      title: 'Monsieur',
+      firstName: 'Jean',
+      lastName: 'Dupont',
+      phone: '0123456789',
+      email: 'jean.dupont@example.com',
+      comment: '',
+      saveInfo: false,
+      acceptTerms: false,
+    );
     _fetchRestaurantDetails();
   }
 
@@ -178,20 +213,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
             ReviewDetailsWidget(restaurant: restaurant, reviews: reviews),
       ),
     );
-  }
-
-  Widget _buildStarRating(double rating) {
-    List<Widget> stars = [];
-    for (int i = 1; i <= 5; i++) {
-      stars.add(
-        Icon(
-          i <= rating ? Icons.star : Icons.star_border,
-          color: Colors.amber,
-          size: 20,
-        ),
-      );
-    }
-    return Row(children: stars);
   }
 
   List<Widget> buildStarRating(double rating) {
@@ -385,6 +406,96 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     );
   }
 
+  void _showBookingDialog() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false, // Empêche de fermer en cliquant en dehors
+      barrierLabel: "BookingDialog",
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Scaffold(
+          appBar: AppBar(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 16.0), // Espacement à gauche
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop(); // Fermer le dialog
+                },
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor, // Cercle semi-transparent
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.close,
+                    color: Colors.white, // Couleur de l'icône
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+            title: Center(
+              child: Text(
+                "Réservations",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textColor,
+                ),
+              ),
+            ),
+          ),
+          body: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: SizedBox(
+              height:
+                  MediaQuery.of(context).size.height, // Prend toute la hauteur
+              child: PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  BookingStepOne(
+                    bookingData: bookingData,
+                    onNext: () => _nextPage(),
+                    onClose: () =>
+                        Navigator.of(context).pop(), // Fermer le dialog
+                  ),
+                  BookingStepTwo(
+                    bookingData: bookingData,
+                    onNext: () => _nextPage(),
+                    onBack: () => _previousPage(),
+                  ),
+                  BookingStepThree(
+                    bookingData: bookingData,
+                    onClose: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      transitionDuration:
+          const Duration(milliseconds: 300), // Durée de la transition
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        const curve = Curves.easeInOut;
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: curve,
+        );
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 1), // Animation depuis le bas de l'écran
+            end: Offset.zero,
+          ).animate(curvedAnimation),
+          child: child,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -401,7 +512,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
             widget.restaurant.name,
             style: AppTextStyles.titleBlueStyle.copyWith(
               color: AppColors.primaryColor,
-              fontSize: 24,
+              fontSize: 25,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -593,6 +704,16 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                               ),
                             ),
                             const SizedBox(height: 20),
+                            SizedBox(height: 20),
+                            Center(
+                              child: CustomNeuButton(
+                                text: 'Réserver',
+                                onPressed: () {
+                                  _showBookingDialog();
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 20),
                             Card(
                               shape: RoundedRectangleBorder(
                                 side: BorderSide(color: Colors.black, width: 2),
