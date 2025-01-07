@@ -6,8 +6,7 @@ import 'package:yummap/constant/theme.dart';
 class HorairesRestaurant extends StatefulWidget {
   final Map<String, List<String>> schedule;
 
-  const HorairesRestaurant({Key? key, required this.schedule})
-      : super(key: key);
+  const HorairesRestaurant({super.key, required this.schedule});
 
   @override
   _HorairesRestaurantState createState() => _HorairesRestaurantState();

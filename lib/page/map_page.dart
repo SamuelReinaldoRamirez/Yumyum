@@ -12,7 +12,7 @@ import 'package:latlong2/latlong.dart' as lat2;
 class MapPage extends StatefulWidget {
   final List<Restaurant> restaurantList;
 
-  const MapPage({Key? key, required this.restaurantList}) : super(key: key);
+  const MapPage({super.key, required this.restaurantList});
 
   @override
   MapPageState createState() => MapPageState();

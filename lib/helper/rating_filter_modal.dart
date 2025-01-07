@@ -7,11 +7,11 @@ class RatingFilterModal extends StatefulWidget {
   final Function(double, double) onApply;
 
   const RatingFilterModal({
-    Key? key,
+    super.key,
     required this.initialMinRating,
     required this.initialMaxRating,
     required this.onApply,
-  }) : super(key: key);
+  });
 
   @override
   State<RatingFilterModal> createState() => _RatingFilterModalState();

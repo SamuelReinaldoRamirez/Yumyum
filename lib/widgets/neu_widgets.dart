@@ -12,13 +12,13 @@ class CustomNeuButton extends StatefulWidget {
   final Color textColor;
 
   const CustomNeuButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.icon,
     this.buttonColor = Colors.yellow,
     this.textColor = Colors.white,
-  }) : super(key: key);
+  });
 
   @override
   _CustomNeuButtonState createState() => _CustomNeuButtonState();
@@ -154,10 +154,10 @@ class NeuTitle extends StatelessWidget {
   final double fontSize;
 
   const NeuTitle({
-    Key? key,
+    super.key,
     required this.text,
     this.fontSize = 32,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -8,10 +8,12 @@ import 'package:yummap/constant/theme.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'dart:async';
-import 'package:yummap/services/stream_manager.dart'; // Importer StreamManager
+// Importer StreamManager
 import 'package:yummap/services/image_optimizer.dart'; // Importer ImageOptimizer
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -133,13 +135,6 @@ class _HomePageState extends State<HomePage> {
                               ExplorePage(restaurantList: restaurantList)),
                     );
                   },
-                ),
-                SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    MonitoringService().forceCrash();
-                  },
-                  child: Text('Test Crash'),
                 ),
               ],
             ),

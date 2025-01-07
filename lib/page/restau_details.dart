@@ -17,8 +17,7 @@ import '../widget/horaires_restaurant.dart';
 import '../widget/neu_brutalism_container.dart'; // Importer le fichier qui contient la classe NeuBrutalismContainer
 
 class RestaurantDetailsWidget extends StatefulWidget {
-  const RestaurantDetailsWidget({Key? key, required this.restaurant})
-      : super(key: key);
+  const RestaurantDetailsWidget({super.key, required this.restaurant});
 
   final Restaurant restaurant;
 
@@ -454,7 +453,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                             ),
                             Positioned(
                               bottom: 15,
-                              child: Container(
+                              child: SizedBox(
                                 width: MediaQuery.of(context)
                                     .size
                                     .width, // Prendre toute la largeur de l'écran

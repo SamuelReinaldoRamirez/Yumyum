@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
-import 'package:yummap/constant/global.dart';
-import 'package:yummap/helper/map_helper.dart';
 import 'package:yummap/model/workspace.dart'; // Importez le modèle de données Workspace si nécessaire
 import 'package:yummap/model/restaurant.dart'; // Importez le modèle de données Restaurant si nécessaire
 import '../constant/theme.dart'; // Importez les thèmes
@@ -13,10 +11,10 @@ class WorkspaceSelectionPage extends StatelessWidget {
   final List<Restaurant>? restaurants; // Liste de restaurants facultative
 
   const WorkspaceSelectionPage({
-    Key? key,
+    super.key,
     required this.workspaces,
     this.restaurants, // Initialisation facultative de la liste de restaurants
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +202,7 @@ class WorkspaceSelectionPage extends StatelessWidget {
 class WorkspaceItem extends StatefulWidget {
   final Workspace workspace;
 
-  const WorkspaceItem({Key? key, required this.workspace}) : super(key: key);
+  const WorkspaceItem({super.key, required this.workspace});
 
   @override
   _WorkspaceItemState createState() => _WorkspaceItemState();

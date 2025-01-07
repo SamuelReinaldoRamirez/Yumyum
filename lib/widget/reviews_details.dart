@@ -5,10 +5,10 @@ import 'package:yummap/model/review_interface.dart';
 
 class ReviewDetailsWidget extends StatefulWidget {
   const ReviewDetailsWidget({
-    Key? key,
+    super.key,
     required this.restaurant,
     required this.reviews,
-  }) : super(key: key);
+  });
 
   final Restaurant restaurant;
   final List<ReviewInterface> reviews;
@@ -21,7 +21,7 @@ class ReviewDetailsWidget extends StatefulWidget {
 class _ReviewDetailsWidgetState extends State<ReviewDetailsWidget> {
   Restaurant restaurant;
   List<ReviewInterface> _reviews = [];
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   _ReviewDetailsWidgetState(this.restaurant, this._reviews);
 

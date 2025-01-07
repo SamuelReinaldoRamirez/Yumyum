@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:yummap/constant/theme.dart';
 
 class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     Future.delayed(Duration(seconds: 2), () {

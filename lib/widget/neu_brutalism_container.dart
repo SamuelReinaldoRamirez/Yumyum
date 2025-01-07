@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../constant/theme.dart';
 
 class NeuBrutalismContainer extends StatelessWidget {
   final Widget child;
@@ -7,11 +6,11 @@ class NeuBrutalismContainer extends StatelessWidget {
   final Color backgroundColor;
 
   const NeuBrutalismContainer({
-    Key? key,
+    super.key,
     required this.child,
     this.padding = const EdgeInsets.all(16),
     this.backgroundColor = Colors.white,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

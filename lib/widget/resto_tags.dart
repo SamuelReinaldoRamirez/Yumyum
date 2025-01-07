@@ -4,7 +4,7 @@ import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/model/tag.dart';
 
 class RestoTags extends StatefulWidget {
-  const RestoTags({Key? key, required this.restaurant}) : super(key: key);
+  const RestoTags({super.key, required this.restaurant});
   final Restaurant restaurant;
 
   @override

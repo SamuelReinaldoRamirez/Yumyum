@@ -5,8 +5,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yummap/helper/context_helper.dart';
 import 'package:yummap/page/home_page.dart';
@@ -75,7 +73,7 @@ class MapAccountNotifier extends StateNotifier<String> {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -255,7 +253,7 @@ final _router = GoRouter(
 
 class MapScreen extends ConsumerStatefulWidget {
   final String id;
-  const MapScreen({required this.id, Key? key}) : super(key: key);
+  const MapScreen({required this.id, super.key});
 
   @override
   ConsumerState<MapScreen> createState() => _MapScreenState();

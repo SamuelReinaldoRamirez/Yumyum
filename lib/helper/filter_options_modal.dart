@@ -11,13 +11,13 @@ class FilterOptionsModal extends StatefulWidget {
   final FilterBarState parentState;
 
   const FilterOptionsModal({
-    Key? key,
+    super.key,
     this.filterType,
     required this.tags,
     required this.initialSelectedTagIds,
     required this.onApply,
     required this.parentState,
-  }) : super(key: key);
+  });
 
   @override
   State<FilterOptionsModal> createState() => _FilterOptionsModalState();

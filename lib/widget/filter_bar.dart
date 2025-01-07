@@ -15,10 +15,10 @@ class FilterBar extends StatefulWidget implements PreferredSizeWidget {
   final ValueNotifier<List<int>> selectedWorkspacesNotifier;
 
   const FilterBar({
-    Key? key,
+    super.key,
     required this.selectedTagIdsNotifier,
     required this.selectedWorkspacesNotifier,
-  }) : super(key: key);
+  });
 
   @override
   FilterBarState createState() => FilterBarState();
@@ -53,8 +53,8 @@ class FilterBarState extends State<FilterBar> {
   List<int> _tempSelectedWorkspaces = [];
   double _minRating = 1.0;
   double _maxRating = 5.0;
-  ValueNotifier<bool> _isRatingFilterActive = ValueNotifier<bool>(false);
-  ValueNotifier<bool> _isPeopleFilterActive = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isRatingFilterActive = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isPeopleFilterActive = ValueNotifier<bool>(false);
   int? selectedPeopleCount;
   final ScrollController _scrollController = ScrollController();
 

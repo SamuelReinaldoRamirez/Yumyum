@@ -14,11 +14,11 @@ class WorkspaceOptionsModal extends StatefulWidget {
   final FilterBarState parentState;
 
   const WorkspaceOptionsModal({
-    Key? key,
+    super.key,
     required this.onApply,
     required this.initialSelectedWorkspaces,
     required this.parentState,
-  }) : super(key: key);
+  });
 
   @override
   _WorkspaceOptionsModalState createState() => _WorkspaceOptionsModalState();

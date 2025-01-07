@@ -81,6 +81,7 @@ dependencies:
   # flutter_webview_plugin: ^0.4.0 # ATTENTION ERROR
   # sensors_plus: ^2.0.0 # ATTENTION ERROR
 
+  image: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

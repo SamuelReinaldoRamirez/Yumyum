@@ -11,7 +11,7 @@ class ExplorePage extends StatelessWidget {
   final ValueNotifier<List<int>> selectedTagIdsNotifier = ValueNotifier<List<int>>([]);
   final ValueNotifier<List<int>> selectedWorkspacesNotifier = ValueNotifier<List<int>>([]);
 
-  ExplorePage({Key? key, required this.restaurantList}) : super(key: key);
+  ExplorePage({super.key, required this.restaurantList});
 
   @override
   Widget build(BuildContext context) {
