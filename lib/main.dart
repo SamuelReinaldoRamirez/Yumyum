@@ -4,9 +4,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:yummap/helper/context_helper.dart';
 import 'package:yummap/page/home_page.dart';
 import 'package:yummap/page/splash_screen.dart';
-import 'package:yummap/helper/context_helper.dart'; // Importer le ContextHelper
+// Importer le ContextHelper
 import 'package:app_links/app_links.dart';
 import 'package:yummap/service/mixpanel_service.dart';
 import 'package:yummap/constant/keys_data.dart';
@@ -15,6 +18,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart'; // Fichier généré
 import 'package:flutter/foundation.dart';
+import 'package:yummap/services/monitoring_service.dart';
+import 'package:yummap/services/cache_manager.dart';
+import 'package:yummap/services/stream_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,112 +51,81 @@ Future<void> main() async {
     } catch (e, stack) {
       FirebaseCrashlytics.instance.recordError(e, stack);
     }
-    runApp(MyApp());
+    runApp(
+      ProviderScope(
+        child: MyApp(),
+      ),
+    );
   }, (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
   });
 }
 
+final mapAccountProvider =
+    StateNotifierProvider<MapAccountNotifier, String>((ref) {
+  return MapAccountNotifier();
+});
+
+class MapAccountNotifier extends StateNotifier<String> {
+  MapAccountNotifier() : super('');
+
+  void updateMapAccount(String newAccount) => state = newAccount;
+}
+
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late AppLinks _appLinks;
+  final StreamManager _streamManager = StreamManager();
   String mapAccount = '';
-  StreamSubscription? _linkSubscription;
+
+  @override
+  Widget build(BuildContext context) {
+    return ProviderScope(
+      child: Builder(
+        builder: (context) {
+          ContextHelper.setContext(context);
+          return MaterialApp.router(
+            title: 'Yummap',
+            routerConfig: _router,
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _initDeepLinking();
-    _initMixpanel();
-  }
-
-  Future<void> _initMixpanel() async {
-    try {
-      print('Initializing MixpanelService...');
-      print('MixpanelService initialized.');
-    } catch (e) {
-      print('Error initializing MixpanelService: $e');
-    }
-  }
-
-  Future<void> _initDeepLinking() async {
-    _appLinks = AppLinks();
-
-    // Check initial link
-    try {
-      final uri = await _appLinks.getInitialLink();
-      print('Initial link: $uri');
-      if (uri != null) {
-        _handleIncomingLink(uri);
-      }
-    } catch (e) {
-      print('Failed to get initial link: $e');
-    }
-
-    // Listen for incoming links
-    _linkSubscription = _appLinks.uriLinkStream.listen(
-      (Uri? uri) {
-        print('Incoming link: $uri');
-        _handleIncomingLink(uri);
-      },
-      onError: (e) {
-        print('Error handling incoming links: $e');
-      },
-    );
-
-    // Check for any intent that launched the app
-    final uri = Uri.parse(Uri.base.toString());
-    if (uri.scheme == 'yummap') {
-      print('App launched with URI: $uri');
-      _handleIncomingLink(uri);
-    }
-  }
-
-  void _handleIncomingLink(Uri? uri) {
-    if (uri == null) return;
-
-    print('Handling incoming link: $uri');
-    print('Scheme: ${uri.scheme}, Host: ${uri.host}, Path: ${uri.path}');
-    final pathSegments = uri.pathSegments;
-    print('Path segments: $pathSegments');
-
-    if (uri.scheme == 'yummap' && uri.host == 'map') {
-      final account = pathSegments.isNotEmpty ? pathSegments[0] : '';
-      print('Navigation to map for account: $account');
-      setState(() {
-        mapAccount = account;
-      });
-    } else if (pathSegments.isNotEmpty && pathSegments[0] == 'map') {
-      final account = pathSegments.length > 1 ? pathSegments[1] : '';
-      print('Navigation to map for account: $account');
-      setState(() {
-        mapAccount = account;
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeResources();
+    });
   }
 
   @override
   void dispose() {
+    _streamManager.cancelAll();
     WidgetsBinding.instance.removeObserver(this);
-    _linkSubscription?.cancel(); // Annuler l'écoute des deep links
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
-      case AppLifecycleState.paused:
-        // L'app passe en arrière-plan
-        _cleanupResources();
+      case AppLifecycleState.inactive:
         break;
-      case AppLifecycleState.resumed:
-        // L'app revient en premier plan
-        _reinitializeResources();
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        _cleanupResources();
         break;
       default:
         break;
@@ -158,30 +133,120 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   void _cleanupResources() {
+    _streamManager.cancelAll();
+    CacheManager().clear();
     imageCache.clear();
     imageCache.clearLiveImages();
-    // Autres nettoyages nécessaires
   }
 
-  void _reinitializeResources() {
-    // Réinitialiser les ressources nécessaires
-    // Recharger les données si nécessaire
+  Future<void> _initializeResources() async {
+    if (!ContextHelper.hasContext) return;
+    await _initDeepLinking();
+    await _initMixpanel();
+    _setupSubscriptions();
   }
+
+  Future<void> _initMixpanel() async {
+    try {
+      await MonitoringService().logMessage('MixpanelService initialized');
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance
+          .recordError(e, stackTrace, reason: 'Mixpanel initialization failed');
+    }
+  }
+
+  Future<void> _initDeepLinking() async {
+    _appLinks = AppLinks();
+    try {
+      final uri = await _appLinks.getInitialLink();
+      await MonitoringService().logMessage('Initial link processed: $uri');
+      if (uri != null) {
+        _handleIncomingLink(uri);
+      }
+    } catch (e, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(e, stackTrace,
+          reason: 'Deep linking initialization failed');
+    }
+  }
+
+  void _handleIncomingLink(Uri? uri) {
+    if (uri == null) return;
+
+    final String newAccount = _extractAccountFromUri(uri);
+    if (newAccount != mapAccount) {
+      setState(() {
+        mapAccount = newAccount;
+      });
+    }
+  }
+
+  String _extractAccountFromUri(Uri uri) {
+    if (uri.scheme == 'yummap' && uri.host == 'map') {
+      return uri.pathSegments.isNotEmpty ? uri.pathSegments[0] : '';
+    } else if (uri.pathSegments.isNotEmpty && uri.pathSegments[0] == 'map') {
+      return uri.pathSegments.length > 1 ? uri.pathSegments[1] : '';
+    }
+    return '';
+  }
+
+  void _setupSubscriptions() {}
+}
+
+final _router = GoRouter(
+  initialLocation: '/', // Ajout de l'emplacement initial
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => SplashScreen(),
+    ),
+    GoRoute(
+      path: '/home',
+      builder: (context, state) => HomePage(),
+    ),
+    GoRoute(
+      path: '/map/:id',
+      builder: (context, state) => MapScreen(
+        id: state.pathParameters['id']!,
+      ),
+    ),
+  ],
+);
+
+class MapScreen extends ConsumerStatefulWidget {
+  final String id;
+  const MapScreen({required this.id, Key? key}) : super(key: key);
 
   @override
+  ConsumerState<MapScreen> createState() => _MapScreenState();
+}
+
+class _MapScreenState extends ConsumerState<MapScreen> {
+  @override
   Widget build(BuildContext context) {
-    // Définir le contexte global
-    ContextHelper.setContext(context);
-    return MaterialApp(
-      title: 'Yummap',
-      initialRoute: '/',
-      routes: {
-        '/': (context) => SplashScreen(),
-        '/home': (context) => HomePage(),
-      },
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    ref.watch(mapAccountProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Map Screen'),
+      ),
+      body: ListView.builder(
+        itemCount: 10,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text('Item $index'),
+          );
+        },
       ),
     );
+  }
+}
+
+// Exemple de gestion d'erreurs
+Future<void> fetchData() async {
+  try {
+    // Votre logique de récupération de données
+  } catch (e) {
+    // Gérer l'erreur ici
+    print('Erreur: $e');
   }
 }

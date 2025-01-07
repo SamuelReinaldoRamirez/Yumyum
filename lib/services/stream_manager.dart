@@ -54,7 +54,7 @@ class StreamManager {
   }
 
   // Annuler toutes les subscriptions
-  void dispose() {
+  void cancelAll() {
     for (var subscription in _subscriptions.values) {
       subscription.cancel();
     }
@@ -77,6 +77,11 @@ class StreamManager {
     }
     
     return stats;
+  }
+
+  // Annuler toutes les subscriptions
+  void dispose() {
+    cancelAll();
   }
 }
 
