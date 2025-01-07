@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yummap/page/explore_page.dart';
+import 'package:yummap/services/cache_manager.dart';
 import 'package:yummap/widgets/neu_widgets.dart';
 import 'package:yummap/constant/theme.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
 import 'package:yummap/model/restaurant.dart';
+import 'dart:async';
+import 'package:yummap/services/stream_manager.dart'; // Importer StreamManager
+import 'package:yummap/services/image_optimizer.dart'; // Importer ImageOptimizer
 
 class HomePage extends StatefulWidget {
   @override
@@ -12,7 +16,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  static const String RESTAURANT_STREAM_KEY = 'restaurant_updates';
+  static const String cacheKey = 'restaurants'; // Ajouter la clé de cache
   List<Restaurant> restaurantList = [];
+  StreamSubscription?
+      _subscription; // Ajouter la variable pour stocker l'abonnement
+  final imageOptimizer = ImageOptimizer(); // Instancier ImageOptimizer
 
   @override
   void initState() {
@@ -22,17 +31,63 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _fetchRestaurants() async {
     try {
+      final cache = CacheManager(); // Instancier CacheManager
+
+      // Vérifier le cache d'abord
+      final cachedRestaurants = cache.get<List<Restaurant>>(cacheKey);
+      if (cachedRestaurants != null) {
+        setState(() {
+          restaurantList = cachedRestaurants;
+        });
+        return;
+      }
+
       final restaurants = await CallEndpointService().getRestaurantsFromXanos();
+      if (!mounted) return;
+
       setState(() {
         restaurantList = restaurants;
         print("---------------------");
-        print("---------------------");
         print("restaurants");
       });
+
+      // Mettre en cache les résultats
+      cache.set(cacheKey, restaurants, ttl: Duration(minutes: 15));
+
+      // Créer un StreamController pour les mises à jour
+      final controller = StreamController<List<Restaurant>>();
+      controller.add(restaurants);
+
+      // Configurer la subscription
+      _subscription = controller.stream.listen(
+        (updatedRestaurants) {
+          if (mounted) {
+            setState(() {
+              restaurantList = updatedRestaurants;
+            });
+          }
+        },
+        onError: (error) {
+          print('Erreur dans le stream des restaurants: $error');
+        },
+      );
+
+      // Ajouter au StreamManager
+      StreamManager().addSubscription(
+        RESTAURANT_STREAM_KEY,
+        _subscription!,
+        description: 'Stream des mises à jour des restaurants',
+        timeout: const Duration(minutes: 5),
+      );
     } catch (e) {
-      // Gérer l'erreur ici (afficher un message, etc.)
       print('Erreur lors de la récupération des restaurants: $e');
     }
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel(); // Annuler l'abonnement
+    super.dispose();
   }
 
   @override

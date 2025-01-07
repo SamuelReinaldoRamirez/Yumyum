@@ -18,15 +18,17 @@ class MapPage extends StatefulWidget {
   MapPageState createState() => MapPageState();
 }
 
-class MapPageState extends State<MapPage> {
+class MapPageState extends State<MapPage> with WidgetsBindingObserver {
   late MapController mapController;
   List<lat2.LatLng> restaurantLocations = [];
-  late Timer _locationUpdateTimer;
+  Timer? _locationUpdateTimer;
   Marker? userMarker;
+  List<Marker>? _markers;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     MapHelper.createRestaurantLocations(
         widget.restaurantList, restaurantLocations);
 
@@ -168,10 +170,29 @@ class MapPageState extends State<MapPage> {
     BottomSheetHelper.showDraggableBottomSheet(context, restaurant);
   }
 
+  void _disposeMapResources() {
+    mapController.dispose();
+    _markers?.clear();
+    _locationUpdateTimer?.cancel();
+  }
+
   @override
   void dispose() {
-    _locationUpdateTimer
-        .cancel(); // Annuler le timer lors de la destruction de l'écran
+    WidgetsBinding.instance.removeObserver(this);
+    _disposeMapResources();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _disposeMapResources();
+    } else if (state == AppLifecycleState.resumed) {
+      _reinitializeMap();
+    }
+  }
+
+  Future<void> _reinitializeMap() async {
+    // Réinitialiser la carte et les marqueurs
   }
 }

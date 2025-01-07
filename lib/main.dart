@@ -1,17 +1,20 @@
 // ignore_for_file: library_private_types_in_public_api
 // ignore: library_prefixes
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:yummap/page/home_page.dart';
 import 'package:yummap/page/splash_screen.dart';
 import 'package:yummap/helper/context_helper.dart'; // Importer le ContextHelper
-import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:app_links/app_links.dart';
 import 'package:yummap/service/mixpanel_service.dart';
 import 'package:yummap/constant/keys_data.dart';
+// Importer StreamManager
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+// Initialiser le StreamManager au démarrage
   try {
     print('Initializing MixpanelService...');
     await MixpanelService.initialize(mixpanelToken);
@@ -28,14 +31,15 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  late Mixpanel _mixpanel;
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late AppLinks _appLinks;
   String mapAccount = '';
+  StreamSubscription? _linkSubscription;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initDeepLinking();
     _initMixpanel();
   }
@@ -43,7 +47,6 @@ class _MyAppState extends State<MyApp> {
   Future<void> _initMixpanel() async {
     try {
       print('Initializing MixpanelService...');
-      _mixpanel = await MixpanelService.instance;
       print('MixpanelService initialized.');
     } catch (e) {
       print('Error initializing MixpanelService: $e');
@@ -65,7 +68,7 @@ class _MyAppState extends State<MyApp> {
     }
 
     // Listen for incoming links
-    _appLinks.uriLinkStream.listen(
+    _linkSubscription = _appLinks.uriLinkStream.listen(
       (Uri? uri) {
         print('Incoming link: $uri');
         _handleIncomingLink(uri);
@@ -104,6 +107,40 @@ class _MyAppState extends State<MyApp> {
         mapAccount = account;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _linkSubscription?.cancel(); // Annuler l'écoute des deep links
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.paused:
+        // L'app passe en arrière-plan
+        _cleanupResources();
+        break;
+      case AppLifecycleState.resumed:
+        // L'app revient en premier plan
+        _reinitializeResources();
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _cleanupResources() {
+    imageCache.clear();
+    imageCache.clearLiveImages();
+    // Autres nettoyages nécessaires
+  }
+
+  void _reinitializeResources() {
+    // Réinitialiser les ressources nécessaires
+    // Recharger les données si nécessaire
   }
 
   @override
