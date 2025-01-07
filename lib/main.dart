@@ -5,6 +5,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yummap/helper/context_helper.dart';
 import 'package:yummap/page/home_page.dart';
@@ -121,29 +123,45 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
-      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+        _cleanupResources(partial: true);
         break;
       case AppLifecycleState.detached:
       case AppLifecycleState.hidden:
-        _cleanupResources();
+        _cleanupResources(partial: false);
+        break;
+      case AppLifecycleState.resumed:
+        _restoreResources();
         break;
       default:
         break;
     }
   }
 
-  void _cleanupResources() {
+  void _cleanupResources({bool partial = false}) {
     _streamManager.cancelAll();
-    CacheManager().clear();
-    imageCache.clear();
-    imageCache.clearLiveImages();
+    if (!partial) {
+      CacheManager().clear();
+      imageCache.clear();
+      imageCache.clearLiveImages();
+    }
+  }
+
+  void _restoreResources() {
+    // Implémenter la restauration des ressources
   }
 
   Future<void> _initializeResources() async {
-    if (!ContextHelper.hasContext) return;
-    await _initDeepLinking();
-    await _initMixpanel();
-    _setupSubscriptions();
+    if (!mounted) return;
+    try {
+      await Future.wait([
+        _initDeepLinking(),
+        _initMixpanel(),
+      ]);
+      _setupSubscriptions();
+    } catch (e, stack) {
+      await FirebaseCrashlytics.instance.recordError(e, stack);
+    }
   }
 
   Future<void> _initMixpanel() async {
@@ -170,13 +188,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   void _handleIncomingLink(Uri? uri) {
+    if (!mounted) return;
     if (uri == null) return;
 
-    final String newAccount = _extractAccountFromUri(uri);
-    if (newAccount != mapAccount) {
-      setState(() {
-        mapAccount = newAccount;
-      });
+    try {
+      final String newAccount = _extractAccountFromUri(uri);
+      if (newAccount.isNotEmpty && newAccount != mapAccount) {
+        setState(() {
+          mapAccount = newAccount;
+        });
+      }
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack);
+      print('Erreur lors du traitement du lien entrant : $e');
     }
   }
 
@@ -189,7 +213,24 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return '';
   }
 
-  void _setupSubscriptions() {}
+  void _setupSubscriptions() {
+    // Exemple de stream à écouter, à remplacer par le stream réel
+    final Stream<dynamic> exampleStream = Stream.periodic(Duration(seconds: 1), (count) => count);
+
+    // Ajouter la subscription
+    _streamManager.addSubscription('exampleStream', exampleStream.listen((data) {
+      // Traiter les données reçues
+      print('Données reçues : $data');
+    }, onError: (error) {
+      // Gérer l'erreur
+      print('Erreur dans le stream : $error');
+    }));
+  }
+
+  @override
+  void didUpdateWidget(MyApp oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
 }
 
 final _router = GoRouter(
