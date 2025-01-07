@@ -222,6 +222,38 @@ class RestaurantState extends ChangeNotifier {
 }
 ```
 
+## Optimisation des Performances
+
+### Modifications Apportées
+1. **Ajout de Firebase Crashlytics** :
+   - Intégration de Firebase Crashlytics pour la gestion des erreurs et le suivi des performances.
+   - Configuration du fichier `firebase_options.dart` pour initialiser Firebase correctement.
+
+2. **Mise à jour de main.dart** :
+   - Modification de `main.dart` pour utiliser les options générées pour Firebase.
+   - Ajout de la gestion des erreurs avec Crashlytics.
+
+3. **Ajout du Service de Monitoring** :
+   - Création d'un service de monitoring pour encapsuler les fonctionnalités de Crashlytics.
+   - Intégration du service dans les pages pour gérer les erreurs et les logs.
+
+4. **Optimisation de la Mémoire** :
+   - Intégration de `WidgetsBindingObserver` pour gérer le cycle de vie de l'application.
+   - Nettoyage des ressources lors de la mise en arrière-plan.
+
+### Étapes Restantes
+1. **Tester l'Application** :
+   - Vérifier que l'application se lance correctement et que les logs de Crashlytics s'affichent.
+
+2. **Validation des Données** :
+   - Implémenter la validation des données pour s'assurer de leur intégrité.
+
+3. **Surveillance Continue** :
+   - Mettre en place des métriques de performance pour surveiller l'application en production.
+
+4. **Documentation** :
+   - Mettre à jour la documentation pour refléter les changements apportés.
+
 ## To-Do List pour l'Implémentation
 
 ### Phase 1 : Optimisation des Widgets

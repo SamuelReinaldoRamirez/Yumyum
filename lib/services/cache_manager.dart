@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:async'; // Import added for Timer
 
 class CacheManager {
   // Singleton pattern
@@ -77,6 +78,29 @@ class CacheManager {
   // Supprimer une entrée spécifique
   void remove(String key) {
     _cache.remove(key);
+  }
+
+  // Journaliser les métriques de cache
+  void logCacheMetrics() {
+    final metrics = getMetrics();
+    print('''
+Cache Metrics:
+- Hits: ${metrics.hits}
+- Misses: ${metrics.misses}
+- Hit Rate: ${metrics.hitRate.toStringAsFixed(2)}%
+- Size: ${metrics.totalEntries}
+- Average Access Time: 0ms // This field was not implemented
+''');
+  }
+
+  // Initialiser la surveillance du cache
+  void initializeCacheMonitoring() {
+    const duration = Duration(minutes: 15);
+    Timer.periodic(duration, (_) {
+      final cache = CacheManager();
+      cache.logCacheMetrics();
+      cache._cleanExpiredEntries();
+    });
   }
 }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yummap/page/explore_page.dart';
 import 'package:yummap/services/cache_manager.dart';
+import 'package:yummap/services/monitoring_service.dart';
 import 'package:yummap/widgets/neu_widgets.dart';
 import 'package:yummap/constant/theme.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
@@ -31,56 +32,49 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _fetchRestaurants() async {
     try {
-      final cache = CacheManager(); // Instancier CacheManager
+      final cache = CacheManager();
+      final stopwatch = Stopwatch()..start();
 
-      // Vérifier le cache d'abord
-      final cachedRestaurants = cache.get<List<Restaurant>>(cacheKey);
-      if (cachedRestaurants != null) {
-        setState(() {
-          restaurantList = cachedRestaurants;
-        });
-        return;
+      // Vérifier le cache avec gestion d'erreur
+      try {
+        final cachedRestaurants = cache.get<List<Restaurant>>(cacheKey);
+        if (cachedRestaurants != null) {
+          setState(() {
+            restaurantList = cachedRestaurants;
+          });
+          // Rafraîchissement en arrière-plan
+          _refreshInBackground();
+          return;
+        }
+      } catch (e) {
+        print('Erreur de cache: $e');
       }
 
+      // Fetch depuis l'API
       final restaurants = await CallEndpointService().getRestaurantsFromXanos();
-      if (!mounted) return;
-
-      setState(() {
-        restaurantList = restaurants;
-        print("---------------------");
-        print("restaurants");
-      });
-
-      // Mettre en cache les résultats
+      // Mise en cache avec métriques
+      final cacheTime = stopwatch.elapsed;
+      print('Temps de récupération: ${cacheTime.inMilliseconds}ms');
       cache.set(cacheKey, restaurants, ttl: Duration(minutes: 15));
 
-      // Créer un StreamController pour les mises à jour
-      final controller = StreamController<List<Restaurant>>();
-      controller.add(restaurants);
-
-      // Configurer la subscription
-      _subscription = controller.stream.listen(
-        (updatedRestaurants) {
-          if (mounted) {
-            setState(() {
-              restaurantList = updatedRestaurants;
-            });
-          }
-        },
-        onError: (error) {
-          print('Erreur dans le stream des restaurants: $error');
-        },
-      );
-
-      // Ajouter au StreamManager
-      StreamManager().addSubscription(
-        RESTAURANT_STREAM_KEY,
-        _subscription!,
-        description: 'Stream des mises à jour des restaurants',
-        timeout: const Duration(minutes: 5),
-      );
+      if (!mounted) return;
+      setState(() => restaurantList = restaurants);
     } catch (e) {
+      // Gestion des erreurs améliorée
       print('Erreur lors de la récupération des restaurants: $e');
+    }
+  }
+
+  // Nouvelle méthode pour le rafraîchissement en arrière-plan
+  Future<void> _refreshInBackground() async {
+    try {
+      final restaurants = await CallEndpointService().getRestaurantsFromXanos();
+      final cache = CacheManager();
+      cache.set(cacheKey, restaurants, ttl: Duration(minutes: 15));
+      if (!mounted) return;
+      setState(() => restaurantList = restaurants);
+    } catch (e) {
+      print('Erreur de rafraîchissement en arrière-plan: $e');
     }
   }
 
@@ -139,6 +133,13 @@ class _HomePageState extends State<HomePage> {
                               ExplorePage(restaurantList: restaurantList)),
                     );
                   },
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    MonitoringService().forceCrash();
+                  },
+                  child: Text('Test Crash'),
                 ),
               ],
             ),

@@ -11,19 +11,44 @@ import 'package:app_links/app_links.dart';
 import 'package:yummap/service/mixpanel_service.dart';
 import 'package:yummap/constant/keys_data.dart';
 // Importer StreamManager
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'firebase_options.dart'; // Fichier généré
+import 'package:flutter/foundation.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-// Initialiser le StreamManager au démarrage
-  try {
-    print('Initializing MixpanelService...');
-    await MixpanelService.initialize(mixpanelToken);
-    print('MixpanelService initialized.');
-  } catch (e) {
-    print('Error initializing MixpanelService: $e');
-  }
 
-  runApp(MyApp());
+  // Initialiser Firebase avec les options générées
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Configuration de Crashlytics
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+
+  // Capture des erreurs Flutter
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FirebaseCrashlytics.instance.recordFlutterError(details);
+  };
+
+  // Capture des erreurs de la plateforme
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
+  // Exécution de l'application dans une zone protégée
+  runZonedGuarded<Future<void>>(() async {
+    try {
+      await MixpanelService.initialize(mixpanelToken);
+    } catch (e, stack) {
+      FirebaseCrashlytics.instance.recordError(e, stack);
+    }
+    runApp(MyApp());
+  }, (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+  });
 }
 
 class MyApp extends StatefulWidget {

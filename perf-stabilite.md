@@ -119,6 +119,20 @@ class CacheService {
     );
   }
 }
+## 2. Améliorations du Cache
+
+### 2.1 Mise en place de la journalisation des métriques de cache
+- Ajout de la classe `CacheEntry` pour gérer les entrées du cache avec expiration.
+- Ajout de la classe `CacheMetrics` pour suivre les performances du cache.
+
+### 2.2 Optimisation de la méthode _fetchRestaurants
+- Gestion améliorée du cache avec des erreurs gérées.
+- Mise en place d'un rafraîchissement en arrière-plan des données.
+
+### 2.3 Surveillance du Cache
+- Implémentation de la journalisation des hits et misses du cache.
+- Initialisation d'un processus de nettoyage des entrées expirées.
+
 3. Gestion des États et Navigation
 3.1 État Global
 Code
@@ -177,6 +191,21 @@ class DataValidator {
     return restaurants.where(isValidRestaurant).toList();
   }
 }
+## 4. Monitoring avec Firebase Crashlytics
+
+### 4.1 Configuration
+- Installation et configuration de Firebase Crashlytics dans le projet.
+- Mise en place du reporting d'erreurs global.
+- Création d'un service de monitoring personnalisé.
+
+### 4.2 Fonctionnalités
+- Capture automatique des erreurs non gérées.
+- Logging personnalisé des événements.
+- Suivi des performances avec des métriques personnalisées.
+
+### 4.3 Tests
+- Ajout d'un bouton de test pour provoquer un crash et vérifier l'intégration avec Crashlytics.
+
 ## Gestion du cycle de vie de l'application
 
 ### Problème identifié
@@ -193,6 +222,38 @@ class DataValidator {
 - Mettre l'application en arrière-plan pendant une longue période
 - Vérifier la reprise correcte de l'application
 - Surveiller la consommation mémoire
+
+## Amélioration de la Stabilité de Yummap
+
+### Modifications Apportées
+1. **Gestion des Erreurs et Exceptions** :
+   - Mise en place d'un gestionnaire d'erreurs global dans `main.dart`.
+   - Utilisation de `FlutterError.onError` et `runZonedGuarded` pour capturer les erreurs.
+
+2. **Optimisation de la Mémoire** :
+   - Intégration de `WidgetsBindingObserver` pour gérer le cycle de vie de l'application.
+   - Nettoyage des ressources lors de la mise en arrière-plan.
+
+3. **Service de Cache** :
+   - Création d'un service de cache pour stocker les données.
+   - Implémentation de la gestion des données mises en cache.
+
+4. **Intégration de Firebase Crashlytics** :
+   - Ajout de Firebase Crashlytics pour le suivi des erreurs et des performances.
+   - Configuration du fichier `firebase_options.dart` pour initialiser Firebase correctement.
+
+### Étapes Restantes
+1. **Tester l'Application** :
+   - Vérifier que l'application se lance correctement et que les logs de Crashlytics s'affichent.
+
+2. **Validation des Données** :
+   - Implémenter la validation des données pour s'assurer de leur intégrité.
+
+3. **Surveillance Continue** :
+   - Mettre en place des métriques de performance pour surveiller l'application en production.
+
+4. **Documentation** :
+   - Mettre à jour la documentation pour refléter les changements apportés.
 
 To-Do List pour l'Implémentation
 Phase 1 : Configuration de Base
