@@ -74,6 +74,9 @@ class _BookingButtonState extends State<BookingButton> {
                 bookingData: bookingData,
                 onNext: () => _nextPage(),
                 onBack: () => _previousPage(),
+                onClose: () {
+                  Navigator.pop(context);
+                },
               ),
               BookingStepThree(
                 bookingData: bookingData,

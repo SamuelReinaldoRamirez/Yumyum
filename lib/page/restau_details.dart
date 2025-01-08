@@ -466,6 +466,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                     bookingData: bookingData,
                     onNext: () => _nextPage(),
                     onBack: () => _previousPage(),
+                    onClose: () => Navigator.of(context).pop(), // Ajout de onClose
                   ),
                   BookingStepThree(
                     bookingData: bookingData,
