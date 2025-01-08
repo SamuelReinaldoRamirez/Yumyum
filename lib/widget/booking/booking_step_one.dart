@@ -29,12 +29,31 @@ class _BookingStepOneState extends State<BookingStepOne> {
   bool isDateExpanded = false; // État pour la date
   bool isSlotExpanded = false; // État pour le créneau
   String? selectedSlot; // Heure choisie
+  final ScrollController _slotsScrollController = ScrollController();
+  double _lastScrollPosition = 0.0;
 
   @override
   void initState() {
     super.initState();
     selectedDate = widget.bookingData.date;
     selectedCovers = widget.bookingData.covers;
+    _slotsScrollController.addListener(() {
+      _lastScrollPosition = _slotsScrollController.offset;
+    });
+  }
+
+  @override
+  void dispose() {
+    _slotsScrollController.dispose();
+    super.dispose();
+  }
+
+  void _restoreScrollPosition() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_slotsScrollController.hasClients && isSlotExpanded) {
+        _slotsScrollController.jumpTo(_lastScrollPosition);
+      }
+    });
   }
 
   @override
@@ -234,6 +253,9 @@ class _BookingStepOneState extends State<BookingStepOne> {
                 onTap: () {
                   setState(() {
                     isSlotExpanded = !isSlotExpanded;
+                    if (isSlotExpanded) {
+                      _restoreScrollPosition();
+                    }
                   });
                 },
                 child: NeuBrutalismContainer(
@@ -287,6 +309,7 @@ class _BookingStepOneState extends State<BookingStepOne> {
                                 ? 300
                                 : 0, // Hauteur maximale fixe quand déplié
                             child: SingleChildScrollView(
+                              controller: _slotsScrollController,
                               child: Column(
                                 children: [
                                   const SizedBox(height: 20),

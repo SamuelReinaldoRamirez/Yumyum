@@ -473,7 +473,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                     bookingData: bookingData,
                     onNext: () => _nextPage(),
                     onBack: () => _previousPage(),
-                    onClose: () => Navigator.of(context).pop(), // Ajout de onClose
+                    onClose: () =>
+                        Navigator.of(context).pop(), // Ajout de onClose
                   ),
                   BookingStepThree(
                     bookingData: bookingData,
@@ -787,7 +788,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                   const Divider(),
                                   ListTile(
                                     leading: const Icon(
-                                      Icons.location_on,
+                                      Icons.copy,
                                       color: AppColors.secondaryColor,
                                     ),
                                     title: Text(

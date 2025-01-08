@@ -79,7 +79,16 @@ class WorkspaceSelectionPage extends StatelessWidget {
             const SizedBox(height: 8),
             ...workspaces.map((workspace) => Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: WorkspaceItem(workspace: workspace),
+                  child: WorkspaceItem(
+                    workspace: workspace,
+                    onFollowToggle: (isFollowing) {
+                      if (isFollowing) {
+                        _showToast(context, "Compte ajouté à la liste des comptes suivis.");
+                      } else {
+                        _showToast(context, "Désabonné avec succès.");
+                      }
+                    },
+                  ),
                 )),
             if (restaurants != null && restaurants!.isNotEmpty) ...[
               const SizedBox(height: 16),
@@ -198,10 +207,25 @@ class WorkspaceSelectionPage extends StatelessWidget {
   }
 }
 
+void _showToast(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 2),
+      backgroundColor: Colors.black,
+    ),
+  );
+}
+
 class WorkspaceItem extends StatefulWidget {
   final Workspace workspace;
+  final Function(bool)? onFollowToggle;
 
-  const WorkspaceItem({super.key, required this.workspace});
+  const WorkspaceItem({
+    super.key,
+    required this.workspace,
+    this.onFollowToggle,
+  });
 
   @override
   _WorkspaceItemState createState() => _WorkspaceItemState();
@@ -249,6 +273,10 @@ class _WorkspaceItemState extends State<WorkspaceItem> {
       setState(() {
         workspace.isFollowed = !isCurrentlyFollowed;
       });
+
+      if (widget.onFollowToggle != null) {
+        widget.onFollowToggle!(workspace.isFollowed);
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
