@@ -108,14 +108,14 @@ class BottomSheetHelper {
                           ),
                           FloatingActionButton(
                             onPressed: () {
-                              _navigateToTags(context, restaurant);
+                              _navigateToRestaurant(restaurant);
                             },
                             backgroundColor: AppColors.secondaryColor,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(50),
                             ),
                             child: const Icon(
-                              Icons.info_outline,
+                              Icons.map_outlined,
                               color: Colors.white,
                               size: 30,
                             ),
@@ -130,10 +130,10 @@ class BottomSheetHelper {
                         children: [
                           CustomNeuButton(
                             onPressed: () {
-                              _navigateToRestaurant(restaurant);
+                              _navigateToTags(context, restaurant);
                             },
-                            text: "Y aller",
-                            icon: Icons.navigation,
+                            text: "Voir plus",
+                            icon: Icons.info_outlined,
                             buttonColor: AppColors.primaryColor,
                             textColor: Colors.black,
                           ),

@@ -125,7 +125,11 @@ class _CustomNeuButtonState extends State<CustomNeuButton>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         if (widget.icon != null) ...[
-                          Icon(widget.icon, color: widget.textColor),
+                          Icon(
+                            widget.icon,
+                            color: widget.textColor,
+                            size: 32,
+                          ),
                           const SizedBox(width: 8),
                         ],
                         Text(

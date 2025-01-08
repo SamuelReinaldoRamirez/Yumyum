@@ -8,13 +8,22 @@ import 'package:yummap/helper/context_helper.dart';
 
 class ExplorePage extends StatelessWidget {
   final List<Restaurant> restaurantList;
-  final ValueNotifier<List<int>> selectedTagIdsNotifier = ValueNotifier<List<int>>([]);
-  final ValueNotifier<List<int>> selectedWorkspacesNotifier = ValueNotifier<List<int>>([]);
+  final ValueNotifier<List<int>> selectedTagIdsNotifier =
+      ValueNotifier<List<int>>([]);
+  final ValueNotifier<List<int>> selectedWorkspacesNotifier =
+      ValueNotifier<List<int>>([]);
 
   ExplorePage({super.key, required this.restaurantList});
 
   @override
   Widget build(BuildContext context) {
+    // Définit les hauteurs des widgets h1 et h2
+    double h1 = 80; // Hauteur de la barre de recherche
+    double h2 = 70; // Hauteur de la barre de filtre
+
+    // Calcule la hauteur restante pour le dernier widget
+    double h3 = MediaQuery.of(context).size.height - h1 - h2;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundColor, // Couleur de fond
       body: SingleChildScrollView(
@@ -22,9 +31,9 @@ class ExplorePage extends StatelessWidget {
           alignment: Alignment.topCenter,
           child: Column(
             children: [
-              // Barre de recherche
+              // Barre de recherche avec hauteur fixe de 50px
               SizedBox(
-                height: MediaQuery.of(ContextHelper.context).size.height * 0.10,
+                height: h1,
                 child: CustomSearchBar.SearchBar(
                   onSearchChanged: (value) {},
                   restaurantList: restaurantList,
@@ -32,17 +41,17 @@ class ExplorePage extends StatelessWidget {
                   selectedWorkspacesNotifier: selectedWorkspacesNotifier,
                 ),
               ),
-              // Barre de filtre
+              // Barre de filtre avec hauteur fixe de 50px
               SizedBox(
-                height: MediaQuery.of(ContextHelper.context).size.height * 0.06,
+                height: h2,
                 child: FilterBar(
                   selectedTagIdsNotifier: selectedTagIdsNotifier,
                   selectedWorkspacesNotifier: selectedWorkspacesNotifier,
                 ),
               ),
-              // Carte
+              // Carte avec hauteur calculée
               SizedBox(
-                height: MediaQuery.of(ContextHelper.context).size.height * 0.84,
+                height: h3,
                 child: MapPage(restaurantList: restaurantList),
               ),
             ],
