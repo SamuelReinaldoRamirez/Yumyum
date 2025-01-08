@@ -16,7 +16,7 @@ class CustomNeuButton extends StatefulWidget {
     required this.text,
     required this.onPressed,
     this.icon,
-    this.buttonColor = AppColors.primaryColor,
+    this.buttonColor = AppColors.secondaryColor,
     this.textColor = Colors.white,
   });
 

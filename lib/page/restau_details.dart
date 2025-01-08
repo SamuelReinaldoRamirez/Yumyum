@@ -707,6 +707,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                             SizedBox(height: 20),
                             Center(
                               child: CustomNeuButton(
+                                icon: Icons.calendar_month,
                                 text: 'Réserver',
                                 onPressed: () {
                                   _showBookingDialog();
