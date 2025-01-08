@@ -146,11 +146,19 @@ class MapPageState extends State<MapPage> with WidgetsBindingObserver {
           Positioned(
             bottom: 16.0,
             right: 16.0,
-            child: FloatingActionButton(
-              onPressed: _centercamera,
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
-              child: const Icon(Icons.my_location),
+            child: SizedBox(
+              width: 60.0,
+              height: 60.0,
+              child: SizedBox(
+                width: 60.0,
+                height: 60.0,
+                child: FloatingActionButton(
+                  onPressed: _centercamera,
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  child: const Icon(Icons.my_location),
+                ),
+              ),
             ),
           ),
         ],

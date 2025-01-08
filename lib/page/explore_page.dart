@@ -26,37 +26,74 @@ class ExplorePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor, // Couleur de fond
-      body: SingleChildScrollView(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Column(
-            children: [
-              // Barre de recherche avec hauteur fixe de 50px
-              SizedBox(
-                height: h1,
-                child: CustomSearchBar.SearchBar(
-                  onSearchChanged: (value) {},
-                  restaurantList: restaurantList,
-                  selectedTagIdsNotifier: selectedTagIdsNotifier,
-                  selectedWorkspacesNotifier: selectedWorkspacesNotifier,
-                ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Column(
+                children: [
+                  // Barre de recherche avec hauteur fixe de 50px
+                  SizedBox(
+                    height: h1,
+                    child: CustomSearchBar.SearchBar(
+                      onSearchChanged: (value) {},
+                      restaurantList: restaurantList,
+                      selectedTagIdsNotifier: selectedTagIdsNotifier,
+                      selectedWorkspacesNotifier: selectedWorkspacesNotifier,
+                    ),
+                  ),
+                  // Barre de filtre avec hauteur fixe de 50px
+                  SizedBox(
+                    height: h2,
+                    child: FilterBar(
+                      selectedTagIdsNotifier: selectedTagIdsNotifier,
+                      selectedWorkspacesNotifier: selectedWorkspacesNotifier,
+                    ),
+                  ),
+                  // Carte avec hauteur calculée
+                  SizedBox(
+                    height: h3,
+                    child: MapPage(restaurantList: restaurantList),
+                  ),
+                ],
               ),
-              // Barre de filtre avec hauteur fixe de 50px
-              SizedBox(
-                height: h2,
-                child: FilterBar(
-                  selectedTagIdsNotifier: selectedTagIdsNotifier,
-                  selectedWorkspacesNotifier: selectedWorkspacesNotifier,
-                ),
-              ),
-              // Carte avec hauteur calculée
-              SizedBox(
-                height: h3,
-                child: MapPage(restaurantList: restaurantList),
-              ),
-            ],
+            ),
           ),
-        ),
+          Positioned(
+            bottom: 16.0,
+            left: 20,
+            child: SizedBox(
+              width: 280.0, // Largeur fixe
+              height: 60.0, // Hauteur
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  // Action à définir
+                },
+                icon: const Icon(
+                  Icons.calendar_today,
+                  color: AppColors.white,
+                  size: 24,
+                ),
+                label: Text(
+                  "Mes réservations",
+                  style: AppTextStyles.paragraphWhiteStyle.copyWith(
+                    fontSize: 22,
+                    color: AppColors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.secondaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  shadowColor: Colors.black,
+                  elevation: 6,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

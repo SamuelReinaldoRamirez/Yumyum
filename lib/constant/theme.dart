@@ -18,6 +18,8 @@ class AppColors {
   static const Color appText = Color(0xFF4A4A4A); // Nouveau nom
 
   static const Color darkGrey = Color(0xFF646165);
+  //white color
+  static const Color white = Color(0xFFFFFFFF);
 }
 
 class AppFonts {
