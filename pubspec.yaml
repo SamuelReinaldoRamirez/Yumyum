@@ -14,7 +14,7 @@ flutter:
     - assets/illustrations/Baker-pana.svg
     - assets/logo/logo_new.png
     - assets/logo/yummap-cremeBG.png
-
+    - assets/animations/success_animation.json
   fonts:
     - family: Poppins
       fonts:
@@ -83,6 +83,7 @@ dependencies:
   # sensors_plus: ^2.0.0 # ATTENTION ERROR
 
   image: any
+  lottie: ^3.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

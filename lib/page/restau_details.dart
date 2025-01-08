@@ -61,12 +61,16 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   lat2.LatLng? _position;
   final PageController _pageController = PageController();
   late BookingData bookingData;
+  int currentStep = 0;
 
   void _nextPage() {
     _pageController.nextPage(
       duration: Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+    setState(() {
+      currentStep++;
+    });
   }
 
   void _previousPage() {
@@ -74,6 +78,9 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
       duration: Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+    setState(() {
+      currentStep--;
+    });
   }
 
   double convertFraction(double fraction) {
@@ -470,7 +477,12 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                   ),
                   BookingStepThree(
                     bookingData: bookingData,
-                    onClose: () => Navigator.pop(context),
+                    onClose: () {
+                      setState(() {
+                        currentStep = 0;
+                      });
+                      Navigator.of(context).pop();
+                    },
                   ),
                 ],
               ),
