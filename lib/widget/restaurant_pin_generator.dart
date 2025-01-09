@@ -3,6 +3,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:yummap/constant/theme.dart';
 import 'package:yummap/model/restaurant.dart';
+import 'package:yummap/helper/restaurant_status_manager.dart';
+import 'package:yummap/helper/opening_hours_helper.dart';
 
 class RestaurantPinGenerator {
   static Marker getPinMarker(
@@ -10,19 +12,38 @@ class RestaurantPinGenerator {
       LatLng position,
       Function(BuildContext, Restaurant) showMarkerInfo,
       Restaurant restaurant) {
+    return Marker(
+      point: position,
+      builder: (ctx) => ValueListenableBuilder<Map<String, bool>>(
+        valueListenable: RestaurantStatusManager.restaurantOpenStatus,
+        builder: (context, statusMap, child) {
+          final bool isOpen = OpeningHoursHelper.isRestaurantOpen(restaurant);
+          // Définir les couleurs en fonction de l'état d'ouverture
+          final Color pinBackgroundColor = isOpen ? Colors.white : Colors.grey[300]!;
+          final Color circleColor = isOpen ? AppColors.secondaryColor : Colors.grey[600]!;
+          return GestureDetector(
+            onTap: () => showMarkerInfo(ctx, restaurant),
+            child: _buildPinIcon(cuisine, isOpen, pinBackgroundColor, circleColor),
+          );
+        },
+      ),
+    );
+  }
+
+  static Widget _buildPinIcon(String cuisine, bool isOpen, Color pinBackgroundColor, Color circleColor) {
     Widget icon;
     switch (cuisine) {
       case 'Cuisine française':
         icon = DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: pinBackgroundColor,
             shape: BoxShape.circle,
           ),
           child: Padding(
             padding: EdgeInsets.all(2),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.secondaryColor,
+                color: circleColor,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -36,14 +57,14 @@ class RestaurantPinGenerator {
       case 'Cuisine asiatique':
         icon = DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: pinBackgroundColor,
             shape: BoxShape.circle,
           ),
           child: Padding(
             padding: EdgeInsets.all(2),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.secondaryColor,
+                color: circleColor,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -57,14 +78,14 @@ class RestaurantPinGenerator {
       case 'Cuisine africaine':
         icon = DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: pinBackgroundColor,
             shape: BoxShape.circle,
           ),
           child: Padding(
             padding: EdgeInsets.all(2),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.secondaryColor,
+                color: circleColor,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -78,14 +99,14 @@ class RestaurantPinGenerator {
       case 'Boulangerie':
         icon = DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: pinBackgroundColor,
             shape: BoxShape.circle,
           ),
           child: Padding(
             padding: EdgeInsets.all(2),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.secondaryColor,
+                color: circleColor,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -99,14 +120,14 @@ class RestaurantPinGenerator {
       case 'Pizzeria':
         icon = DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: pinBackgroundColor,
             shape: BoxShape.circle,
           ),
           child: Padding(
             padding: EdgeInsets.all(2),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.secondaryColor,
+                color: circleColor,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -120,14 +141,14 @@ class RestaurantPinGenerator {
       case 'Cuisine US':
         icon = DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: pinBackgroundColor,
             shape: BoxShape.circle,
           ),
           child: Padding(
             padding: EdgeInsets.all(2),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.secondaryColor,
+                color: circleColor,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -141,14 +162,14 @@ class RestaurantPinGenerator {
       case 'Cuisine fusion':
         icon = DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: pinBackgroundColor,
             shape: BoxShape.circle,
           ),
           child: Padding(
             padding: EdgeInsets.all(2),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.secondaryColor,
+                color: circleColor,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -162,14 +183,14 @@ class RestaurantPinGenerator {
       case 'Café':
         icon = DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: pinBackgroundColor,
             shape: BoxShape.circle,
           ),
           child: Padding(
             padding: EdgeInsets.all(2),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.secondaryColor,
+                color: circleColor,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -183,14 +204,14 @@ class RestaurantPinGenerator {
       case 'Cuisine orientale':
         icon = DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: pinBackgroundColor,
             shape: BoxShape.circle,
           ),
           child: Padding(
             padding: EdgeInsets.all(2),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.secondaryColor,
+                color: circleColor,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -204,14 +225,14 @@ class RestaurantPinGenerator {
       case 'Cuisine italienne':
         icon = DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: pinBackgroundColor,
             shape: BoxShape.circle,
           ),
           child: Padding(
             padding: EdgeInsets.all(2),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.secondaryColor,
+                color: circleColor,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -225,14 +246,14 @@ class RestaurantPinGenerator {
       case 'Fast Food':
         icon = DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: pinBackgroundColor,
             shape: BoxShape.circle,
           ),
           child: Padding(
             padding: EdgeInsets.all(2),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.secondaryColor,
+                color: circleColor,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -244,16 +265,16 @@ class RestaurantPinGenerator {
         );
         break;
       default:
-        icon = const DecoratedBox(
+        icon = DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: pinBackgroundColor,
             shape: BoxShape.circle,
           ),
           child: Padding(
             padding: EdgeInsets.all(2),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.secondaryColor,
+                color: circleColor,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -267,16 +288,6 @@ class RestaurantPinGenerator {
           ),
         );
     }
-
-    return Marker(
-      point: position,
-      builder: (ctx) => GestureDetector(
-        onTap: () {
-          showMarkerInfo(
-              ctx, restaurant); // Ouvrir la bottom sheet du restaurant
-        },
-        child: icon,
-      ),
-    );
+    return icon;
   }
 }

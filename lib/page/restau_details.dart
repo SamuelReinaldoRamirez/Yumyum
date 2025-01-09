@@ -7,6 +7,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:yummap/helper/opening_hours_helper.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
 import 'package:yummap/model/review.dart';
 import 'package:yummap/model/review_interface.dart';
@@ -14,7 +15,10 @@ import 'package:yummap/constant/theme.dart';
 import 'package:yummap/widget/booking/booking_step_one.dart';
 import 'package:yummap/widget/booking/booking_step_three.dart';
 import 'package:yummap/widget/booking/booking_step_two.dart';
+import 'package:yummap/widget/pulsing_dot.dart';
 import 'package:yummap/widgets/neu_widgets.dart';
+import '../helper/favorite_manager.dart';
+import '../model/favorite_restaurant.dart';
 import '../model/restaurant.dart';
 import '../widget/reviews_details.dart';
 import '../widget/horaires_restaurant.dart';
@@ -62,6 +66,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   final PageController _pageController = PageController();
   late BookingData bookingData;
   int currentStep = 0;
+  bool isOpen = false; // Nouvelle variable d'état
+  bool isFavorite = false;
 
   void _nextPage() {
     _pageController.nextPage(
@@ -114,6 +120,8 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
   @override
   void initState() {
     super.initState();
+    _updateOpenStatus(); // Mise à jour initiale
+    _checkIfFavorite();
     bookingData = BookingData(
       covers: 2,
       date: DateTime.now(),
@@ -128,6 +136,43 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
       acceptTerms: false,
     );
     _fetchRestaurantDetails();
+  }
+
+  void _updateOpenStatus() {
+    setState(() {
+      isOpen = OpeningHoursHelper.isRestaurantOpen(widget.restaurant);
+    });
+  }
+
+  Future<void> _checkIfFavorite() async {
+    bool favorite = await FavoriteManager.isFavorite(
+        widget.restaurant.id.toString()); // Correction de type
+    setState(() {
+      isFavorite = favorite;
+    });
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (isFavorite) {
+      await FavoriteManager.removeFavorite(
+          widget.restaurant.id.toString()); // Correction de type
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Retiré des favoris')));
+    } else {
+      final favorite = FavoriteRestaurant(
+        id: widget.restaurant.id.toString(), // Correction de type
+        name: widget.restaurant.name,
+        address: widget.restaurant.address,
+        latitude: widget.restaurant.latitude,
+        longitude: widget.restaurant.longitude,
+      );
+      await FavoriteManager.saveFavorite(favorite);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Ajouté aux favoris')));
+    }
+    setState(() {
+      isFavorite = !isFavorite;
+    });
   }
 
   Future<void> _fetchRestaurantDetails() async {
@@ -541,63 +586,78 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                   child: Column(
                     children: [
                       // Image with overlay
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black, width: 2),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black,
-                              offset: Offset(4, 4),
-                              blurRadius: 0,
+                      Stack(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black, width: 2),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black,
+                                  offset: Offset(4, 4),
+                                  blurRadius: 0,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: Stack(
-                          alignment: Alignment.bottomCenter,
-                          children: [
-                            Image.network(
+                            child: Image.network(
                               _photoReference,
                               fit: BoxFit.cover,
                               width: double.infinity,
                               height: 200,
                             ),
-                            Positioned.fill(
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.bottomCenter,
-                                    end: Alignment.topCenter,
-                                    colors: [
-                                      Colors.black,
-                                      Colors.transparent,
-                                    ],
-                                    stops: [0.0, 0.45],
-                                  ),
+                          ),
+                          Positioned.fill(
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                  colors: [
+                                    Colors.black,
+                                    Colors.transparent,
+                                  ],
+                                  stops: [0.0, 0.45],
                                 ),
                               ),
                             ),
-                            Positioned(
-                              bottom: 15,
-                              child: SizedBox(
-                                width: MediaQuery.of(context)
-                                    .size
-                                    .width, // Prendre toute la largeur de l'écran
-                                child: Text(
-                                  widget.restaurant.name,
-                                  style: AppTextStyles.titleWhiteStyle.copyWith(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  maxLines:
-                                      2, // Permet d'afficher jusqu'à 2 lignes
-                                  overflow: TextOverflow
-                                      .visible, // Ne pas couper le texte
-                                  textAlign: TextAlign.center,
+                          ),
+                          Positioned(
+                            bottom: 15,
+                            child: SizedBox(
+                              width: MediaQuery.of(context)
+                                  .size
+                                  .width, // Prendre toute la largeur de l'écran
+                              child: Text(
+                                widget.restaurant.name,
+                                style: AppTextStyles.titleWhiteStyle.copyWith(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
                                 ),
+                                maxLines:
+                                    2, // Permet d'afficher jusqu'à 2 lignes
+                                overflow: TextOverflow
+                                    .visible, // Ne pas couper le texte
+                                textAlign: TextAlign.center,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                          Positioned(
+                            top: 16,
+                            right: 16,
+                            child: IconButton(
+                              icon: Icon(
+                                isFavorite
+                                    ? Icons.bookmark
+                                    : Icons.bookmark_border_outlined,
+                                color: isFavorite
+                                    ? AppColors.primaryColor
+                                    : AppColors.white,
+                                size: 30, // Augmenter la taille de l'icône
+                              ),
+                              onPressed: _toggleFavorite,
+                            ),
+                          ),
+                        ],
                       ),
 
                       // Ratings
@@ -641,6 +701,48 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                               style: AppTextStyles.titleDarkStyle,
                             ),
                             const SizedBox(height: 10),
+                            Container(
+                              margin: const EdgeInsets.symmetric(vertical: 6),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  if (!isOpen)
+                                    const SizedBox(
+                                        width:
+                                            7), // Espace ajouté à gauche uniquement si le restaurant est fermé
+                                  Container(
+                                    margin: const EdgeInsets.only(right: 6),
+                                    child: isOpen
+                                        ? PulsingDot(
+                                            size: 12.0,
+                                            color: Colors.green,
+                                          )
+                                        : const SizedBox(
+                                            width: 12.0,
+                                            height: 12.0,
+                                            child: DecoratedBox(
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ),
+                                  ),
+                                  if (!isOpen)
+                                    const SizedBox(
+                                        width:
+                                            6), // Espace ajouté seulement si le restaurant est fermé
+                                  Text(
+                                    isOpen ? 'Ouvert' : 'Actuellement fermé',
+                                    style: TextStyle(
+                                      color:
+                                          isOpen ? Colors.green : Colors.grey,
+                                      fontSize: isOpen ? 16 : 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                             Visibility(
                               visible: _price !=
                                   0, // Rendre le widget visible si _price est valide
@@ -673,7 +775,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 5),
                             Row(
                               children: [
                                 Icon(
@@ -692,7 +793,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 5),
                             Visibility(
                               visible: widget.restaurant
                                   .vege, // Masquer le widget si vege est false

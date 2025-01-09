@@ -1,6 +1,7 @@
 // ignore: unused_import
 import 'package:logger/logger.dart';
 import 'package:yummap/model/review_interface.dart';
+import 'package:flutter/material.dart'; // Import TimeOfDay
 
 class Restaurant {
   final int id;
@@ -23,6 +24,7 @@ class Restaurant {
   final String pictureProfile;
   final int numberOfReviews;
   final String cuisine;
+  final List<OpeningHours> openingHours;
 
   Restaurant({
     required this.id,
@@ -45,6 +47,7 @@ class Restaurant {
     required this.pictureProfile,
     required this.numberOfReviews,
     required this.cuisine,
+    required this.openingHours,
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
@@ -160,6 +163,17 @@ class Restaurant {
       }
     }
 
+    List<OpeningHours> openingHours = [];
+    if (json.containsKey('opening_hours') && json['opening_hours'] != null) {
+      if (json['opening_hours'] is List<dynamic>) {
+        for (dynamic hours in json['opening_hours']) {
+          if (hours is Map<String, dynamic>) {
+            openingHours.add(OpeningHours.fromJson(hours));
+          }
+        }
+      }
+    }
+
     return Restaurant(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
@@ -171,18 +185,19 @@ class Restaurant {
       phoneNumber: json['phone_number'] ?? '',
       tagStr: tagsId,
       placeId: json['placeId'] ?? '',
-      ratings: ratings, // Utilisation de la valeur convertie et loggée
+      ratings: ratings,
       reviews: reviews,
       price: json['price'] ?? '',
       websiteUrl: json['website_url'] ?? '',
       handicap: json['handicap'] ?? false,
       vege: json['vege'] ?? false,
-      schedule: schedule, // Utilisation de la nouvelle structure pour l'horaire
+      schedule: schedule,
       pictureProfile: json['picture_profile'] ?? '',
       numberOfReviews: json['number_of_reviews'] ?? 0,
       cuisine: json.containsKey('cuisine')
           ? json['cuisine']['cuisine_name'] ?? ''
           : '',
+      openingHours: openingHours,
     );
   }
 
@@ -236,6 +251,58 @@ class ReviewRestau implements ReviewInterface {
       author: json['author'] ?? '',
       text: json['text'] ?? '',
       rating: double.tryParse(json['rating'].toString()) ?? 0.0,
+    );
+  }
+}
+
+class OpeningHours {
+  final bool isOpen;
+  final List<TimeSlot> timeSlots;
+
+  OpeningHours({required this.isOpen, required this.timeSlots});
+
+  factory OpeningHours.fromJson(Map<String, dynamic> json) {
+    return OpeningHours(
+      isOpen: json['isOpen'] as bool,
+      timeSlots: (json['timeSlots'] as List)
+          .map((slot) => TimeSlot.fromJson(slot))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'isOpen': isOpen,
+      'timeSlots': timeSlots.map((slot) => slot.toJson()).toList(),
+    };
+  }
+}
+
+class TimeSlot {
+  final TimeOfDay opening;
+  final TimeOfDay closing;
+
+  TimeSlot({required this.opening, required this.closing});
+
+  factory TimeSlot.fromJson(Map<String, dynamic> json) {
+    return TimeSlot(
+      opening: _timeFromString(json['opening'] as String),
+      closing: _timeFromString(json['closing'] as String),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'opening': '${opening.hour}:${opening.minute}',
+      'closing': '${closing.hour}:${closing.minute}',
+    };
+  }
+
+  static TimeOfDay _timeFromString(String time) {
+    final parts = time.split(':');
+    return TimeOfDay(
+      hour: int.parse(parts[0]),
+      minute: int.parse(parts[1]),
     );
   }
 }

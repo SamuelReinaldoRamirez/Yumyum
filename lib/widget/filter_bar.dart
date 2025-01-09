@@ -57,6 +57,7 @@ class FilterBarState extends State<FilterBar> {
   final ValueNotifier<bool> _isPeopleFilterActive = ValueNotifier<bool>(false);
   int? selectedPeopleCount;
   final ScrollController _scrollController = ScrollController();
+  bool showFavorites = false; // Variable d'état pour le filtre "Favoris"
 
   @override
   void initState() {
@@ -741,6 +742,54 @@ class FilterBarState extends State<FilterBar> {
     );
   }
 
+  Widget _buildFavoritesFilterButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: ElevatedButton(
+        onPressed: () {
+          setState(() {
+            showFavorites = !showFavorites;
+          });
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: showFavorites
+              ? AppColors.secondaryColor
+              : Colors.white, // Fond blanc pour le bouton
+          foregroundColor: showFavorites
+              ? Colors.white
+              : AppColors.textColor,
+          elevation: 2,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: showFavorites
+                  ? AppColors.secondaryColor
+                  : AppColors.textColor,
+              width: 1,
+            ),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              showFavorites ? Icons.bookmark : Icons.bookmark_border_outlined,
+              color: showFavorites ? Colors.white : AppColors.textColor,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'Favoris',
+              style: TextStyle(
+                color: showFavorites ? Colors.white : AppColors.textColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _scrollToStart() {
     if (_scrollController.hasClients) {
       // Calculer la position du premier filtre actif
@@ -805,6 +854,8 @@ class FilterBarState extends State<FilterBar> {
                               return const SizedBox.shrink();
                             },
                           ),
+                        if (showFavorites)
+                          _buildFavoritesFilterButton(),
                         // Boutons de type avec des tags sélectionnés (filtres actifs)
                         ..._tagsByType.entries.map((entry) {
                           final selectedTagsForType = entry.value
@@ -831,6 +882,8 @@ class FilterBarState extends State<FilterBar> {
                               return const SizedBox.shrink();
                             },
                           ),
+                        if (!showFavorites)
+                          _buildFavoritesFilterButton(),
                         // Boutons de type sans tags sélectionnés
                         ..._tagsByType.entries.map((entry) {
                           final selectedTagsForType = entry.value

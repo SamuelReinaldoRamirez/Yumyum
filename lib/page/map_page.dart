@@ -8,6 +8,7 @@ import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/helper/map_helper.dart';
 import 'package:yummap/helper/bottom_sheet_helper.dart';
 import 'package:latlong2/latlong.dart' as lat2;
+import 'package:yummap/widget/pulsing_dot.dart'; // Importer le widget PulsingDot
 
 class MapPage extends StatefulWidget {
   final List<Restaurant> restaurantList;
@@ -24,6 +25,7 @@ class MapPageState extends State<MapPage> with WidgetsBindingObserver {
   Timer? _locationUpdateTimer;
   Marker? userMarker;
   List<Marker>? _markers;
+  Timer? _updateTimer;
 
   @override
   void initState() {
@@ -38,6 +40,10 @@ class MapPageState extends State<MapPage> with WidgetsBindingObserver {
     _createListMarkers(); // Appel initial pour créer les marqueurs
     _getCurrentLocation();
     _startLocationUpdates(); // Démarrer les mises à jour de la position de l'utilisateur
+    _updatePins();
+    _updateTimer = Timer.periodic(Duration(minutes: 15), (timer) {
+      _updatePins();
+    });
   }
 
   void _getCurrentLocation() async {
@@ -117,6 +123,12 @@ class MapPageState extends State<MapPage> with WidgetsBindingObserver {
         () {}); // Mettre à jour l'état pour reconstruire la carte avec les nouveaux marqueurs
   }
 
+  void _updatePins() {
+    setState(() {
+      _createListMarkers(); // Met à jour l'état des pins en recréant les marqueurs
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -188,6 +200,7 @@ class MapPageState extends State<MapPage> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _disposeMapResources();
+    _updateTimer?.cancel();
     super.dispose();
   }
 
