@@ -7,6 +7,7 @@ import 'package:yummap/model/hotel.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/page/map_page.dart';
 import 'package:latlong2/latlong.dart' as lat2;
+import 'package:yummap/widget/restaurant_pin_generator.dart';
 
 class MarkerManager {
   static List<Marker> allmarkers = [];
@@ -144,42 +145,15 @@ class MapHelper {
     List<Marker> markers = [];
 
     for (int i = 0; i < restaurantLocations.length; i++) {
-      Marker marker = Marker(
-        width: 30,
-        height: 30,
-        point: restaurantLocations[i],
-        builder: (ctx) => GestureDetector(
-          onTap: () {
-            showMarkerInfo(context, restaurantList[i]);
-          },
-          child: const DecoratedBox(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(2),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppColors.secondaryColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.local_dining_outlined,
-                    size: 24,
-                    color: AppColors.appPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-      markers.add(marker);
+        Marker marker = RestaurantPinGenerator.getPinMarker(
+            restaurantList[i].cuisine,
+            restaurantLocations[i],
+            showMarkerInfo, // Passer la fonction pour ouvrir la bottom sheet
+            restaurantList[i] // Passer l'objet restaurant
+        );
+        markers.add(marker);
     }
 
-    MarkerManager.markersList = markers;
     return markers;
   }
 

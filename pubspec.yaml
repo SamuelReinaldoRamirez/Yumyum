@@ -7,6 +7,7 @@ environment:
 flutter:
   uses-material-design: true
   assets:
+    - assets/icons/ # Dossier contenant les icônes SVG
     - assets/splash.png
     - assets/custom_map.json
     - assets/i18n/ # Dossier contenant les fichiers de traduction
@@ -15,6 +16,7 @@ flutter:
     - assets/logo/logo_new.png
     - assets/logo/yummap-cremeBG.png
     - assets/animations/success_animation.json
+    - assets/icons/ # Dossier contenant les icônes
   fonts:
     - family: Poppins
       fonts:
