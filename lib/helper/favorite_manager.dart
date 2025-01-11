@@ -13,18 +13,24 @@ class FavoriteManager {
 
     String restaurantId = restaurant.id.toString();
 
+    // Modifier l'ID pour s'assurer qu'il est stocké comme un entier
+    Map<String, dynamic> restaurantJson = restaurant.toJson();
+    restaurantJson['id'] = restaurant.id.toInt(); // Stocke l'ID comme un int
+
     if (favorites.contains(restaurantId)) {
       // Retirer du favoris
       favorites.remove(restaurantId);
       await prefs.setStringList(_favoritesKey, favorites);
-      await prefs.remove('restaurant_${restaurantId}'); // Retirer les détails du restaurant
+      await prefs.remove(
+          'restaurant_${restaurantId}'); // Retirer les détails du restaurant
       favoriteRestaurants.removeWhere((element) => element.id == restaurant.id);
       return false; // Restaurant n'est plus favori
     } else {
       // Ajouter aux favoris
       favorites.add(restaurantId);
       await prefs.setStringList(_favoritesKey, favorites);
-      await prefs.setString('restaurant_${restaurantId}', jsonEncode(restaurant.toJson()));
+      await prefs.setString(
+          'restaurant_${restaurantId}', jsonEncode(restaurantJson));
       favoriteRestaurants.add(restaurant);
       return true; // Restaurant est maintenant favori
     }
@@ -67,7 +73,8 @@ class FavoriteManager {
     for (String id in favoriteIds) {
       String? restaurantJson = prefs.getString('restaurant_${id}');
       if (restaurantJson != null) {
-        favoriteRestaurants.add(Restaurant.fromJson(jsonDecode(restaurantJson)));
+        favoriteRestaurants
+            .add(Restaurant.fromJson(jsonDecode(restaurantJson)));
       }
     }
 

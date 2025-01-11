@@ -179,16 +179,20 @@ class FilterBarState extends State<FilterBar> {
     setState(() {});
     List<Restaurant> filteredRestaurants;
 
-    if (widget.filterFavoritesNotifier.value) {  
-      filteredRestaurants = FavoriteManager.favoriteRestaurants;
-    } else {
-      List<int> selectedTags = widget.selectedTagIdsNotifier.value;
-      List<int> selectedWorkspaces = widget.selectedWorkspacesNotifier.value;
+    // Step 1: Filter by tags and workspaces
+    List<int> selectedTags = widget.selectedTagIdsNotifier.value;
+    List<int> selectedWorkspaces = widget.selectedWorkspacesNotifier.value;
+    filteredRestaurants = await CallEndpointService()
+        .getRestaurantsByTagsAndWorkspaces(selectedTags, selectedWorkspaces);
 
-      filteredRestaurants = await CallEndpointService()
-          .getRestaurantsByTagsAndWorkspaces(selectedTags, selectedWorkspaces);
+    // Step 2: Apply favorites filter if active
+    if (widget.filterFavoritesNotifier.value) {
+      // Utiliser la liste actuelle depuis MarkerManager
+      filteredRestaurants =
+          await filterFavoriteRestaurants(filteredRestaurants);
     }
 
+    // Step 3: Apply rating filter if active
     if (_isRatingFilterActive.value) {
       filteredRestaurants = filteredRestaurants.where((restaurant) {
         double rating = restaurant.ratings.toDouble();
@@ -204,6 +208,18 @@ class FilterBarState extends State<FilterBar> {
     } else {
       MarkerManager.clearMarkers();
     }
+  }
+
+  // Fonction pour filtrer les restaurants favoris
+  Future<List<Restaurant>> filterFavoriteRestaurants(
+      List<Restaurant> restaurants) async {
+    List<Restaurant> favoriteRestaurants = [];
+    for (Restaurant restaurant in restaurants) {
+      if (await FavoriteManager.isFavorite(restaurant)) {
+        favoriteRestaurants.add(restaurant);
+      }
+    }
+    return favoriteRestaurants;
   }
 
   IconData _getIconForType(String type) {
@@ -709,19 +725,15 @@ class FilterBarState extends State<FilterBar> {
 
   Widget _buildFavoritesFilterButton() {
     return ValueListenableBuilder<bool>(
-      valueListenable:
-          widget.filterFavoritesNotifier, // Écoute les changements de filterFavorites
+      valueListenable: widget.filterFavoritesNotifier,
       builder: (context, isFavoriteFilter, child) {
-        print('Filter state: $isFavoriteFilter'); // Affiche l'état actuel
-
         return FilterChip(
-          selected:
-              isFavoriteFilter, // Utilise filterFavorites pour déterminer si le chip est sélectionné
+          selected: isFavoriteFilter,
           label: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                isFavoriteFilter // Utilise isFavoriteFilter pour décider quelle icône afficher
+                isFavoriteFilter
                     ? Icons.bookmark
                     : Icons.bookmark_border_outlined,
                 size: 20,
@@ -737,32 +749,13 @@ class FilterBarState extends State<FilterBar> {
             ],
           ),
           onSelected: (bool selected) async {
-            print('Selected: $selected');
-
+            // Mise à jour simple du notifier, comme pour le rating
+            widget.filterFavoritesNotifier.value = selected;
             if (selected) {
-              List<Restaurant> favoriteRestaurants =
-                  FavoriteManager.favoriteRestaurants;
-              print(
-                  'Favorite restaurants count: ${favoriteRestaurants.length}');
-
-              if (favoriteRestaurants.isNotEmpty) {
-                widget.filterFavoritesNotifier.value = true; // Met à jour filterFavorites
-                widget.filterIsOn.value = true; // Met à jour filterIsOn si nécessaire
-                await generalFilter();
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Aucun restaurant favori'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
-            } else {
-              widget.filterFavoritesNotifier.value = false; // Désactive le filtre de favoris
-              widget.filterIsOn.value =
-                  false; // Désactive le filtre global si nécessaire
-              await generalFilter();
+              widget.filterIsOn.value = true;
             }
+            // Appel de generalFilter qui appliquera tous les filtres
+            await generalFilter();
           },
           selectedColor: AppColors.secondaryColor,
           backgroundColor: Colors.white,
@@ -770,10 +763,9 @@ class FilterBarState extends State<FilterBar> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
             side: BorderSide(
-              color:
-                  isFavoriteFilter // Change la couleur de la bordure en fonction de l'état
-                      ? AppColors.secondaryColor
-                      : AppColors.textColor,
+              color: isFavoriteFilter
+                  ? AppColors.secondaryColor
+                  : AppColors.textColor,
               width: 1,
             ),
           ),

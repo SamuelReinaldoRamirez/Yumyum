@@ -98,18 +98,6 @@ class Restaurant {
       }
     }
 
-    if (json['id'] == 32) {
-      schedule = {
-        'Monday': ['12:00 PM – 2:30 PM', '7:00 PM – 10:30 PM'],
-        'Tuesday': ['12:00 PM – 2:30 PM', '7:00 PM – 10:30 PM'],
-        'Wednesday': ['12:00 PM – 2:30 PM'],
-        'Thursday': ['7:00 PM – 10:30 PM'],
-        'Friday': ['12:00 PM – 2:30 PM', '7:00 PM – 10:30 PM'],
-        'Saturday': ['7:00 PM – 10:30 PM'],
-        'Sunday': [],
-      };
-    }
-
     //logger.d(schedule);
 
     // Parsing des autres données du restaurant
