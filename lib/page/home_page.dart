@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yummap/page/explore_page.dart';
 import 'package:yummap/services/cache_manager.dart';
@@ -6,139 +7,220 @@ import 'package:yummap/widgets/neu_widgets.dart';
 import 'package:yummap/constant/theme.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
 import 'package:yummap/model/restaurant.dart';
-import 'dart:async';
-// Importer StreamManager
-import 'package:yummap/services/image_optimizer.dart'; // Importer ImageOptimizer
+import 'package:yummap/helper/map_helper.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  static const String cacheKey = 'restaurants'; // Ajouter la clé de cache
-  List<Restaurant> restaurantList = [];
-  StreamSubscription?
-      _subscription; // Ajouter la variable pour stocker l'abonnement
-  final imageOptimizer = ImageOptimizer(); // Instancier ImageOptimizer
+  static const String cacheKey = 'restaurants';
+  final ValueNotifier<double> _loadingProgress = ValueNotifier<double>(0.0);
+  bool _isLoading = false;
+  late Future<Map<String, dynamic>> _preloadedData;
 
   @override
   void initState() {
     super.initState();
-    _fetchRestaurants();
-  }
-
-  Future<void> _fetchRestaurants() async {
-    try {
-      final cache = CacheManager();
-      final stopwatch = Stopwatch()..start();
-
-      // Vérifier le cache avec gestion d'erreur
-      try {
-        final cachedRestaurants = cache.get<List<Restaurant>>(cacheKey);
-        if (cachedRestaurants != null) {
-          setState(() {
-            restaurantList = cachedRestaurants;
-          });
-          // Rafraîchissement en arrière-plan
-          _refreshInBackground();
-          return;
-        }
-      } catch (e) {
-        print('Erreur de cache: $e');
-      }
-
-      // Fetch depuis l'API
-      final restaurants = await CallEndpointService().getRestaurantsFromXanos();
-      // Mise en cache avec métriques
-      final cacheTime = stopwatch.elapsed;
-      print('Temps de récupération: ${cacheTime.inMilliseconds}ms');
-      cache.set(cacheKey, restaurants, ttl: Duration(minutes: 15));
-
-      if (!mounted) return;
-      setState(() => restaurantList = restaurants);
-    } catch (e) {
-      // Gestion des erreurs améliorée
-      print('Erreur lors de la récupération des restaurants: $e');
-    }
-  }
-
-  // Nouvelle méthode pour le rafraîchissement en arrière-plan
-  Future<void> _refreshInBackground() async {
-    try {
-      final restaurants = await CallEndpointService().getRestaurantsFromXanos();
-      final cache = CacheManager();
-      cache.set(cacheKey, restaurants, ttl: Duration(minutes: 15));
-      if (!mounted) return;
-      setState(() => restaurantList = restaurants);
-    } catch (e) {
-      print('Erreur de rafraîchissement en arrière-plan: $e');
-    }
-  }
-
-  @override
-  void dispose() {
-    _subscription?.cancel(); // Annuler l'abonnement
-    super.dispose();
+    // Démarrer le préchargement immédiatement
+    _preloadedData = _initializeApp();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors
-          .backgroundColor, // Utilisation de la couleur de fond définie dans AppColors
+      backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
-        child: Center(
-          // Centrer le contenu
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                // Illustration sans cadre
-                SvgPicture.asset(
-                  'assets/illustrations/Baker-pana.svg',
-                  width: 300,
-                ),
-                SizedBox(height: 32),
-                // Titre avec styles associés
-                Text(
-                  'Yummap',
-                  style: AppTextStyles
-                      .titleBlackStyle, // Utiliser le style du thème
-                ),
-                SizedBox(height: 16),
-                // Texte descriptif avec style de l'app
-                Text(
-                  'Retrouvez en un instant les meilleurs endroits pour savourer vos moments gourmands avec Yummap.',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles
-                      .paragraphDarkStyle, // Utiliser le style du thème
-                ),
-                SizedBox(height: 82),
-                // Bouton
-                CustomNeuButton(
-                  text: 'Continuer',
-                  icon: Icons.arrow_forward,
-                  buttonColor: AppColors.appSecondary,
-                  textColor:
-                      Colors.white, // Ajout de la couleur claire pour le texte
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              ExplorePage(restaurantList: restaurantList)),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
+        child: Stack(
+          children: [
+            _buildMainContent(context),
+            if (_isLoading) _buildLoadingOverlay(),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildMainContent(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SvgPicture.asset(
+            'assets/illustrations/Baker-pana.svg',
+            width: 300,
+          ),
+          const SizedBox(height: 32),
+          Text(
+            'Yummap',
+            style: AppTextStyles.titleBlackStyle,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Retrouvez en un instant les meilleurs endroits pour savourer vos moments gourmands avec Yummap.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.paragraphDarkStyle,
+          ),
+          const SizedBox(height: 82),
+          CustomNeuButton(
+            text: 'Continuer',
+            icon: Icons.arrow_forward,
+            buttonColor: AppColors.appSecondary,
+            textColor: Colors.white,
+            onPressed: _handleContinuePressed,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingOverlay() {
+    return Container(
+      color: Colors.black54,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ValueListenableBuilder<double>(
+              valueListenable: _loadingProgress,
+              builder: (context, progress, _) {
+                return Column(
+                  children: [
+                    CircularProgressIndicator(
+                      value: progress,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.appSecondary),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Chargement ${(progress * 100).toInt()}%',
+                      style: AppTextStyles.paragraphDarkStyle.copyWith(color: Colors.white),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>> _initializeApp() async {
+    try {
+      _loadingProgress.value = 0.1;
+      // 1. Charger les restaurants
+      final restaurants = await _getRestaurants();
+      
+      _loadingProgress.value = 0.4;
+      // 2. Créer les marqueurs pour la carte
+      final preloadedData = await _preloadResources(restaurants);
+      
+      _loadingProgress.value = 0.8;
+      // 3. Initialiser les notifiers pour la gestion des filtres
+      final notifiers = _initializeNotifiers();
+      
+      _loadingProgress.value = 1.0;
+      
+      return {
+        ...preloadedData,  // Contient 'restaurants', 'markers', 'cuisines'
+        ...notifiers,      // Contient 'selectedTagIdsNotifier', 'selectedWorkspacesNotifier'
+      };
+    } catch (e) {
+      print('Erreur d\'initialisation: $e');
+      throw Exception('Erreur lors du chargement de l\'application');
+    }
+  }
+
+  Future<void> _handleContinuePressed() async {
+    setState(() => _isLoading = true);
+    try {
+      final data = await _preloadedData; // Utiliser les données préchargées
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ExplorePage(
+            restaurantList: data['restaurants'],
+            selectedTagIdsNotifier: data['selectedTagIdsNotifier'],
+            selectedWorkspacesNotifier: data['selectedWorkspacesNotifier'],
+            ratingFilterNotifier: ValueNotifier<bool>(false),
+            filterFavoritesNotifier: ValueNotifier<bool>(false),
+            filterIsOn: ValueNotifier<bool>(false),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Une erreur est survenue: ${e.toString()}'),
+          action: SnackBarAction(
+            label: 'Réessayer',
+            onPressed: _handleContinuePressed,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<List<Restaurant>> _getRestaurants() async {
+    final cache = CacheManager();
+    try {
+      final cachedData = cache.get<List<Restaurant>>(cacheKey);
+      if (cachedData != null) {
+        _refreshDataInBackground(cache);
+        return cachedData;
+      }
+    } catch (e) {
+      print('Erreur de cache: $e');
+    }
+    final restaurants = await CallEndpointService().getRestaurantsFromXanos();
+    cache.set(cacheKey, restaurants, ttl: const Duration(minutes: 15));
+    return restaurants;
+  }
+
+  Future<void> _refreshDataInBackground(CacheManager cache) async {
+    try {
+      final freshData = await CallEndpointService().getRestaurantsFromXanos();
+      cache.set(cacheKey, freshData, ttl: const Duration(minutes: 15));
+    } catch (e) {
+      print('Erreur de rafraîchissement: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> _preloadResources(List<Restaurant> restaurants) async {
+    final markers = await MapHelper.createMarkersFromRestaurants(restaurants);
+    MarkerManager.swapMarkersList(markers);
+    MarkerManager.allmarkers = List<Marker>.from(markers);
+    final cuisines = restaurants.map((r) => r.cuisine).toSet().toList();
+    // Supprimez ou commentez la ligne suivante si workspaces n'est pas nécessaire
+    // final workspaces = restaurants.expand((r) => r.workspaces).toSet().toList();
+    return {
+      'restaurants': restaurants,
+      'markers': markers,
+      'cuisines': cuisines,
+      // 'workspaces': workspaces, // Supprimez ou commentez cette ligne
+    };
+  }
+
+  Map<String, dynamic> _initializeNotifiers() {
+    return {
+      'selectedTagIdsNotifier': ValueNotifier<List<int>>([]),
+      'selectedWorkspacesNotifier': ValueNotifier<List<int>>([]),
+    };
+  }
+
+  @override
+  void dispose() {
+    _loadingProgress.dispose();
+    super.dispose();
   }
 }

@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:yummap/helper/bottom_sheet_helper.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
 import 'package:yummap/service/mixpanel_service.dart';
-import 'package:yummap/widget/filter_bar.dart';
 import 'package:yummap/helper/map_helper.dart';
-import 'package:yummap/constant/global.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/constant/theme.dart';
 import 'package:yummap/model/workspace.dart';
 import 'package:yummap/page/workspace_selection_page.dart';
 import 'package:latlong2/latlong.dart' as lat2;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchBar extends StatefulWidget implements PreferredSizeWidget {
   final List<Restaurant> restaurantList;
   final Function(String) onSearchChanged;
   final ValueNotifier<List<int>> selectedTagIdsNotifier;
   final ValueNotifier<List<int>> selectedWorkspacesNotifier;
+  final ValueNotifier<bool> filterFavoritesNotifier;
+  final ValueNotifier<bool> ratingFilterNotifier;
 
   const SearchBar({
     super.key,
@@ -23,6 +25,8 @@ class SearchBar extends StatefulWidget implements PreferredSizeWidget {
     required this.restaurantList,
     required this.selectedTagIdsNotifier,
     required this.selectedWorkspacesNotifier,
+    required this.filterFavoritesNotifier,
+    required this.ratingFilterNotifier,
   });
 
   @override
@@ -35,7 +39,7 @@ class SearchBar extends StatefulWidget implements PreferredSizeWidget {
 class _SearchBarState extends State<SearchBar> {
   final TextEditingController _searchController = TextEditingController();
   int lastShakeTimestamp = 0;
-  VoidCallback? _listener;
+  ValueNotifier<bool> filterIsOn = ValueNotifier(false);
 
   void listener() {
     setState(() {});
@@ -44,14 +48,89 @@ class _SearchBarState extends State<SearchBar> {
   @override
   void initState() {
     super.initState();
-    _listener = listener;
-    filterIsOn.addListener(_listener!);
+    widget.filterFavoritesNotifier.addListener(_updateFilterIsOn);
+    widget.ratingFilterNotifier.addListener(_updateFilterIsOn);
+    widget.selectedTagIdsNotifier.addListener(_updateFilterIsOn);
+    widget.selectedWorkspacesNotifier.addListener(_updateFilterIsOn);
   }
 
   @override
   void dispose() {
-    filterIsOn.removeListener(_listener!);
+    widget.filterFavoritesNotifier.removeListener(_updateFilterIsOn);
+    widget.ratingFilterNotifier.removeListener(_updateFilterIsOn);
+    widget.selectedTagIdsNotifier.removeListener(_updateFilterIsOn);
+    widget.selectedWorkspacesNotifier.removeListener(_updateFilterIsOn);
     super.dispose();
+  }
+
+  void _updateFilterIsOn() {
+    bool isAnyFilterActive = 
+      widget.filterFavoritesNotifier.value ||
+      widget.selectedTagIdsNotifier.value.isNotEmpty ||
+      widget.selectedWorkspacesNotifier.value.isNotEmpty ||
+      widget.ratingFilterNotifier.value;
+
+    if (filterIsOn.value != isAnyFilterActive) {
+      setState(() {
+        filterIsOn.value = isAnyFilterActive;
+      });
+    }
+  }
+
+  void _clearFilters(BuildContext context) {
+    print("Méthode _clearFilters appelée.");
+    
+    // Réinitialiser les filtres
+    widget.filterFavoritesNotifier.value = false; // Désactiver le filtre des favoris
+    widget.selectedTagIdsNotifier.value = [];
+    widget.selectedWorkspacesNotifier.value = [];
+    
+    // Désactiver le filtre de notation
+    widget.ratingFilterNotifier.value = false; // Assurez-vous que cela est bien ici
+    
+    _searchController.clear();
+    
+    // Réinitialiser les marqueurs
+    MarkerManager.resetMarkers();
+    
+    setState(() {
+      filterIsOn.value = false; // Désactiver le filtre global
+    });
+  }
+
+  void _showAliasAlert(
+      BuildContext context, List<String> aliasList, String title) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: aliasList.map((alias) {
+              return ListTile(
+                title: Text(alias),
+              );
+            }).toList(),
+          ),
+          actions: [
+            TextButton(
+              child: Text('Fermer'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _handleWorkspaceSelection(Workspace workspace) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> aliasList = prefs.getStringList('workspaceAliases') ?? [];
+
+    _showAliasAlert(context, aliasList, 'After setting');
   }
 
   @override
@@ -65,60 +144,33 @@ class _SearchBarState extends State<SearchBar> {
           _handleSubmitted(value);
         },
         style: AppTextStyles.paragraphDarkStyle.copyWith(
-          color: AppColors.textColor, // Couleur du texte
+          color: AppColors.textColor,
         ),
         decoration: InputDecoration(
           hintText: 'Rechercher dans Yummap',
           hintStyle: AppTextStyles.hintTextDarkStyle.copyWith(
-            color: AppColors.textColor
-                .withOpacity(0.5), // Couleur du texte d'indice
+            color: AppColors.textColor.withOpacity(0.5),
           ),
           border: InputBorder.none,
           prefixIcon: const Icon(
             Icons.search,
-            color: AppColors.textColor, // Couleur de l'icône de recherche
+            color: AppColors.textColor,
           ),
           suffixIcon: IconButton(
             icon: Container(
               decoration: filterIsOn.value
                   ? BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.secondaryColor, // Fond orange si actif
+                      color: AppColors.secondaryColor,
                     )
                   : null,
-              padding:
-                  const EdgeInsets.all(4.0), // Pas de bordure si non pressé
+              padding: const EdgeInsets.all(4.0),
               child: Icon(
                 Icons.clear,
-                color: filterIsOn.value
-                    ? Colors.white
-                    : AppColors.textColor, // Couleur de l'icône de suppression
+                color: filterIsOn.value ? Colors.white : AppColors.textColor,
               ),
             ),
-            onPressed: () async {
-              setState(() {
-                // Réinitialisation des workspaces et tags
-                widget.selectedWorkspacesNotifier.value = [];
-                widget.selectedTagIdsNotifier.value = [];
-              });
-
-              // Nettoyage de la recherche
-              _clearSearch(context);
-
-              // Réinitialisation des marqueurs
-              MarkerManager.resetMarkers();
-
-              // Désactivation du flag de filtre
-              filterIsOn.value = false;
-
-              if (context.mounted) {
-                final filterBarState =
-                    context.findAncestorStateOfType<FilterBarState>();
-                if (filterBarState != null) {
-                  filterBarState.resetFilters(); // Appeler la méthode correcte
-                }
-              }
-            },
+            onPressed: () => _clearFilters(context),
           ),
           filled: true,
           fillColor: AppColors.backgroundColor,
@@ -133,22 +185,19 @@ class _SearchBarState extends State<SearchBar> {
     });
 
     if (value == "#hotelz") {
-      // Appeler l'API Xano pour récupérer les hôtels
       try {
-        final hotels = await CallEndpointService()
-            .getHotelsFromXano(); // Implémenter cette méthode pour récupérer les hôtels
+        final hotels = await CallEndpointService().getHotelsFromXano();
         if (hotels.isNotEmpty) {
-          // Créer les nouveaux marqueurs pour les hôtels
           List<lat2.LatLng> hotelLocations = hotels
               .map((hotel) => lat2.LatLng(hotel.latitude, hotel.longitude))
               .toList();
 
-          // Utiliser MapHelper pour créer les marqueurs des hôtels
-          MarkerManager.markersList = MapHelper.createHotelMarkers(
+          List<Marker> newMarkers = MapHelper.createHotelMarkers(
             MarkerManager.context,
             hotels,
             hotelLocations,
           );
+          MarkerManager.swapMarkersList(newMarkers);
 
           MarkerManager.updateMap();
         } else {
@@ -167,10 +216,9 @@ class _SearchBarState extends State<SearchBar> {
         );
       }
 
-      return; // Terminer l'exécution pour éviter de poursuivre avec les autres logiques
+      return;
     }
 
-    // Logique pour changer l'environnement (dev/prod)
     if (value == ",dev,") {
       print("TO DEV ??");
       await CallEndpointService.switchToDev();
@@ -181,7 +229,6 @@ class _SearchBarState extends State<SearchBar> {
       value = "";
     }
 
-    // Recherche de workspaces et de restaurants
     List<Workspace> workspacesToDisplay =
         await CallEndpointService().searchWorkspaceByName(value);
 
@@ -189,17 +236,13 @@ class _SearchBarState extends State<SearchBar> {
         await CallEndpointService().searchRestaurantByName(value);
 
     if (workspacesToDisplay.isNotEmpty) {
-      // Si des workspaces sont trouvés, afficher la page de sélection
       _showWorkspaceSelectionPage(
           MarkerManager.context, workspacesToDisplay, restaurantsToDisplay);
     } else {
-      // Afficher les restaurants sur la carte
       if (restaurantsToDisplay.isNotEmpty) {
         if (restaurantsToDisplay.length > 1) {
-          // Plusieurs restaurants trouvés, les afficher sur la carte
           MarkerManager.createFull(MarkerManager.context, restaurantsToDisplay);
         } else {
-          // Un seul restaurant trouvé, afficher son détail dans un bottom sheet
           final restaurant = restaurantsToDisplay[0];
           final latitude = restaurant.latitude;
           final longitude = restaurant.longitude;
@@ -236,36 +279,11 @@ class _SearchBarState extends State<SearchBar> {
     }
   }
 
-  void _handleWorkspaceSelection(Workspace workspace) async {
-    // SharedPreferences prefs = await SharedPreferences.getInstance();
-    // List<String> aliasList = prefs.getStringList('workspaceAliases') ?? [];
-
-    // Afficher la liste mise à jour des alias
-    // _showAliasAlert(context, aliasList, 'After setting');
-  }
-
   void _handleRestaurantSelection(Restaurant restaurant) {
     BottomSheetHelper.showDraggableBottomSheet(
         MarkerManager.context, restaurant);
     MarkerManager.mapPageState?.mapController
         .move(lat2.LatLng(restaurant.latitude, restaurant.longitude), 15);
     MarkerManager.resetMarkers();
-  }
-
-  void _clearSearch(BuildContext context) {
-    _searchController.clear();
-
-    // Réinitialiser les ValueNotifier
-    widget.selectedTagIdsNotifier.value = [];
-    widget.selectedWorkspacesNotifier.value = [];
-
-    // Réinitialiser l'état des filtres
-    final filterBarState = context.findAncestorStateOfType<FilterBarState>();
-    if (filterBarState != null) {
-      filterBarState.resetFilters();
-    }
-
-    // Mettre à jour l'état global
-    filterIsOn.value = false;
   }
 }

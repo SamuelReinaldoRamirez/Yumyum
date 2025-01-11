@@ -249,41 +249,6 @@ class CallEndpointService {
     }
   }
 
-//AVANT DE SUPPRIMER : SUPPRIME LE ENDPOINT DANS XANO
-  // Future<List<Restaurant>> getRestaurantsByTags(List<int> tagsId) async {
-  //   if (baseUrl.isEmpty) {
-  //     throw Exception('Service not initialized. Call init() first.');
-  //   }
-
-  //   String tagsIdQueryString = jsonEncode({'tags_id': tagsId});
-
-  //   String url = '$baseUrl/tags/';
-
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse(url),
-  //       headers: <String, String>{
-  //         'Content-Type': 'application/json; charset=UTF-8',
-  //       },
-  //       body: tagsIdQueryString,
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       final List<dynamic> jsonData = json.decode(response.body);
-
-  //       List<Restaurant> restaurants = jsonData.map((data) {
-  //         return Restaurant.fromJson(data);
-  //       }).toList();
-
-  //       return restaurants;
-  //     } else {
-  //       throw Exception('Failed to load restaurants by tags');
-  //     }
-  //   } catch (e) {
-  //     throw Exception('Failed to load restaurants by tags: $e');
-  //   }
-  // }
-
   Future<List<Restaurant>> searchRestaurantByName(String restaurantName) async {
     if (rootUrl.isEmpty) {
       throw Exception('Service not initialized. Call init() first.');

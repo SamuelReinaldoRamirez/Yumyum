@@ -3,11 +3,14 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:yummap/constant/theme.dart';
 import 'package:yummap/helper/bottom_sheet_helper.dart';
+import 'package:yummap/helper/opening_hours_helper.dart';
 import 'package:yummap/model/hotel.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/page/map_page.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 import 'package:yummap/widget/restaurant_pin_generator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class MarkerManager {
   static List<Marker> allmarkers = [];
@@ -15,6 +18,7 @@ class MarkerManager {
   static List<Marker> markersList = [];
   static late BuildContext context;
   static Marker? userMarker; // Marqueur de la position de l'utilisateur
+  static List<Marker> favoriteMarkers = [];
 
   static void addMarker(Marker marker) {
     markersList.add(marker);
@@ -43,13 +47,39 @@ class MarkerManager {
 
   static void createFull(
       BuildContext context, List<Restaurant> newRestaurants) {
-    MapHelper.createFull(mapPageState!.context, newRestaurants);
+    MapHelper.createFull(context, newRestaurants);
     updateMap();
   }
 
   static void resetMarkers() {
     markersList = List<Marker>.from(allmarkers);
+    print("MarkersList length: ${markersList.length}");
     updateMap();
+  }
+
+  static void swapMarkersList(List<Marker> newMarkers) {
+    // Nettoyage de l'ancienne liste pour éviter les fuites
+    markersList.clear();
+
+    // Assigne la nouvelle liste en créant une nouvelle référence
+    markersList = List<Marker>.from(newMarkers);
+    print("MarkersList length: ${markersList.length}");
+
+    // Met à jour la carte pour afficher les nouveaux markers
+    updateMap();
+  }
+
+  static void addRestaurantMarker(Restaurant restaurant) {
+    // Create a marker for the restaurant
+    final marker = Marker(
+      point: lat2.LatLng(restaurant.latitude, restaurant.longitude),
+      builder: (ctx) => Container(
+        child: Icon(Icons.restaurant,
+            color: Colors.red), // Customize the marker icon
+      ),
+    );
+    // Add the marker to the markers list
+    addMarker(marker);
   }
 
   // Fonction pour initialiser et mettre à jour la position de l'utilisateur
@@ -84,6 +114,45 @@ class MarkerManager {
       updateMap();
     });
   }
+
+  static Future<void> saveFavoriteMarkers() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> markersData = favoriteMarkers.map((marker) {
+      return jsonEncode({
+        'latitude': marker.point.latitude,
+        'longitude': marker.point.longitude,
+      });
+    }).toList();
+    await prefs.setStringList('favorite_markers', markersData);
+  }
+
+  static Future<void> loadFavoriteMarkers() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String>? markersData = prefs.getStringList('favorite_markers');
+    if (markersData != null) {
+      favoriteMarkers.clear();
+      for (String markerData in markersData) {
+        Map<String, dynamic> data = jsonDecode(markerData);
+        favoriteMarkers.add(Marker(
+          point: lat2.LatLng(data['latitude'], data['longitude']),
+          builder: (ctx) => Container(
+            child: Icon(Icons.restaurant,
+                color: Colors.red), // Customize the marker icon
+          ),
+        ));
+      }
+    }
+  }
+
+  // Méthode pour nettoyer complètement lors de la fermeture de l'app
+  static void dispose() {
+    // Nettoyage de toutes les listes sans essayer de modifier les builders
+    allmarkers.clear();
+    markersList.clear();
+    favoriteMarkers.clear();
+    userMarker = null;
+    mapPageState = null;
+  }
 }
 
 class MapHelper {
@@ -97,13 +166,17 @@ class MapHelper {
     callback(position);
   }
 
-  static void createFull(
-      BuildContext context, List<Restaurant> newRestaurants) {
+  static Future<void> createFull(
+      BuildContext context, List<Restaurant> newRestaurants) async {
     List<lat2.LatLng> newLocations = [];
     createRestaurantLocations(newRestaurants, newLocations);
-    List<Marker> newMarkers = MapHelper.createListMarkers(
-        context, newRestaurants, newLocations, _showMarkerInfo);
-    MarkerManager.markersList = newMarkers;
+
+    // Créer la nouvelle liste de markers
+    List<Marker> newMarkers =
+        await createMarkersFromRestaurants(newRestaurants);
+
+    // Utiliser la nouvelle méthode de swap
+    MarkerManager.swapMarkersList(newMarkers);
   }
 
   static void createRestaurantLocations(
@@ -114,7 +187,7 @@ class MapHelper {
     }
   }
 
-  static void _showMarkerInfo(BuildContext context, Restaurant restaurant) {
+  static void showMarkerInfo(BuildContext context, Restaurant restaurant) {
     BottomSheetHelper.showDraggableBottomSheet(context, restaurant);
   }
 
@@ -133,27 +206,6 @@ class MapHelper {
     }
 
     MarkerManager.markersList = markers;
-    return markers;
-  }
-
-  static List<Marker> createListMarkers(
-    BuildContext context,
-    List<Restaurant> restaurantList,
-    List<lat2.LatLng> restaurantLocations,
-    Function(BuildContext context, Restaurant r) showMarkerInfo,
-  ) {
-    List<Marker> markers = [];
-
-    for (int i = 0; i < restaurantLocations.length; i++) {
-        Marker marker = RestaurantPinGenerator.getPinMarker(
-            restaurantList[i].cuisine,
-            restaurantLocations[i],
-            showMarkerInfo, // Passer la fonction pour ouvrir la bottom sheet
-            restaurantList[i] // Passer l'objet restaurant
-        );
-        markers.add(marker);
-    }
-
     return markers;
   }
 
@@ -234,5 +286,26 @@ class MapHelper {
     }
 
     return hotelMarkers;
+  }
+
+  static Future<List<Marker>> createMarkersFromRestaurants(
+      List<Restaurant> restaurants) async {
+    List<Marker> markers = [];
+    for (var restaurant in restaurants) {
+      markers.add(createPinFromRestaurant(restaurant));
+    }
+    return markers;
+  }
+
+  static Marker createPinFromRestaurant(Restaurant restaurant) {
+    bool isOpen = OpeningHoursHelper.isRestaurantOpen(restaurant);
+    return Marker(
+      point: lat2.LatLng(restaurant.latitude, restaurant.longitude),
+      builder: (ctx) => GestureDetector(
+        onTap: () => showMarkerInfo(ctx, restaurant),
+        child: RestaurantPinGenerator.buildPinIcon(
+            restaurant.cuisine, isOpen, Colors.white, AppColors.secondaryColor),
+      ),
+    );
   }
 }

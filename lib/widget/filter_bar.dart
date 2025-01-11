@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart' as lat2;
+import 'package:yummap/helper/favorite_manager.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
 import 'package:yummap/constant/global.dart';
 import 'package:yummap/helper/map_helper.dart';
@@ -9,15 +11,24 @@ import 'package:yummap/model/workspace.dart';
 import '../helper/filter_options_modal.dart';
 import '../service/local_data_service.dart';
 import '../helper/rating_filter_modal.dart';
+import 'package:flutter_map/flutter_map.dart';
 
 class FilterBar extends StatefulWidget implements PreferredSizeWidget {
   final ValueNotifier<List<int>> selectedTagIdsNotifier;
   final ValueNotifier<List<int>> selectedWorkspacesNotifier;
+  final ValueNotifier<bool> ratingFilterNotifier;
+  final ValueNotifier<bool> filterFavoritesNotifier;
+  final ValueNotifier<bool> filterIsOn;
+  final Function(RangeValues, int, List<String>) onFilterChanged;
 
   const FilterBar({
     super.key,
     required this.selectedTagIdsNotifier,
     required this.selectedWorkspacesNotifier,
+    required this.ratingFilterNotifier,
+    required this.filterFavoritesNotifier,
+    required this.filterIsOn,
+    required this.onFilterChanged,
   });
 
   @override
@@ -51,26 +62,45 @@ class FilterBarState extends State<FilterBar> {
   final Map<String, bool> _loadingStates = {};
   bool _isLoadingWorkspaces = false;
   List<int> _tempSelectedWorkspaces = [];
-  double _minRating = 1.0;
-  double _maxRating = 5.0;
-  final ValueNotifier<bool> _isRatingFilterActive = ValueNotifier<bool>(false);
+  late ValueNotifier<bool> _isRatingFilterActive;
+  final ValueNotifier<double> minRatingThreshold = ValueNotifier<double>(1.0);
+  final ValueNotifier<double> maxRatingThreshold = ValueNotifier<double>(5.0);
   final ValueNotifier<bool> _isPeopleFilterActive = ValueNotifier<bool>(false);
   int? selectedPeopleCount;
   final ScrollController _scrollController = ScrollController();
-  bool showFavorites = false; // Variable d'état pour le filtre "Favoris"
+  List<lat2.LatLng> locations = [];
+  bool showMarkerInfo = true;
+  RangeValues selectedPriceRange = const RangeValues(0, 100);
+  int selectedRating = 0;
+  List<String> selectedCategories = [];
 
   @override
   void initState() {
     super.initState();
+    _isRatingFilterActive = widget.ratingFilterNotifier;
+    widget.filterFavoritesNotifier.addListener(() {
+      generalFilter();
+    });
+    widget.filterFavoritesNotifier.addListener(() {
+      generalFilter();
+    });
     _loadInitialState();
   }
 
   @override
   void dispose() {
+    widget.filterFavoritesNotifier.removeListener(() {
+      generalFilter();
+    });
+    widget.filterFavoritesNotifier.removeListener(() {
+      generalFilter();
+    });
     _scrollController.dispose();
     _localDataService.tagsNotifier.removeListener(_onTagsChanged);
     widget.selectedTagIdsNotifier.removeListener(_onSelectedTagsChanged);
     _isRatingFilterActive.dispose();
+    minRatingThreshold.dispose();
+    maxRatingThreshold.dispose();
     _isPeopleFilterActive.dispose();
     super.dispose();
   }
@@ -145,104 +175,51 @@ class FilterBarState extends State<FilterBar> {
     setState(() {});
   }
 
-  // Méthode publique pour réinitialiser les filtres
-  void resetFilters() {
-    setState(() {
-      // Reset rating filter
-      _isRatingFilterActive.value = false;
-      _isPeopleFilterActive.value = false;
-      selectedPeopleCount = null;
-      _minRating = 1.0;
-      _maxRating = 5.0;
-
-      // Reset other filters
-      widget.selectedTagIdsNotifier.value = [];
-      widget.selectedWorkspacesNotifier.value = [];
-
-      // Reset loading states
-      for (var type in _tagsByType.keys) {
-        _loadingStates[type] = false;
-      }
-      _isLoadingWorkspaces = false;
-
-      // Force la mise à jour de l'état visuel
-      filterIsOn.value = false;
-    });
-  }
-
-  Future<List<Restaurant>> generalFilter() async {
-    List<int> filterTags = widget.selectedTagIdsNotifier.value;
-    List<int> workspaceIds = widget.selectedWorkspacesNotifier.value;
-
-    if (_isRatingFilterActive.value) {}
-
+  Future<void> generalFilter() async {
+    setState(() {});
     List<Restaurant> filteredRestaurants;
 
-    // Si le filtre "compte suivi" est actif
-    if (workspaceIds.contains(-1)) {
-      // Utiliser la liste locale des workspaces suivis
-      final followedWorkspaces = _localDataService.getFollowedWorkspaces();
-
-      // Extraire les IDs des workspaces suivis
-      final followedIds = followedWorkspaces.map((w) => w.id).toList();
-      workspaceIds.remove(-1);
-      workspaceIds.addAll(followedIds);
-    }
-
-    // Utiliser l'endpoint pour récupérer les restaurants filtrés
-    try {
-      filteredRestaurants = await CallEndpointService()
-          .getRestaurantsByTagsAndWorkspaces(filterTags, workspaceIds);
-
-      // Appliquer le filtre de note si actif
-      if (_isRatingFilterActive.value) {
-        filteredRestaurants = filteredRestaurants.where((restaurant) {
-          // Vérifier si le restaurant a une note valide
-          if (restaurant.ratings > 0) {
-            final bool isInRange = restaurant.ratings >= _minRating &&
-                restaurant.ratings <= _maxRating;
-            return isInRange;
-          }
-          return false; // Exclure les restaurants sans note
-        }).toList();
-      }
-    } catch (e) {
-      filteredRestaurants = [];
-    }
-
-    // Mettre à jour filterIsOn en fonction de tous les filtres actifs
-    if (workspaceIds.isEmpty &&
-        filterTags.isEmpty &&
-        !_isRatingFilterActive.value) {
-      filterIsOn.value = false;
+    if (widget.filterFavoritesNotifier.value) {  
+      filteredRestaurants = FavoriteManager.favoriteRestaurants;
     } else {
-      filterIsOn.value = true;
+      List<int> selectedTags = widget.selectedTagIdsNotifier.value;
+      List<int> selectedWorkspaces = widget.selectedWorkspacesNotifier.value;
+
+      filteredRestaurants = await CallEndpointService()
+          .getRestaurantsByTagsAndWorkspaces(selectedTags, selectedWorkspaces);
     }
 
-    MarkerManager.createFull(MarkerManager.context, filteredRestaurants);
+    if (_isRatingFilterActive.value) {
+      filteredRestaurants = filteredRestaurants.where((restaurant) {
+        double rating = restaurant.ratings.toDouble();
+        return rating >= minRatingThreshold.value &&
+            rating <= maxRatingThreshold.value;
+      }).toList();
+    }
 
-    return filteredRestaurants;
+    if (filteredRestaurants.isNotEmpty) {
+      List<Marker> newMarkers =
+          await MapHelper.createMarkersFromRestaurants(filteredRestaurants);
+      MarkerManager.swapMarkersList(newMarkers);
+    } else {
+      MarkerManager.clearMarkers();
+    }
   }
 
   IconData _getIconForType(String type) {
     switch (type.toLowerCase()) {
-      // Ambiance
       case 'ambiance':
         return Icons.brunch_dining;
 
-      // Cuisine
       case 'cuisine':
         return Icons.restaurant_menu;
 
-      // Restrictions
       case 'restrictions':
         return Icons.no_meals;
 
-      // Formules
       case 'formules':
         return Icons.food_bank;
 
-      // Plat
       case 'plat':
         return Icons.cookie;
 
@@ -267,10 +244,8 @@ class FilterBarState extends State<FilterBar> {
             : () {
                 showModalBottomSheet<void>(
                   context: context,
-                  isScrollControlled:
-                      true, // Permet une BottomSheet ajustée au contenu
-                  backgroundColor:
-                      Colors.transparent, // Pour un contour stylisé
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
                   builder: (BuildContext context) {
                     return DraggableScrollableSheet(
                       initialChildSize: 0.6,
@@ -300,7 +275,6 @@ class FilterBarState extends State<FilterBar> {
                           ),
                           child: Column(
                             children: [
-                              // Barre draggable
                               Container(
                                 width: 50,
                                 height: 5,
@@ -310,7 +284,6 @@ class FilterBarState extends State<FilterBar> {
                                   borderRadius: BorderRadius.circular(2.5),
                                 ),
                               ),
-                              // Contenu existant conservé
                               Expanded(
                                 child: FilterOptionsModal(
                                   filterType: type,
@@ -346,9 +319,8 @@ class FilterBarState extends State<FilterBar> {
                 );
               },
         style: ElevatedButton.styleFrom(
-          backgroundColor: selectedCount > 0
-              ? AppColors.secondaryColor
-              : Colors.white, // Fond blanc pour le bouton
+          backgroundColor:
+              selectedCount > 0 ? AppColors.secondaryColor : Colors.white,
           foregroundColor:
               selectedCount > 0 ? Colors.white : AppColors.textColor,
           elevation: 2,
@@ -444,7 +416,6 @@ class FilterBarState extends State<FilterBar> {
                           ),
                           child: Column(
                             children: [
-                              // Barre draggable
                               Container(
                                 width: 50,
                                 height: 5,
@@ -454,7 +425,6 @@ class FilterBarState extends State<FilterBar> {
                                   borderRadius: BorderRadius.circular(2.5),
                                 ),
                               ),
-                              // Contenu principal
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -488,8 +458,7 @@ class FilterBarState extends State<FilterBar> {
                                     return StatefulBuilder(
                                       builder: (context, setModalState) {
                                         return ListView.builder(
-                                          controller:
-                                              scrollController, // Pour le scroll draggable
+                                          controller: scrollController,
                                           shrinkWrap: true,
                                           itemCount: followedWorkspaces.length,
                                           itemBuilder: (context, index) {
@@ -549,8 +518,7 @@ class FilterBarState extends State<FilterBar> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  minimumSize: Size(double.infinity,
-                                      0), // Prendre toute la largeur
+                                  minimumSize: Size(double.infinity, 0),
                                 ),
                                 onPressed: () async {
                                   _scrollToStart();
@@ -589,9 +557,8 @@ class FilterBarState extends State<FilterBar> {
                 );
               },
         style: ElevatedButton.styleFrom(
-          backgroundColor: selectedCount > 0
-              ? AppColors.secondaryColor
-              : Colors.white, // Fond blanc pour le bouton
+          backgroundColor:
+              selectedCount > 0 ? AppColors.secondaryColor : Colors.white,
           foregroundColor:
               selectedCount > 0 ? Colors.white : AppColors.textColor,
           elevation: 2,
@@ -647,7 +614,6 @@ class FilterBarState extends State<FilterBar> {
       child: ValueListenableBuilder<bool>(
         valueListenable: filterIsOn,
         builder: (context, isFilterOn, child) {
-          // Si filterIsOn est false, on force _isRatingFilterActive à false aussi
           if (!isFilterOn && _isRatingFilterActive.value) {
             _isRatingFilterActive.value = false;
           }
@@ -666,18 +632,17 @@ class FilterBarState extends State<FilterBar> {
                         top: Radius.circular(20),
                       ),
                       border: Border.all(
-                        color: Colors
-                            .black, // Contour noir autour de la BottomSheet
+                        color: Colors.black,
                         width: 2.0,
                       ),
                     ),
                     child: RatingFilterModal(
-                      initialMinRating: _minRating,
-                      initialMaxRating: _maxRating,
+                      initialMinRating: minRatingThreshold.value,
+                      initialMaxRating: maxRatingThreshold.value,
                       onApply: (min, max) async {
                         setState(() {
-                          _minRating = min;
-                          _maxRating = max;
+                          minRatingThreshold.value = min;
+                          maxRatingThreshold.value = max;
                           _isRatingFilterActive.value =
                               (min > 1.0 || max < 5.0);
                         });
@@ -695,7 +660,7 @@ class FilterBarState extends State<FilterBar> {
             style: ElevatedButton.styleFrom(
               backgroundColor: _isRatingFilterActive.value
                   ? AppColors.secondaryColor
-                  : Colors.white, // Fond blanc pour le bouton
+                  : Colors.white,
               foregroundColor: _isRatingFilterActive.value
                   ? Colors.white
                   : AppColors.textColor,
@@ -724,7 +689,7 @@ class FilterBarState extends State<FilterBar> {
                 const SizedBox(width: 4),
                 Text(
                   _isRatingFilterActive.value
-                      ? '${_minRating.toStringAsFixed(1)}-${_maxRating.toStringAsFixed(1)}'
+                      ? '${minRatingThreshold.value.toStringAsFixed(1)}-${maxRatingThreshold.value.toStringAsFixed(1)}'
                       : 'Note',
                   style: TextStyle(
                     fontSize: 14,
@@ -743,59 +708,84 @@ class FilterBarState extends State<FilterBar> {
   }
 
   Widget _buildFavoritesFilterButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: ElevatedButton(
-        onPressed: () {
-          setState(() {
-            showFavorites = !showFavorites;
-          });
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: showFavorites
-              ? AppColors.secondaryColor
-              : Colors.white, // Fond blanc pour le bouton
-          foregroundColor: showFavorites
-              ? Colors.white
-              : AppColors.textColor,
-          elevation: 2,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+    return ValueListenableBuilder<bool>(
+      valueListenable:
+          widget.filterFavoritesNotifier, // Écoute les changements de filterFavorites
+      builder: (context, isFavoriteFilter, child) {
+        print('Filter state: $isFavoriteFilter'); // Affiche l'état actuel
+
+        return FilterChip(
+          selected:
+              isFavoriteFilter, // Utilise filterFavorites pour déterminer si le chip est sélectionné
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isFavoriteFilter // Utilise isFavoriteFilter pour décider quelle icône afficher
+                    ? Icons.bookmark
+                    : Icons.bookmark_border_outlined,
+                size: 20,
+                color: isFavoriteFilter ? Colors.white : AppColors.textColor,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Favoris',
+                style: TextStyle(
+                  color: isFavoriteFilter ? Colors.white : AppColors.textColor,
+                ),
+              ),
+            ],
+          ),
+          onSelected: (bool selected) async {
+            print('Selected: $selected');
+
+            if (selected) {
+              List<Restaurant> favoriteRestaurants =
+                  FavoriteManager.favoriteRestaurants;
+              print(
+                  'Favorite restaurants count: ${favoriteRestaurants.length}');
+
+              if (favoriteRestaurants.isNotEmpty) {
+                widget.filterFavoritesNotifier.value = true; // Met à jour filterFavorites
+                widget.filterIsOn.value = true; // Met à jour filterIsOn si nécessaire
+                await generalFilter();
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Aucun restaurant favori'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            } else {
+              widget.filterFavoritesNotifier.value = false; // Désactive le filtre de favoris
+              widget.filterIsOn.value =
+                  false; // Désactive le filtre global si nécessaire
+              await generalFilter();
+            }
+          },
+          selectedColor: AppColors.secondaryColor,
+          backgroundColor: Colors.white,
+          checkmarkColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
             side: BorderSide(
-              color: showFavorites
-                  ? AppColors.secondaryColor
-                  : AppColors.textColor,
+              color:
+                  isFavoriteFilter // Change la couleur de la bordure en fonction de l'état
+                      ? AppColors.secondaryColor
+                      : AppColors.textColor,
               width: 1,
             ),
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              showFavorites ? Icons.bookmark : Icons.bookmark_border_outlined,
-              color: showFavorites ? Colors.white : AppColors.textColor,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              'Favoris',
-              style: TextStyle(
-                color: showFavorites ? Colors.white : AppColors.textColor,
-              ),
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 
   void _scrollToStart() {
     if (_scrollController.hasClients) {
-      // Calculer la position du premier filtre actif
       double targetPosition = _scrollController.position.minScrollExtent;
 
-      // Défiler complètement à gauche
       _scrollController.animateTo(
         targetPosition,
         duration: const Duration(milliseconds: 300),
@@ -806,14 +796,14 @@ class FilterBarState extends State<FilterBar> {
 
   bool get isRatingFilterActive => _isRatingFilterActive.value;
 
-  void activateRatingFilter() {
-    _isRatingFilterActive.value = true;
+  set isRatingFilterActive(bool value) {
+    _isRatingFilterActive.value = value;
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.backgroundColor, // Couleur de fond du thème
+      color: AppColors.backgroundColor,
       child: SafeArea(
         top: false,
         bottom: false,
@@ -841,7 +831,6 @@ class FilterBarState extends State<FilterBar> {
                     child: Row(
                       children: [
                         const SizedBox(width: 10),
-                        // Boutons actifs en premier
                         if (_isRatingFilterActive.value)
                           _buildRatingFilterButton(),
                         if (widget.selectedWorkspacesNotifier.value.isNotEmpty)
@@ -854,9 +843,8 @@ class FilterBarState extends State<FilterBar> {
                               return const SizedBox.shrink();
                             },
                           ),
-                        if (showFavorites)
+                        if (widget.filterFavoritesNotifier.value)
                           _buildFavoritesFilterButton(),
-                        // Boutons de type avec des tags sélectionnés (filtres actifs)
                         ..._tagsByType.entries.map((entry) {
                           final selectedTagsForType = entry.value
                               .where((tag) => widget
@@ -869,7 +857,6 @@ class FilterBarState extends State<FilterBar> {
                           }
                           return const SizedBox.shrink();
                         }),
-                        // Boutons inactifs ensuite
                         if (!_isRatingFilterActive.value)
                           _buildRatingFilterButton(),
                         if (widget.selectedWorkspacesNotifier.value.isEmpty)
@@ -882,9 +869,8 @@ class FilterBarState extends State<FilterBar> {
                               return const SizedBox.shrink();
                             },
                           ),
-                        if (!showFavorites)
+                        if (!widget.filterFavoritesNotifier.value)
                           _buildFavoritesFilterButton(),
-                        // Boutons de type sans tags sélectionnés
                         ..._tagsByType.entries.map((entry) {
                           final selectedTagsForType = entry.value
                               .where((tag) => widget

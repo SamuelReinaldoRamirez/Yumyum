@@ -213,16 +213,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   void _setupSubscriptions() {
     // Exemple de stream à écouter, à remplacer par le stream réel
-    final Stream<dynamic> exampleStream = Stream.periodic(Duration(seconds: 1), (count) => count);
+    final Stream<dynamic> exampleStream =
+        Stream.periodic(Duration(seconds: 1), (count) => count);
 
     // Ajouter la subscription
-    _streamManager.addSubscription('exampleStream', exampleStream.listen((data) {
-      // Traiter les données reçues
-      print('Données reçues : $data');
-    }, onError: (error) {
-      // Gérer l'erreur
-      print('Erreur dans le stream : $error');
-    }));
+    _streamManager.addSubscription(
+        'exampleStream',
+        exampleStream.listen((data) {
+          // Traiter les données reçues
+          //print('Données reçues : $data');
+        }, onError: (error) {
+          // Gérer l'erreur
+          print('Erreur dans le stream : $error');
+        }));
   }
 
   @override

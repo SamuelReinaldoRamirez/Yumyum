@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/plugin_api.dart';
-import 'package:yummap/service/mixpanel_service.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/helper/map_helper.dart';
-import 'package:yummap/helper/bottom_sheet_helper.dart';
 import 'package:latlong2/latlong.dart' as lat2;
-import 'package:yummap/widget/pulsing_dot.dart'; // Importer le widget PulsingDot
+import 'package:yummap/constant/keys_data.dart';
 
 class MapPage extends StatefulWidget {
   final List<Restaurant> restaurantList;
@@ -26,6 +24,12 @@ class MapPageState extends State<MapPage> with WidgetsBindingObserver {
   Marker? userMarker;
   List<Marker>? _markers;
   Timer? _updateTimer;
+  final ValueNotifier<Marker?> userMarkerNotifier =
+      ValueNotifier<Marker?>(null);
+  final ValueNotifier<Marker?> userMarkerNotifier2 =
+      ValueNotifier<Marker?>(null);
+  final ValueNotifier<Marker?> userMarkerNotifier3 =
+      ValueNotifier<Marker?>(null);
 
   @override
   void initState() {
@@ -39,7 +43,7 @@ class MapPageState extends State<MapPage> with WidgetsBindingObserver {
     MarkerManager.context = context;
     _createListMarkers(); // Appel initial pour créer les marqueurs
     _getCurrentLocation();
-    _startLocationUpdates(); // Démarrer les mises à jour de la position de l'utilisateur
+    //_startLocationUpdates(); // Démarrer les mises à jour de la position de l'utilisateur
     _updatePins();
     _updateTimer = Timer.periodic(Duration(minutes: 15), (timer) {
       _updatePins();
@@ -49,8 +53,8 @@ class MapPageState extends State<MapPage> with WidgetsBindingObserver {
   void _getCurrentLocation() async {
     MapHelper.getCurrentLocation((Position position) {
       // Initialiser la position de l'utilisateur si nécessaire
-      if (userMarker == null) {
-        userMarker = Marker(
+      if (userMarkerNotifier.value == null) {
+        userMarkerNotifier.value = Marker(
           width: 20.0,
           height: 20.0,
           point: lat2.LatLng(position.latitude, position.longitude),
@@ -63,49 +67,16 @@ class MapPageState extends State<MapPage> with WidgetsBindingObserver {
               padding: EdgeInsets.all(2),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Colors.blue,
+                  color: Colors.green,
                   shape: BoxShape.circle,
                 ),
               ),
             ),
           ),
         );
-        MarkerManager.addMarker(
-            userMarker!); // Ajouter le marqueur à la liste des marqueurs
+        MarkerManager.addMarker(userMarkerNotifier
+            .value!); // Ajouter le marqueur à la liste des marqueurs
       }
-    });
-  }
-
-  void _startLocationUpdates() {
-    // Mise à jour régulière de la position toutes les 3 secondes
-    _locationUpdateTimer =
-        Timer.periodic(const Duration(seconds: 3), (_) async {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      setState(() {
-        userMarker = Marker(
-          width: 20.0,
-          height: 20.0,
-          point: lat2.LatLng(position.latitude, position.longitude),
-          builder: (ctx) => const DecoratedBox(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(2),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-          ),
-        );
-        MarkerManager.addMarker(
-            userMarker!); // Ajouter le marqueur à la liste des marqueurs
-      });
     });
   }
 
@@ -116,17 +87,14 @@ class MapPageState extends State<MapPage> with WidgetsBindingObserver {
   }
 
   Future<void> _createListMarkers() async {
-    MarkerManager.markersList = MapHelper.createListMarkers(
-        context, widget.restaurantList, restaurantLocations, _showMarkerInfo);
-    MarkerManager.allmarkers = List<Marker>.from(MarkerManager.markersList);
-    setState(
-        () {}); // Mettre à jour l'état pour reconstruire la carte avec les nouveaux marqueurs
+    List<Marker> newMarkers =
+        await MapHelper.createMarkersFromRestaurants(widget.restaurantList);
+    MarkerManager.swapMarkersList(newMarkers);
+    MarkerManager.allmarkers = List<Marker>.from(newMarkers);
   }
 
   void _updatePins() {
-    setState(() {
-      _createListMarkers(); // Met à jour l'état des pins en recréant les marqueurs
-    });
+    _createListMarkers(); // Supprimez setState car nous utilisons maintenant ValueNotifier
   }
 
   @override
@@ -149,10 +117,21 @@ class MapPageState extends State<MapPage> with WidgetsBindingObserver {
             children: [
               TileLayer(
                 urlTemplate:
-                    "https://api.mapbox.com/styles/v1/yummaps/clw628gqc02ok01qzbth1aaql/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoieXVtbWFwcyIsImEiOiJjbHJ0aDEzeGQwMXVkMmxudWg5d2EybTlqIn0.hqUva2cQmp3rXHMbON8_Kw",
+                    "https://api.mapbox.com/styles/v1/yummaps/clw628gqc02ok01qzbth1aaql/tiles/256/{z}/{x}/{y}@2x?access_token=$mapBoxToken",
                 subdomains: const ['a', 'b', 'c'],
               ),
-              MarkerLayer(markers: MarkerManager.markersList),
+              ValueListenableBuilder<Marker?>(
+                valueListenable: userMarkerNotifier,
+                builder: (context, userMarker, child) {
+                  final List<Marker> allMarkers = [
+                    ...MarkerManager.markersList
+                  ];
+                  if (userMarker != null) {
+                    allMarkers.add(userMarker);
+                  }
+                  return MarkerLayer(markers: allMarkers);
+                },
+              ),
             ],
           ),
           Positioned(
@@ -178,22 +157,13 @@ class MapPageState extends State<MapPage> with WidgetsBindingObserver {
     );
   }
 
-  void _showMarkerInfo(BuildContext context, Restaurant restaurant) {
-    // Envoyer l'événement "OpenPin" à Mixpanel
-    MixpanelService.instance.track('OpenPin', properties: {
-      'resto_id': restaurant.id,
-      'resto_name': restaurant.name,
-    });
-
-    mapController.move(lat2.LatLng(restaurant.latitude, restaurant.longitude),
-        mapController.zoom);
-    BottomSheetHelper.showDraggableBottomSheet(context, restaurant);
-  }
-
   void _disposeMapResources() {
     mapController.dispose();
     _markers?.clear();
     _locationUpdateTimer?.cancel();
+    userMarkerNotifier.dispose();
+    userMarkerNotifier2.dispose();
+    userMarkerNotifier3.dispose();
   }
 
   @override

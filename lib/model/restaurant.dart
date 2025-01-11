@@ -220,6 +220,32 @@ class Restaurant {
   List<ReviewRestau> getReviews() {
     return reviews;
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'address': address,
+      'published': published,
+      'latitude': latitude,
+      'longitude': longitude,
+      'videoLinks': videoLinks,
+      'phoneNumber': phoneNumber,
+      'tagStr': tagStr,
+      'placeId': placeId,
+      'ratings': ratings,
+      'reviews': reviews.map((review) => review.toJson()).toList(),
+      'price': price,
+      'websiteUrl': websiteUrl,
+      'handicap': handicap,
+      'vege': vege,
+      'schedule': schedule,
+      'pictureProfile': pictureProfile,
+      'numberOfReviews': numberOfReviews,
+      'cuisine': cuisine,
+      'openingHours': openingHours.map((hours) => hours.toJson()).toList(),
+    };
+  }
 }
 
 class ReviewRestau implements ReviewInterface {
@@ -252,6 +278,14 @@ class ReviewRestau implements ReviewInterface {
       text: json['text'] ?? '',
       rating: double.tryParse(json['rating'].toString()) ?? 0.0,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'author': _author,
+      'text': text,
+      'rating': _rating,
+    };
   }
 }
 

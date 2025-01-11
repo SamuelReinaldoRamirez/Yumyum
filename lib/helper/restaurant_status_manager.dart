@@ -5,7 +5,8 @@ import 'opening_hours_helper.dart';
 
 class RestaurantStatusManager {
   static Timer? _updateTimer;
-  static final ValueNotifier<Map<String, bool>> restaurantOpenStatus = ValueNotifier({});
+  static final ValueNotifier<Map<String, bool>> restaurantOpenStatus =
+      ValueNotifier({});
 
   /// Démarre la mise à jour périodique des statuts
   static void startPeriodicUpdates(List<Restaurant> restaurants) {
@@ -29,7 +30,8 @@ class RestaurantStatusManager {
   static void _updateRestaurantsStatus(List<Restaurant> restaurants) {
     final Map<String, bool> newStatus = {};
     for (var restaurant in restaurants) {
-      newStatus[restaurant.id.toString()] = OpeningHoursHelper.isRestaurantOpen(restaurant);
+      newStatus[restaurant.id.toString()] =
+          OpeningHoursHelper.isRestaurantOpen(restaurant);
     }
     restaurantOpenStatus.value = newStatus;
   }

@@ -82,7 +82,7 @@ class _BookingStepTwoState extends State<BookingStepTwo> {
                         ),
                         _buildRecapItem(
                           'Heure',
-                          widget.bookingData.timeSlot ?? '',
+                          widget.bookingData.timeSlot,
                           Icons.access_time,
                         ),
                         _buildRecapItem(

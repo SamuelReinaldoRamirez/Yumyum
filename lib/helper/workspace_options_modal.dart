@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
 import 'package:yummap/widget/filter_bar.dart';
@@ -50,8 +51,9 @@ class _WorkspaceOptionsModalState extends State<WorkspaceOptionsModal> {
   }
 
   void _handleWorkspaceSelection() async {
-    List<Restaurant> restaurants = await widget.parentState.generalFilter();
-    if (restaurants.isEmpty) {
+    await widget.parentState.generalFilter();
+
+    if (MarkerManager.markersList.isEmpty) {
       ScaffoldMessenger.of(MarkerManager.context).showSnackBar(
         const SnackBar(
           content: Text(

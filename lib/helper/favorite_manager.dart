@@ -1,41 +1,33 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../model/favorite_restaurant.dart';
+import '../model/restaurant.dart';
 
 class FavoriteManager {
   static const String _favoritesKey = 'favorites';
+  static List<Restaurant> favoriteRestaurants = [];
 
-  // Sauvegarder un restaurant favori
-  static Future<void> saveFavorite(FavoriteRestaurant restaurant) async {
+  // Toggle le restaurant en favori
+  static Future<bool> toggleFavorite(Restaurant restaurant) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> favorites = await getFavoritesIds();
-    
-    if (!favorites.contains(restaurant.id)) {
-      favorites.add(restaurant.id);
+
+    String restaurantId = restaurant.id.toString();
+
+    if (favorites.contains(restaurantId)) {
+      // Retirer du favoris
+      favorites.remove(restaurantId);
       await prefs.setStringList(_favoritesKey, favorites);
-      
-      // Sauvegarder les détails du restaurant
-      await prefs.setString(
-        'restaurant_${restaurant.id}',
-        jsonEncode(restaurant.toJson())
-      );
+      await prefs.remove('restaurant_${restaurantId}'); // Retirer les détails du restaurant
+      favoriteRestaurants.removeWhere((element) => element.id == restaurant.id);
+      return false; // Restaurant n'est plus favori
+    } else {
+      // Ajouter aux favoris
+      favorites.add(restaurantId);
+      await prefs.setStringList(_favoritesKey, favorites);
+      await prefs.setString('restaurant_${restaurantId}', jsonEncode(restaurant.toJson()));
+      favoriteRestaurants.add(restaurant);
+      return true; // Restaurant est maintenant favori
     }
-  }
-
-  // Retirer un restaurant des favoris
-  static Future<void> removeFavorite(String restaurantId) async {
-    final prefs = await SharedPreferences.getInstance();
-    List<String> favorites = await getFavoritesIds();
-    
-    favorites.remove(restaurantId);
-    await prefs.setStringList(_favoritesKey, favorites);
-    await prefs.remove('restaurant_${restaurantId}');
-  }
-
-  // Vérifier si un restaurant est favori
-  static Future<bool> isFavorite(String restaurantId) async {
-    List<String> favorites = await getFavoritesIds();
-    return favorites.contains(restaurantId);
   }
 
   // Obtenir la liste des IDs des restaurants favoris
@@ -44,21 +36,41 @@ class FavoriteManager {
     return prefs.getStringList(_favoritesKey) ?? [];
   }
 
-  // Obtenir tous les restaurants favoris
-  static Future<List<FavoriteRestaurant>> getAllFavorites() async {
+  // Vérifier si un restaurant est favori
+  static Future<bool> isFavorite(Restaurant restaurant) async {
+    List<String> favorites = await getFavoritesIds();
+    return favorites.contains(restaurant.id
+        .toString()); // Vérifier si l'ID est dans la liste des favoris
+  }
+
+  // Charger les restaurants favoris
+  static Future<void> loadFavoriteRestaurants() async {
     final prefs = await SharedPreferences.getInstance();
-    List<String> favoriteIds = await getFavoritesIds();
-    List<FavoriteRestaurant> favorites = [];
+    List<String>? favoriteIds = await getFavoritesIds();
+    favoriteRestaurants = [];
 
     for (String id in favoriteIds) {
       String? restaurantJson = prefs.getString('restaurant_${id}');
       if (restaurantJson != null) {
-        favorites.add(
-          FavoriteRestaurant.fromJson(jsonDecode(restaurantJson))
-        );
+        favoriteRestaurants
+            .add(Restaurant.fromJson(jsonDecode(restaurantJson)));
+      }
+    }
+  }
+
+  // Obtenir la liste des restaurants favoris depuis la mémoire
+  static Future<List<Restaurant>> getFavoriteRestaurants() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> favoriteIds = await getFavoritesIds();
+    List<Restaurant> favoriteRestaurants = [];
+
+    for (String id in favoriteIds) {
+      String? restaurantJson = prefs.getString('restaurant_${id}');
+      if (restaurantJson != null) {
+        favoriteRestaurants.add(Restaurant.fromJson(jsonDecode(restaurantJson)));
       }
     }
 
-    return favorites;
+    return favoriteRestaurants;
   }
 }

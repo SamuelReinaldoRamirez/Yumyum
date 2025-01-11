@@ -3,34 +3,36 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:yummap/constant/theme.dart';
 import 'package:yummap/model/restaurant.dart';
-import 'package:yummap/helper/restaurant_status_manager.dart';
-import 'package:yummap/helper/opening_hours_helper.dart';
 
 class RestaurantPinGenerator {
   static Marker getPinMarker(
       String cuisine,
       LatLng position,
       Function(BuildContext, Restaurant) showMarkerInfo,
-      Restaurant restaurant) {
+      Restaurant restaurant,
+      bool isOpen) {
     return Marker(
       point: position,
-      builder: (ctx) => ValueListenableBuilder<Map<String, bool>>(
-        valueListenable: RestaurantStatusManager.restaurantOpenStatus,
-        builder: (context, statusMap, child) {
-          final bool isOpen = OpeningHoursHelper.isRestaurantOpen(restaurant);
-          // Définir les couleurs en fonction de l'état d'ouverture
-          final Color pinBackgroundColor = isOpen ? Colors.white : Colors.grey[300]!;
-          final Color circleColor = isOpen ? AppColors.secondaryColor : Colors.grey[600]!;
-          return GestureDetector(
-            onTap: () => showMarkerInfo(ctx, restaurant),
-            child: _buildPinIcon(cuisine, isOpen, pinBackgroundColor, circleColor),
-          );
-        },
-      ),
+      builder: (ctx) {
+        final Color pinBackgroundColor =
+            isOpen ? Colors.white : Colors.grey[300]!;
+        final Color circleColor =
+            isOpen ? AppColors.secondaryColor : Colors.grey[600]!;
+        return GestureDetector(
+          onTap: () => showMarkerInfo(ctx, restaurant),
+          child: buildPinIcon(cuisine, isOpen, pinBackgroundColor, circleColor),
+        );
+      },
     );
   }
 
-  static Widget _buildPinIcon(String cuisine, bool isOpen, Color pinBackgroundColor, Color circleColor) {
+  static Widget buildPinIcon(String cuisine, bool isOpen,
+      Color pinBackgroundColor, Color circleColor) {
+    // Si le restaurant est fermé, assombrir la couleur de fond du pin
+    if (!isOpen) {
+      circleColor = Colors.blueGrey; // Ajustez l'opacité selon vos besoins
+    }
+
     Widget icon;
     switch (cuisine) {
       case 'Cuisine française':

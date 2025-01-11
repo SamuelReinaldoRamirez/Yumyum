@@ -4,16 +4,23 @@ import 'map_page.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/page/search_bar.dart' as CustomSearchBar;
 import 'package:yummap/widget/filter_bar.dart';
-import 'package:yummap/helper/context_helper.dart';
 
 class ExplorePage extends StatelessWidget {
   final List<Restaurant> restaurantList;
-  final ValueNotifier<List<int>> selectedTagIdsNotifier =
-      ValueNotifier<List<int>>([]);
-  final ValueNotifier<List<int>> selectedWorkspacesNotifier =
-      ValueNotifier<List<int>>([]);
+  final ValueNotifier<List<int>> selectedTagIdsNotifier;
+  final ValueNotifier<List<int>> selectedWorkspacesNotifier;
+  final ValueNotifier<bool> filterFavoritesNotifier;
+  final ValueNotifier<bool> ratingFilterNotifier;
+  final ValueNotifier<bool> filterIsOn;
 
-  ExplorePage({super.key, required this.restaurantList});
+  ExplorePage(
+      {super.key,
+      required this.restaurantList,
+      required this.selectedTagIdsNotifier,
+      required this.selectedWorkspacesNotifier,
+      required this.ratingFilterNotifier,
+      required this.filterFavoritesNotifier,
+      required this.filterIsOn});
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +48,8 @@ class ExplorePage extends StatelessWidget {
                       restaurantList: restaurantList,
                       selectedTagIdsNotifier: selectedTagIdsNotifier,
                       selectedWorkspacesNotifier: selectedWorkspacesNotifier,
+                      filterFavoritesNotifier: filterFavoritesNotifier,
+                      ratingFilterNotifier: ratingFilterNotifier,
                     ),
                   ),
                   // Barre de filtre avec hauteur fixe de 50px
@@ -49,6 +58,13 @@ class ExplorePage extends StatelessWidget {
                     child: FilterBar(
                       selectedTagIdsNotifier: selectedTagIdsNotifier,
                       selectedWorkspacesNotifier: selectedWorkspacesNotifier,
+                      ratingFilterNotifier: ratingFilterNotifier,
+                      filterFavoritesNotifier: filterFavoritesNotifier,
+                      filterIsOn: filterIsOn,
+                      onFilterChanged: (RangeValues priceRange, int rating,
+                          List<String> categories) {
+                        // Implémentez la logique pour gérer les changements de filtres
+                      },
                     ),
                   ),
                   // Carte avec hauteur calculée

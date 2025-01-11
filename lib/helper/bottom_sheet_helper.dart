@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:yummap/service/mixpanel_service.dart';
 import 'package:yummap/page/restau_details.dart';
 import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/widget/video_carousel.dart';
 import 'package:yummap/widgets/neu_widgets.dart';
 import '../constant/theme.dart';
+import 'package:yummap/helper/favorite_manager.dart';
 
 class BottomSheetHelper {
   static void showDraggableBottomSheet(
       BuildContext context, Restaurant restaurant) {
+    final favoriteState = ValueNotifier<bool>(false);
+
+    // Initialiser l'état
+    FavoriteManager.isFavorite(restaurant).then((value) {
+      favoriteState.value = value;
+    });
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -106,19 +113,30 @@ class BottomSheetHelper {
                               ],
                             ),
                           ),
-                          FloatingActionButton(
-                            onPressed: () {
-                              _navigateToRestaurant(restaurant);
+                          ValueListenableBuilder<bool>(
+                            valueListenable: favoriteState,
+                            builder: (context, isFavorite, child) {
+                              return FloatingActionButton(
+                                onPressed: () async {
+                                  // Toggle le restaurant en favori
+                                  bool newFavoriteState =
+                                      await FavoriteManager.toggleFavorite(
+                                          restaurant);
+                                  favoriteState.value = newFavoriteState;
+                                },
+                                backgroundColor: AppColors.secondaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30), // Rendre le bouton rond
+                                ),
+                                child: Icon(
+                                  isFavorite
+                                      ? Icons.bookmark
+                                      : Icons.bookmark_border,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                              );
                             },
-                            backgroundColor: AppColors.secondaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: const Icon(
-                              Icons.map_outlined,
-                              color: Colors.white,
-                              size: 30,
-                            ),
                           ),
                         ],
                       ),
@@ -151,30 +169,6 @@ class BottomSheetHelper {
     ).whenComplete(() {
       FocusScope.of(context).requestFocus(FocusNode());
     });
-  }
-
-  static void _navigateToRestaurant(Restaurant restaurant) async {
-    MixpanelService.instance.track('MoveToResto', properties: {
-      'resto_id': restaurant.id,
-      'resto_name': restaurant.name,
-    });
-
-    final String url =
-        'https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}';
-    final Uri uri = Uri.parse(url);
-
-    if (await canLaunchUrl(uri)) {
-      await launch(uri.toString(), forceSafariVC: false);
-    } else {
-      final String fallbackUrl =
-          'https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}';
-      final Uri fallbackUri = Uri.parse(fallbackUrl);
-      if (await canLaunchUrl(fallbackUri)) {
-        await launchUrl(fallbackUri);
-      } else {
-        // Handle error if URL cannot be launched
-      }
-    }
   }
 
   static void _navigateToTags(BuildContext context, Restaurant restaurant) {

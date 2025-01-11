@@ -1,5 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api, avoid_print
 
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:yummap/helper/map_helper.dart';
 import 'package:yummap/helper/opening_hours_helper.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
 import 'package:yummap/model/review.dart';
@@ -18,7 +20,6 @@ import 'package:yummap/widget/booking/booking_step_two.dart';
 import 'package:yummap/widget/pulsing_dot.dart';
 import 'package:yummap/widgets/neu_widgets.dart';
 import '../helper/favorite_manager.dart';
-import '../model/favorite_restaurant.dart';
 import '../model/restaurant.dart';
 import '../widget/reviews_details.dart';
 import '../widget/horaires_restaurant.dart';
@@ -146,32 +147,9 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
 
   Future<void> _checkIfFavorite() async {
     bool favorite = await FavoriteManager.isFavorite(
-        widget.restaurant.id.toString()); // Correction de type
+        widget.restaurant); // Correction de type
     setState(() {
       isFavorite = favorite;
-    });
-  }
-
-  Future<void> _toggleFavorite() async {
-    if (isFavorite) {
-      await FavoriteManager.removeFavorite(
-          widget.restaurant.id.toString()); // Correction de type
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Retiré des favoris')));
-    } else {
-      final favorite = FavoriteRestaurant(
-        id: widget.restaurant.id.toString(), // Correction de type
-        name: widget.restaurant.name,
-        address: widget.restaurant.address,
-        latitude: widget.restaurant.latitude,
-        longitude: widget.restaurant.longitude,
-      );
-      await FavoriteManager.saveFavorite(favorite);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Ajouté aux favoris')));
-    }
-    setState(() {
-      isFavorite = !isFavorite;
     });
   }
 
@@ -555,6 +533,19 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
     );
   }
 
+  void _openMaps() async {
+    final latitude = widget.restaurant.latitude;
+    final longitude = widget.restaurant.longitude;
+    final url =
+        'https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude';
+
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -639,22 +630,6 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                     .visible, // Ne pas couper le texte
                                 textAlign: TextAlign.center,
                               ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 16,
-                            right: 16,
-                            child: IconButton(
-                              icon: Icon(
-                                isFavorite
-                                    ? Icons.bookmark
-                                    : Icons.bookmark_border_outlined,
-                                color: isFavorite
-                                    ? AppColors.primaryColor
-                                    : AppColors.white,
-                                size: 30, // Augmenter la taille de l'icône
-                              ),
-                              onPressed: _toggleFavorite,
                             ),
                           ),
                         ],
@@ -886,6 +861,26 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                                     },
                                   ),
                                   const Divider(),
+                                  ListTile(
+                                    leading: Transform.rotate(
+                                      angle: pi / 2, // Rotation de 90°
+                                      child: const Icon(
+                                        Icons.explore,
+                                        color: AppColors.secondaryColor,
+                                      ),
+                                    ),
+                                    title: Text(
+                                      'Itinéraire',
+                                      style:
+                                          AppTextStyles.titleDarkStyle.copyWith(
+                                        fontSize: 18,
+                                        color: AppColors.secondaryColor,
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      _openMaps();
+                                    },
+                                  ),
                                   ListTile(
                                     leading: const Icon(
                                       Icons.copy,
