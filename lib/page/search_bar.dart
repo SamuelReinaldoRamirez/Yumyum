@@ -64,11 +64,10 @@ class _SearchBarState extends State<SearchBar> {
   }
 
   void _updateFilterIsOn() {
-    bool isAnyFilterActive = 
-      widget.filterFavoritesNotifier.value ||
-      widget.selectedTagIdsNotifier.value.isNotEmpty ||
-      widget.selectedWorkspacesNotifier.value.isNotEmpty ||
-      widget.ratingFilterNotifier.value;
+    bool isAnyFilterActive = widget.filterFavoritesNotifier.value ||
+        widget.selectedTagIdsNotifier.value.isNotEmpty ||
+        widget.selectedWorkspacesNotifier.value.isNotEmpty ||
+        widget.ratingFilterNotifier.value;
 
     if (filterIsOn.value != isAnyFilterActive) {
       setState(() {
@@ -79,20 +78,22 @@ class _SearchBarState extends State<SearchBar> {
 
   void _clearFilters(BuildContext context) {
     print("Méthode _clearFilters appelée.");
-    
+
     // Réinitialiser les filtres
-    widget.filterFavoritesNotifier.value = false; // Désactiver le filtre des favoris
+    widget.filterFavoritesNotifier.value =
+        false; // Désactiver le filtre des favoris
     widget.selectedTagIdsNotifier.value = [];
     widget.selectedWorkspacesNotifier.value = [];
-    
+
     // Désactiver le filtre de notation
-    widget.ratingFilterNotifier.value = false; // Assurez-vous que cela est bien ici
-    
+    widget.ratingFilterNotifier.value =
+        false; // Assurez-vous que cela est bien ici
+
     _searchController.clear();
-    
+
     // Réinitialiser les marqueurs
     MarkerManager.resetMarkers();
-    
+
     setState(() {
       filterIsOn.value = false; // Désactiver le filtre global
     });
@@ -241,7 +242,14 @@ class _SearchBarState extends State<SearchBar> {
     } else {
       if (restaurantsToDisplay.isNotEmpty) {
         if (restaurantsToDisplay.length > 1) {
-          MarkerManager.createFull(MarkerManager.context, restaurantsToDisplay);
+          filterIsOn.value = true;
+          setState(() {
+            filterIsOn.value = true; // Désactiver le filtre global
+          });
+          List<Marker> newMarkers =
+              await MapHelper.createMarkersFromRestaurants(
+                  restaurantsToDisplay);
+          MarkerManager.swapMarkersList(newMarkers);
         } else {
           final restaurant = restaurantsToDisplay[0];
           final latitude = restaurant.latitude;
