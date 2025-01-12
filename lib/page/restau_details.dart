@@ -8,7 +8,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as lat2;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:yummap/helper/map_helper.dart';
 import 'package:yummap/helper/opening_hours_helper.dart';
 import 'package:yummap/service/call_endpoint_service.dart';
 import 'package:yummap/model/review.dart';
