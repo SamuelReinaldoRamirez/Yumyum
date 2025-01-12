@@ -5,17 +5,23 @@ import 'package:yummap/widget/chewie_video_player.dart';
 import 'package:yummap/widget/custom_video_controls.dart';
 
 class FullScreenVideoFeed extends StatefulWidget {
-  final List<ChewieController> controllers;
+  final List<String> videos;
+  final List<String> thumbnailUrls;
   final int initialIndex;
+  final Function(int) onVideoChange;
+  final VoidCallback onExit;
 
   const FullScreenVideoFeed({
-    super.key,
-    required this.controllers,
+    Key? key,
+    required this.videos,
+    required this.thumbnailUrls,
     required this.initialIndex,
-  });
+    required this.onVideoChange,
+    required this.onExit,
+  }) : super(key: key);
 
   @override
-  State<FullScreenVideoFeed> createState() => _FullScreenVideoFeedState();
+  _FullScreenVideoFeedState createState() => _FullScreenVideoFeedState();
 }
 
 class _FullScreenVideoFeedState extends State<FullScreenVideoFeed> {
@@ -41,14 +47,13 @@ class _FullScreenVideoFeedState extends State<FullScreenVideoFeed> {
   void initState() {
     super.initState();
     _activeIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: widget.initialIndex);
+    _pageController = PageController(initialPage: _activeIndex);
     _initializeActiveVideo();
-    _loadThumbnails();
   }
 
   void _loadThumbnails() {
-    for (int i = 0; i < widget.controllers.length; i++) {
-      final thumbnailUrl = getThumbnailUrl(widget.controllers[i].videoPlayerController.dataSource);
+    for (int i = 0; i < widget.videos.length; i++) {
+      final thumbnailUrl = getThumbnailUrl(widget.videos[i]);
       _thumbnailCache[i] = thumbnailUrl; // Stocker la miniature dans le cache
       _thumbnailAccessTime[i] = DateTime.now(); // Enregistrer le timestamp
     }
@@ -83,8 +88,10 @@ class _FullScreenVideoFeedState extends State<FullScreenVideoFeed> {
     });
 
     try {
-      _videoPlayerController =
-          VideoPlayerController.network(widget.controllers[_activeIndex].videoPlayerController.dataSource);
+      if (_videoPlayerController == null) {
+        _videoPlayerController =
+            VideoPlayerController.network(widget.videos[_activeIndex]);
+      }
       await _videoPlayerController?.initialize();
 
       // Créer le ChewieController avec le placeholder
@@ -133,7 +140,7 @@ class _FullScreenVideoFeedState extends State<FullScreenVideoFeed> {
 
     try {
       final videoController =
-          VideoPlayerController.network(widget.controllers[index].videoPlayerController.dataSource);
+          VideoPlayerController.network(widget.videos[index]);
       await videoController.initialize();
 
       if (!mounted) return;
@@ -221,6 +228,25 @@ class _FullScreenVideoFeedState extends State<FullScreenVideoFeed> {
     }
   }
 
+  Widget _buildVideoPlayer(int index) {
+    return Stack(
+      children: [
+        // Vidéo par dessus quand elle est prête
+        if (_chewieControllers[index] != null)
+          Center(
+            child: Chewie(controller: _chewieControllers[index]!),
+          ),
+        // Loader si la vidéo n'est pas prête
+        if (_chewieControllers[index] == null)
+          ChewieVideoPlayer(
+            videoLink: widget.videos[index],
+            thumbnailUrl: _thumbnailCache[index] ?? widget.videos[index].replaceFirst(".mp4", ".jpg"),
+            onFullScreenEntered: (_) {}, // Empty callback since we're already in full screen
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
@@ -232,53 +258,20 @@ class _FullScreenVideoFeedState extends State<FullScreenVideoFeed> {
       );
     }
 
-    return WillPopScope(
-      onWillPop: () async {
-        await _pauseAllVideos();
-        return true;
-      },
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: Stack(
-          children: [
-            PageView.builder(
-              scrollDirection: Axis.vertical,
-              controller: _pageController,
-              itemCount: widget.controllers.length,
-              onPageChanged: _handlePageChange,
-              itemBuilder: (context, index) {
-                return Stack(
-                  children: [
-                    // Vidéo par dessus quand elle est prête
-                    if (_chewieControllers[index] != null)
-                      Center(
-                        child: Chewie(controller: _chewieControllers[index]!),
-                      ),
-                    // Loader si la vidéo n'est pas prête
-                    if (_chewieControllers[index] == null)
-                      ChewieVideoPlayer(
-                        controller: widget.controllers[index],
-                        isFullScreen: true,
-                        onTap: () {}, // Pas besoin d'action sur le tap en mode plein écran
-                      ),
-                  ],
-                );
-              },
-            ),
-            const Positioned(
-              top: 40,
-              left: 20,
-              child: Text(
-                'FEED',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: PageView.builder(
+        scrollDirection: Axis.vertical,
+        controller: _pageController,
+        itemCount: widget.videos.length,
+        onPageChanged: (index) {
+          // Gérer le changement de vidéo
+          widget.onVideoChange(index);
+          _handlePageChange(index);
+        },
+        itemBuilder: (context, index) {
+          return _buildVideoPlayer(index);
+        },
       ),
     );
   }

@@ -145,7 +145,7 @@ class BottomSheetHelper {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        VideoCarousel(videoLinks: restaurant.videoLinks),
+                        VideoCarousel(videos: restaurant.videoLinks),
                         const SizedBox(height: 30),
                         Row(
                           mainAxisSize: MainAxisSize.min,
