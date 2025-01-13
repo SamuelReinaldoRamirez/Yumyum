@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
+import 'package:yummap/managers/video_player_manager.dart';
 import 'package:yummap/service/mixpanel_service.dart';
 import 'package:yummap/page/restau_details.dart';
 import 'package:yummap/model/restaurant.dart';
@@ -9,8 +9,6 @@ import '../constant/theme.dart';
 import 'package:yummap/helper/favorite_manager.dart';
 
 class BottomSheetHelper {
-  static List<VideoPlayerController> _chewieControllers = [];
-
   static Future<void> showDraggableBottomSheet(
       BuildContext context, Restaurant restaurant) async {
     final favoriteState = ValueNotifier<bool>(false);
@@ -28,7 +26,6 @@ class BottomSheetHelper {
 
         return WillPopScope(
           onWillPop: () async {
-            _chewieControllers.forEach((controller) => controller?.dispose());
             return true;
           },
           child: DraggableScrollableSheet(
@@ -72,7 +69,8 @@ class BottomSheetHelper {
                                   Text(
                                     restaurant.name,
                                     textAlign: TextAlign.center,
-                                    style: AppTextStyles.titleDarkStyle.copyWith(
+                                    style:
+                                        AppTextStyles.titleDarkStyle.copyWith(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -145,7 +143,10 @@ class BottomSheetHelper {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        VideoCarousel(videos: restaurant.videoLinks),
+                        VideoCarousel(
+                            videos: restaurant.videoLinks
+                                .map((url) => url)
+                                .toList()),
                         const SizedBox(height: 30),
                         Row(
                           mainAxisSize: MainAxisSize.min,
@@ -172,7 +173,9 @@ class BottomSheetHelper {
         );
       },
     ).whenComplete(() {
-      FocusScope.of(context).requestFocus(FocusNode());
+      VideoPlayerManager().pauseAll(); // Mettre en pause toutes les vidéos
+      VideoPlayerManager()
+          .disposeAll(); // Disposer de tous les contrôleurs vidéo
     });
   }
 

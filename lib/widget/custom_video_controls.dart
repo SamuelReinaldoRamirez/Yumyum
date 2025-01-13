@@ -1,136 +1,106 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 import 'package:yummap/constant/theme.dart';
 
 class CustomVideoControls extends StatelessWidget {
-  final VideoPlayerController videoPlayerController;
-  final bool showPlayPause;
-  final bool showFullScreenButton;
-  final VoidCallback? onToggleFullScreen;
+  final VideoPlayerController controller;
+  final ChewieController chewieController;
+  final VoidCallback? onExitFullScreen;
+  final VoidCallback onPlayPause;
 
   const CustomVideoControls({
     Key? key,
-    required this.videoPlayerController,
-    this.showPlayPause = true,
-    this.showFullScreenButton = true,
-    this.onToggleFullScreen,
+    required this.controller,
+    required this.chewieController,
+    required this.onPlayPause,
+    this.onExitFullScreen,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Gradient overlay pour meilleure lisibilité des contrôles
-        Positioned.fill(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withOpacity(0.0),
-                  Colors.black.withOpacity(0.5),
-                ],
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        controller.value.isPlaying ? controller.pause() : controller.play();
+      },
+      child: Stack(
+        children: [
+          // Positioned(
+          //   left: 16,
+          //   bottom: 16,
+          //   child: _NeubrutalButton(
+          //     onPressed: onExitFullScreen,
+          //     child: const Icon(Icons.close, color: AppColors.white),
+          //   ),
+          // ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: VideoProgressIndicator(
+              controller,
+              allowScrubbing: true,
+              colors: VideoProgressColors(
+                playedColor: AppColors.appSecondary,
+                bufferedColor: AppColors.appPrimary.withOpacity(0.5),
+                backgroundColor: AppColors.darkGrey.withOpacity(0.3),
               ),
+              padding: const EdgeInsets.all(8),
             ),
           ),
-        ),
-        // Contrôles
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 20,
-          child: Column(
-            children: [
-              // Barre de progression
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: ValueListenableBuilder(
-                  valueListenable: videoPlayerController,
-                  builder: (context, VideoPlayerValue value, child) {
-                    return Container(
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: AppColors.white.withOpacity(0.3),
-                        border: Border.all(
-                          color: AppColors.white,
-                          width: 2,
-                        ),
-                      ),
-                      child: FractionallySizedBox(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: value.position.inMilliseconds /
-                            value.duration.inMilliseconds,
-                        child: Container(
-                          color: AppColors.appPrimary,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              // Boutons de contrôle
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  if (showPlayPause)
-                    _buildControlButton(
-                      icon: videoPlayerController.value.isPlaying
-                          ? Icons.pause
-                          : Icons.play_arrow,
-                      onPressed: () {
-                        videoPlayerController.value.isPlaying
-                            ? videoPlayerController.pause()
-                            : videoPlayerController.play();
-                      },
+          Center(
+            child: ValueListenableBuilder<VideoPlayerValue>(
+              valueListenable: controller,
+              builder: (context, value, child) {
+                return AnimatedOpacity(
+                  opacity: value.isPlaying ? 0.0 : 1.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: _NeubrutalButton(
+                    onPressed: onPlayPause,
+                    child: Icon(
+                      value.isPlaying ? Icons.pause : Icons.play_arrow,
+                      color: AppColors.white,
+                      size: 48,
                     ),
-                  if (showFullScreenButton)
-                    _buildControlButton(
-                      icon: Icons.fullscreen,
-                      onPressed: onToggleFullScreen,
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildControlButton({
-    required IconData icon,
-    VoidCallback? onPressed,
-  }) {
-    return Container(
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border.all(
-          color: AppColors.appSecondary,
-          width: 3,
-        ),
-        borderRadius: BorderRadius.circular(4),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.appSecondary,
-            offset: const Offset(4, 4),
-            blurRadius: 0,
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Icon(
-              icon,
-              color: AppColors.appSecondary,
-              size: 24,
+    );
+  }
+}
+
+class _NeubrutalButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  final Widget child;
+
+  const _NeubrutalButton({
+    Key? key,
+    required this.onPressed,
+    required this.child,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.appSecondary.withOpacity(0.7),
+            border: Border.all(
+              color: AppColors.borderColor,
+              width: 2,
             ),
+            borderRadius: BorderRadius.circular(8),
           ),
+          child: child,
         ),
       ),
     );

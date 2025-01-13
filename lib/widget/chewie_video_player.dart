@@ -1,71 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
-import 'package:yummap/service/mixpanel_service.dart';
-import 'package:yummap/widget/custom_controls.dart';
-import 'package:yummap/widget/full_screen_video_feed.dart';
-import 'package:yummap/widget/custom_video_controls.dart'; // Importer CustomVideoControls ici
+import 'package:yummap/widget/custom_video_controls.dart';
+import '../managers/video_player_manager.dart';
 
 class ChewieVideoPlayer extends StatefulWidget {
-  final String videoLink;
-  final String thumbnailUrl;  // Ajout du paramètre
-  final Function(BuildContext) onFullScreenEntered;
+  final String videoUrl;
+  final String thumbnailUrl;
+  final bool autoPlay;
+  final bool looping;
 
   const ChewieVideoPlayer({
+    required this.videoUrl,
+    required this.thumbnailUrl,
+    this.autoPlay = false,
+    this.looping = true,
     Key? key,
-    required this.videoLink,
-    required this.thumbnailUrl,  // Ajout du paramètre
-    required this.onFullScreenEntered,
   }) : super(key: key);
 
-  void enterFullScreen(BuildContext context) {
-    onFullScreenEntered(context);
-  }
-
   @override
-  _ChewieVideoPlayerState createState() => _ChewieVideoPlayerState();
+  State<ChewieVideoPlayer> createState() => _ChewieVideoPlayerState();
 }
 
 class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
-  late final VideoPlayerController videoPlayerController;
-  late final ChewieController chewieController;
+  VideoPlayerController? _videoPlayerController;
+  ChewieController? _chewieController;
+  final _videoManager = VideoPlayerManager();
 
   @override
   void initState() {
     super.initState();
-    videoPlayerController =
-        VideoPlayerController.networkUrl(Uri.parse(widget.videoLink));
-    chewieController = ChewieController(
-      videoPlayerController: videoPlayerController,
-      autoPlay: false,
-      looping: false,
-      allowFullScreen: true,
-      allowMuting: false,
-      aspectRatio: 9 / 16,
-      customControls: CustomControls(
-        videoPlayerController: videoPlayerController,
-        showPlayPause: false,
-        showFullScreenButton: true,
-      ),
-    );
-    // Initialiser et mettre en pause immédiatement
-    videoPlayerController.initialize().then((_) {
-      videoPlayerController.pause();
-    });
+    _initializePlayer();
   }
 
-  void play() {
-    chewieController.play();
-  }
+  Future<void> _initializePlayer() async {
+    _videoPlayerController = await _videoManager.getController(widget.videoUrl);
 
-  void pause() {
-    chewieController.pause();
+    if (mounted) {
+      setState(() {
+        _chewieController = ChewieController(
+          videoPlayerController: _videoPlayerController!,
+          autoPlay: widget.autoPlay,
+          looping: widget.looping,
+          allowFullScreen: true,
+          allowMuting: false,
+          aspectRatio: 9 / 16,
+          showControls: false,
+        );
+      });
+    }
   }
 
   @override
   void dispose() {
-    videoPlayerController.dispose();
-    chewieController.dispose();
+    // Ne pas disposer du contrôleur ici
     super.dispose();
   }
 
@@ -73,43 +61,42 @@ class _ChewieVideoPlayerState extends State<ChewieVideoPlayer> {
   Widget build(BuildContext context) {
     return AspectRatio(
       aspectRatio: 9 / 16,
-      child: GestureDetector(
-        onTap: () {
-          widget.enterFullScreen(context);
-        },
-        child: Stack(
-          children: [
-            // Miniature visible en premier
-            Positioned.fill(
-              child: Image.network(
-                widget.thumbnailUrl, // Utiliser le paramètre thumbnailUrl
-                fit: BoxFit.cover,
-              ),
-            ),
-            // Lecteur vidéo caché mais préchargé
-            Visibility(
-              visible: false,
-              child: Chewie(controller: chewieController),
-            ),
-            // Icône de lecture
-            Positioned(
-              top: 10,
-              right: 10,
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.black12.withOpacity(0.3),
-                ),
-                padding: const EdgeInsets.all(8),
-                child: const Icon(
-                  Icons.play_arrow,
-                  color: Colors.white,
-                  size: 32,
+      child: Stack(
+        children: [
+          // Miniature visible en premier
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(widget.thumbnailUrl),
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+          // Lecteur vidéo
+          if (_chewieController != null) Chewie(controller: _chewieController!),
+          if (_chewieController == null)
+            Center(child: CircularProgressIndicator()),
+          // Contrôles personnalisés
+          if (_chewieController != null)
+            CustomVideoControls(
+              controller: _videoPlayerController!,
+              chewieController: _chewieController!,
+              onPlayPause: () {
+                setState(() {
+                  if (_chewieController!.isPlaying) {
+                    _chewieController!.pause();
+                  } else {
+                    _chewieController!.play();
+                  }
+                });
+              },
+              onExitFullScreen: () {
+                // Logique pour quitter le mode plein écran
+              },
+            ),
+        ],
       ),
     );
   }

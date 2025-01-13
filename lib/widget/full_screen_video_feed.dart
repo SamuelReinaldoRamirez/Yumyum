@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
-import 'package:chewie/chewie.dart';
+import 'package:yummap/constant/theme.dart';
+import 'package:yummap/managers/video_player_manager.dart';
 import 'package:yummap/widget/chewie_video_player.dart';
-import 'package:yummap/widget/custom_video_controls.dart';
 
 class FullScreenVideoFeed extends StatefulWidget {
   final List<String> videos;
-  final List<String> thumbnailUrls;
   final int initialIndex;
-  final Function(int) onVideoChange;
-  final VoidCallback onExit;
+  final VoidCallback? onExit;
 
   const FullScreenVideoFeed({
-    Key? key,
     required this.videos,
-    required this.thumbnailUrls,
     required this.initialIndex,
-    required this.onVideoChange,
-    required this.onExit,
+    this.onExit,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -26,268 +21,136 @@ class FullScreenVideoFeed extends StatefulWidget {
 
 class _FullScreenVideoFeedState extends State<FullScreenVideoFeed> {
   late PageController _pageController;
-  Map<int, ChewieController> _chewieControllers = {};
-  int _activeIndex = -1;
-  bool _isInitialized = false;
-  bool _isLoadingActiveVideo = false;
-  VideoPlayerController? _videoPlayerController;
-
-  static const int MAX_CACHE_SIZE =
-      15; // Par exemple, garder 15 vidéos en cache maximum
-  final Map<int, DateTime> _lastAccessTime =
-      {}; // Map pour stocker les timestamps de dernière utilisation
-
-  static const int MAX_THUMBNAIL_CACHE_SIZE =
-      15; // Taille maximale du cache des miniatures
-  final Map<int, String> _thumbnailCache = {}; // Cache pour les miniatures
-  final Map<int, DateTime> _thumbnailAccessTime =
-      {}; // Timestamps pour les miniatures
+  late int _currentIndex;
+  final _videoManager = VideoPlayerManager();
+  String? _currentVideoUrl;
+// État pour suivre si la vidéo a été lue
+// État pour suivre si la vidéo a été lue au moins une fois
 
   @override
   void initState() {
     super.initState();
-    _activeIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: _activeIndex);
-    _initializeActiveVideo();
-  }
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+    _currentVideoUrl = widget.videos[widget.initialIndex];
 
-  void _loadThumbnails() {
-    for (int i = 0; i < widget.videos.length; i++) {
-      final thumbnailUrl = getThumbnailUrl(widget.videos[i]);
-      _thumbnailCache[i] = thumbnailUrl; // Stocker la miniature dans le cache
-      _thumbnailAccessTime[i] = DateTime.now(); // Enregistrer le timestamp
-    }
-  }
-
-  String getThumbnailUrl(String videoLink) {
-    // Logique pour générer l'URL de la miniature à partir du lien vidéo
-    return videoLink.replaceFirst('.mp4', '_thumbnail.jpg'); // Exemple
-  }
-
-  void _cleanupOldThumbnails() {
-    if (_thumbnailCache.length <= MAX_THUMBNAIL_CACHE_SIZE) return;
-
-    // Trier les miniatures par timestamp d'accès
-    final sortedIndices = _thumbnailAccessTime.keys.toList()
-      ..sort((a, b) =>
-          _thumbnailAccessTime[a]!.compareTo(_thumbnailAccessTime[b]!));
-
-    // Supprimer les miniatures les plus anciennes
-    for (var i = 0; i < sortedIndices.length - MAX_THUMBNAIL_CACHE_SIZE; i++) {
-      final index = sortedIndices[i];
-      _thumbnailCache.remove(index);
-      _thumbnailAccessTime.remove(index);
-    }
-  }
-
-  Future<void> _initializeActiveVideo() async {
-    if (!mounted) return;
-
-    setState(() {
-      _isLoadingActiveVideo = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (mounted) {
+        _videoManager.play(_currentVideoUrl!);
+        setState(() {
+// Marquer comme lu
+// Marquer comme lu au moins une fois
+        });
+      }
     });
-
-    try {
-      if (_videoPlayerController == null) {
-        _videoPlayerController =
-            VideoPlayerController.network(widget.videos[_activeIndex]);
-      }
-      await _videoPlayerController?.initialize();
-
-      // Créer le ChewieController avec le placeholder
-      _chewieControllers[_activeIndex] = ChewieController(
-        videoPlayerController: _videoPlayerController!,
-        aspectRatio: 9 / 16,
-        autoPlay: true,
-        looping: true,
-        placeholder: Image.network(
-          _thumbnailCache[_activeIndex] ?? '',
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Container(
-            color: Colors.black,
-          ),
-        ),
-        customControls: CustomVideoControls(
-          videoPlayerController: _videoPlayerController!,
-          showPlayPause: true,
-          showFullScreenButton: false,
-          onToggleFullScreen: () => Navigator.pop(context),
-        ),
-      );
-
-      _lastAccessTime[_activeIndex] =
-          DateTime.now(); // Enregistrer le timestamp
-
-      setState(() {
-        _isInitialized = true;
-        _isLoadingActiveVideo = false;
-      });
-    } catch (e) {
-      print('Erreur lors de l\'initialisation de la vidéo active: $e');
-      setState(() {
-        _isLoadingActiveVideo = false;
-      });
-    }
-  }
-
-  Future<void> _initializeVideoAtIndex(int index) async {
-    if (!mounted) return;
-    if (_chewieControllers[index] != null) {
-      // Mettre à jour le timestamp d'accès
-      _lastAccessTime[index] = DateTime.now();
-      return;
-    }
-
-    try {
-      final videoController =
-          VideoPlayerController.network(widget.videos[index]);
-      await videoController.initialize();
-
-      if (!mounted) return;
-
-      final chewieController = ChewieController(
-        videoPlayerController: videoController,
-        aspectRatio: 9 / 16,
-        autoPlay: index == _activeIndex, // Autoplay uniquement pour la vidéo active
-        looping: true,
-        customControls: CustomVideoControls(
-          videoPlayerController: videoController,
-          showPlayPause: true,
-          showFullScreenButton: false,
-          onToggleFullScreen: () => Navigator.pop(context),
-        ),
-      );
-
-      _chewieControllers[index] = chewieController;
-      _lastAccessTime[index] = DateTime.now(); // Enregistrer le timestamp
-
-      // Si on dépasse la taille maximale du cache, nettoyer les plus anciennes vidéos
-      if (_chewieControllers.length > MAX_CACHE_SIZE) {
-        _cleanupOldestVideos();
-      }
-
-      setState(() {});
-    } catch (e) {
-      print('Erreur lors de l\'initialisation de la vidéo $index: $e');
-    }
-  }
-
-  void _cleanupOldestVideos() {
-    if (_chewieControllers.length <= MAX_CACHE_SIZE) return;
-
-    // Trier les vidéos par timestamp d'accès
-    final sortedIndices = _lastAccessTime.keys.toList()
-      ..sort((a, b) => _lastAccessTime[a]!.compareTo(_lastAccessTime[b]!));
-
-    // Garder les vidéos les plus récemment utilisées
-    for (var i = 0; i < sortedIndices.length - MAX_CACHE_SIZE; i++) {
-      final index = sortedIndices[i];
-      // Ne pas supprimer les vidéos proches de l'index actif
-      if ((index - _activeIndex).abs() <= 3) continue;
-
-      _cleanupControllerAtIndex(index);
-      _lastAccessTime.remove(index);
-    }
-  }
-
-  void _cleanupControllerAtIndex(int index) {
-    _chewieControllers[index]?.dispose();
-    _chewieControllers.remove(index);
-  }
-
-  Future<void> _handlePageChange(int newIndex) async {
-    if (!mounted) return;
-
-    // Mettre à jour le timestamp d'accès pour la nouvelle vidéo
-    _lastAccessTime[newIndex] = DateTime.now();
-
-    if (_chewieControllers[_activeIndex]
-            ?.videoPlayerController
-            .value
-            .isPlaying ??
-        false) {
-      await _chewieControllers[_activeIndex]?.pause();
-    }
-
-    setState(() {
-      _activeIndex = newIndex;
-    });
-
-    if (_chewieControllers[newIndex] == null) {
-      await _initializeVideoAtIndex(newIndex);
-    } else {
-      await _chewieControllers[newIndex]?.play();
-    }
-  }
-
-  Future<void> _pauseAllVideos() async {
-    for (final controller in _chewieControllers.values) {
-      if (controller.videoPlayerController.value.isPlaying) {
-        await controller.pause();
-      }
-    }
-  }
-
-  Widget _buildVideoPlayer(int index) {
-    return Stack(
-      children: [
-        // Vidéo par dessus quand elle est prête
-        if (_chewieControllers[index] != null)
-          Center(
-            child: Chewie(controller: _chewieControllers[index]!),
-          ),
-        // Loader si la vidéo n'est pas prête
-        if (_chewieControllers[index] == null)
-          ChewieVideoPlayer(
-            videoLink: widget.videos[index],
-            thumbnailUrl: _thumbnailCache[index] ?? widget.videos[index].replaceFirst(".mp4", ".jpg"),
-            onFullScreenEntered: (_) {}, // Empty callback since we're already in full screen
-          ),
-      ],
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_isInitialized) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
-      );
-    }
-
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: PageView.builder(
-        scrollDirection: Axis.vertical,
-        controller: _pageController,
-        itemCount: widget.videos.length,
-        onPageChanged: (index) {
-          // Gérer le changement de vidéo
-          widget.onVideoChange(index);
-          _handlePageChange(index);
+      backgroundColor: Colors.black, // Fond noir
+      body: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          if (details.velocity.pixelsPerSecond.dx > 0) {
+            // Si le glissement est vers la droite
+            VideoPlayerManager().pauseAll(); // Mettre en pause toutes les vidéos
+            Navigator.of(context).pop(); // Quitter le mode plein écran
+          }
         },
-        itemBuilder: (context, index) {
-          return _buildVideoPlayer(index);
-        },
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              itemCount: widget.videos.length,
+              onPageChanged: _onPageChanged,
+              itemBuilder: (context, index) {
+                final videoUrl = widget.videos[index];
+                return Container(
+                  color: Colors.black, // Fond noir
+                  child: Center(
+                    // Centrer le ChewieVideoPlayer
+                    child: ChewieVideoPlayer(
+                      videoUrl: videoUrl,
+                      thumbnailUrl: videoUrl.replaceFirst('.mp4', '.jpg'),
+                      autoPlay: index == widget.initialIndex,
+                      looping: true,
+                    ),
+                  ),
+                );
+              },
+            ),
+            Positioned(
+              left: 16,
+              bottom: 16,
+              child: _NeubrutalButton(
+                onPressed: () {
+                  _videoManager.pause(_currentVideoUrl!); // Pause la vidéo actuelle
+                  VideoPlayerManager().pauseAll(); // Mettre en pause toutes les vidéos
+                  Navigator.of(context).pop(); // Quitter le mode plein écran
+                },
+                child: const Icon(Icons.close, color: AppColors.white),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
+  void _onPageChanged(int index) {
+    if (_currentIndex != index) {
+      if (_currentVideoUrl != null) {
+        _videoManager.pause(_currentVideoUrl!); // Pause la vidéo actuelle
+      }
+      _currentVideoUrl =
+          widget.videos[index]; // Met à jour l'URL de la vidéo actuelle
+      _videoManager.play(_currentVideoUrl!); // Joue la nouvelle vidéo
+      setState(() => _currentIndex = index);
+    }
+  }
+
   @override
   void dispose() {
-    // Nettoyer tout lors de la fermeture de la bottom sheet
-    for (final controller in _chewieControllers.values) {
-      controller.dispose();
+    _videoManager.pause(_currentVideoUrl!); // Pause la vidéo actuelle
+    VideoPlayerManager().pauseAll(); // Mettre en pause toutes les vidéos
+    if (widget.onExit != null) {
+      widget.onExit!(); // Appeler la fonction onExit pour gérer l'état
     }
-    _chewieControllers.clear();
-    _lastAccessTime.clear();
-    _thumbnailCache.clear();
-    _thumbnailAccessTime.clear();
-    _pageController.dispose();
-    _videoPlayerController?.dispose();
     super.dispose();
+  }
+}
+
+class _NeubrutalButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  final Widget child;
+
+  const _NeubrutalButton({
+    Key? key,
+    required this.onPressed,
+    required this.child,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.appSecondary.withOpacity(0.7),
+            border: Border.all(
+              color: AppColors.borderColor,
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: child,
+        ),
+      ),
+    );
   }
 }
