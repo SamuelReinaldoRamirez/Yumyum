@@ -4,13 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:yummap/managers/video_player_manager.dart';
 import 'package:yummap/widget/full_screen_video_feed.dart'; // Import de FullScreenVideoFeed
+import 'package:yummap/helper/bottom_sheet_helper.dart'; // Assurez-vous que cette ligne est présente
 
 class VideoCarousel extends StatefulWidget {
   final List<String> videos;
+  final dynamic restaurant; // Ajouter le restaurant ici
 
   const VideoCarousel({
     Key? key,
     required this.videos,
+    required this.restaurant, // Ajouter le restaurant ici
   }) : super(key: key);
 
   @override
@@ -62,6 +65,10 @@ class _VideoCarouselState extends State<VideoCarousel> {
             FullScreenVideoFeed(
           videos: _videos,
           initialIndex: index,
+          onExit: _exitFullScreen,
+          onNavigateToDetails: () {
+              _navigateToDetails(); // Appeler la méthode de navigation
+          },
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(0.0, 1.0); // Début de l'animation
@@ -86,6 +93,10 @@ class _VideoCarouselState extends State<VideoCarousel> {
       _isFullScreen = false; // Masquer le plein écran
     });
     Navigator.of(context).pop();
+  }
+
+  void _navigateToDetails() {
+    BottomSheetHelper.navigateToRestaurantDetails(context, widget.restaurant);
   }
 
   Widget _buildCarouselItem(int index) {
@@ -147,6 +158,9 @@ class _VideoCarouselState extends State<VideoCarousel> {
         videos: _videos,
         initialIndex: _currentFullScreenIndex,
         onExit: _exitFullScreen, // Passer la fonction onExit
+        onNavigateToDetails: () {
+              _navigateToDetails(); // Appeler la méthode de navigation
+          },
       );
     }
 

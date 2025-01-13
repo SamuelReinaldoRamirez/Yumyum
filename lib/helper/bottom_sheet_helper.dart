@@ -26,6 +26,9 @@ class BottomSheetHelper {
 
         return WillPopScope(
           onWillPop: () async {
+            VideoPlayerManager().pauseAll(); // Mettre en pause toutes les vidéos
+            VideoPlayerManager()
+                .disposeAll(); // Disposer de tous les contrôleurs vidéo
             return true;
           },
           child: DraggableScrollableSheet(
@@ -146,14 +149,16 @@ class BottomSheetHelper {
                         VideoCarousel(
                             videos: restaurant.videoLinks
                                 .map((url) => url)
-                                .toList()),
+                                .toList(),
+                            restaurant: restaurant),
                         const SizedBox(height: 30),
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             CustomNeuButton(
                               onPressed: () {
-                                _navigateToTags(context, restaurant);
+                                VideoPlayerManager().pauseAll(); // Mettre en pause toutes les vidéos
+                                navigateToRestaurantDetails(context, restaurant);
                               },
                               text: "Voir plus",
                               icon: Icons.info_outlined,
@@ -172,22 +177,39 @@ class BottomSheetHelper {
           ),
         );
       },
-    ).whenComplete(() {
-      VideoPlayerManager().pauseAll(); // Mettre en pause toutes les vidéos
-      VideoPlayerManager()
-          .disposeAll(); // Disposer de tous les contrôleurs vidéo
-    });
+    );
   }
 
-  static void _navigateToTags(BuildContext context, Restaurant restaurant) {
+  static Future<void> closeFullScreenVideo(BuildContext context) async {
+    await VideoPlayerManager().pauseAllVideos();
+    // Fermer le bottom sheet
+    Navigator.pop(context);
+  }
+
+  static void navigateToRestaurantDetails(BuildContext context, Restaurant restaurant) {
+    // Navigation vers les détails après avoir pausé la vidéo
+    VideoPlayerManager().pauseAllVideos();
     MixpanelService.instance.track('DetailsResto', properties: {
       'resto_id': restaurant.id,
       'resto_name': restaurant.name,
     });
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => RestaurantDetailsWidget(restaurant: restaurant),
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => RestaurantDetailsWidget(restaurant: restaurant),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0); // Commencer à droite
+          const end = Offset.zero; // Finir à la position normale
+          const curve = Curves.easeInOut;
+
+          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          var offsetAnimation = animation.drive(tween);
+
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+          );
+        },
       ),
     );
   }

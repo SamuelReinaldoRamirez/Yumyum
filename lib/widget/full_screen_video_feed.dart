@@ -7,11 +7,13 @@ class FullScreenVideoFeed extends StatefulWidget {
   final List<String> videos;
   final int initialIndex;
   final VoidCallback? onExit;
+  final Function onNavigateToDetails; // Nouveau paramètre
 
   const FullScreenVideoFeed({
     required this.videos,
     required this.initialIndex,
     this.onExit,
+    required this.onNavigateToDetails, // Nouveau paramètre
     Key? key,
   }) : super(key: key);
 
@@ -51,13 +53,7 @@ class _FullScreenVideoFeedState extends State<FullScreenVideoFeed> {
     return Scaffold(
       backgroundColor: Colors.black, // Fond noir
       body: GestureDetector(
-        onHorizontalDragEnd: (details) {
-          if (details.velocity.pixelsPerSecond.dx > 0) {
-            // Si le glissement est vers la droite
-            VideoPlayerManager().pauseAll(); // Mettre en pause toutes les vidéos
-            Navigator.of(context).pop(); // Quitter le mode plein écran
-          }
-        },
+        onHorizontalDragEnd: _handleDragEnd, // Assurez-vous que cette ligne est présente
         child: Stack(
           children: [
             PageView.builder(
@@ -97,6 +93,16 @@ class _FullScreenVideoFeedState extends State<FullScreenVideoFeed> {
         ),
       ),
     );
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    if (details.primaryVelocity! > 0) {
+      // Swipe vers la droite -> fermer
+      widget.onExit?.call(); // Utiliser onExit pour fermer
+    } else if (details.primaryVelocity! < 0) {
+      // Swipe vers la gauche -> détails
+      widget.onNavigateToDetails.call(); // Ouvre les détails du restaurant
+    }
   }
 
   void _onPageChanged(int index) {

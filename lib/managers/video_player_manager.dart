@@ -41,6 +41,25 @@ class VideoPlayerManager {
     }
   }
 
+  Future<void> pauseAllVideos() async {
+    // Pause toutes les vidéos actives
+    for (var controller in _controllers.values) {
+      if (controller != null && controller.value.isInitialized) {
+        await controller.pause();
+      }
+    }
+  }
+
+  Future<void> disposeControllers() async {
+    // Nettoyer proprement les contrôleurs
+    for (var controller in _controllers.values) {
+      if (controller != null) {
+        await controller.dispose();
+      }
+    }
+    _controllers.clear();
+  }
+
   void disposeController(String videoUrl) {
     if (!_isDisposing && _controllers.containsKey(videoUrl)) {
       _controllers[videoUrl]?.pause(); // Pause instead of dispose
