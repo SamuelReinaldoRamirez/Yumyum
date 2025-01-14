@@ -99,6 +99,7 @@ class LocalDataService {
       currentWorkspaces.add(workspace);
       followedWorkspacesNotifier.value = currentWorkspaces;
       _saveFollowedWorkspaces(currentWorkspaces);
+      print('Workspace ajouté: ${workspace.name}'); // Debug
     }
   }
 
@@ -138,5 +139,22 @@ class LocalDataService {
   // Récupérer la liste des workspaces suivis
   List<Workspace> getFollowedWorkspaces() {
     return List.from(_followedWorkspacesNotifier.value);
+  }
+
+  Future<void> followWorkspace(Workspace workspace) async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    // Charger la liste actuelle des workspaces suivis
+    List<Workspace> currentWorkspaces = followedWorkspacesNotifier.value;
+    
+    // Vérifier si le workspace n'est pas déjà suivi
+    if (!currentWorkspaces.any((w) => w.id == workspace.id)) {
+      // Utiliser la méthode existante pour ajouter le workspace
+      addFollowedWorkspace(workspace);
+      
+      // Sauvegarder dans les préférences
+      final workspaceJsonList = currentWorkspaces.map((w) => w.toJson()).toList();
+      await prefs.setString('followed_workspaces', jsonEncode(workspaceJsonList));
+    }
   }
 }

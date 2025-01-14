@@ -54,5 +54,17 @@
     
     mixpanel.init("5070afa7d4765226a35ce4895068eeb1"); 
   </script>
+
+  <script>
+    window.onload = function() {
+      const currentPath = window.location.pathname;
+
+      // Rediriger vers SharePage si l'URL commence par /share/
+      if (currentPath.startsWith('/share/')) {
+        const shareId = currentPath.split('/share/')[1];
+        window.location.href = `/share.html?id=${shareId}`;
+      }
+    };
+  </script>
 </body>
 </html>

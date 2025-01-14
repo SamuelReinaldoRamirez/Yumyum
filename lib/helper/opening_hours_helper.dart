@@ -10,8 +10,8 @@ class OpeningHoursHelper {
     final currentTime = TimeOfDay.fromDateTime(now);
 
     // Log des données reçues
-    print('Données reçues pour ${restaurant.name}: ${restaurant.schedule}');
-    print('Heure actuelle: ${currentTime.hour}:${currentTime.minute}');
+    // print('Données reçues pour ${restaurant.name}: ${restaurant.schedule}');
+    // print('Heure actuelle: ${currentTime.hour}:${currentTime.minute}');
 
     // Vérification du schedule
     if (restaurant.schedule.isEmpty) {
@@ -26,7 +26,7 @@ class OpeningHoursHelper {
       return false;
     }
 
-    print('Horaires pour ${currentDay}: ${todayHours.join(", ")}');
+    //print('Horaires pour ${currentDay}: ${todayHours.join(", ")}');
 
     // Pour chaque créneau horaire de la journée
     for (String timeSlot in todayHours) {
@@ -53,13 +53,13 @@ class OpeningHoursHelper {
 
       // Vérifier si l'heure actuelle est dans la plage
       if (currentMinutes >= openMinutes && currentMinutes <= closeMinutes) {
-        print(
-            '✅ ${restaurant.name} est OUVERT dans ce créneau (${times[0]}-${times[1]}).');
+        // print(
+        //     '✅ ${restaurant.name} est OUVERT dans ce créneau (${times[0]}-${times[1]}).');
         return true;
       }
     }
 
-    print('❌ ${restaurant.name} est FERMÉ - Aucun créneau correspondant.');
+    //print('❌ ${restaurant.name} est FERMÉ - Aucun créneau correspondant.');
     return false;
   }
 

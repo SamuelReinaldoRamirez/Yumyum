@@ -5,9 +5,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yummap/helper/context_helper.dart';
 import 'package:yummap/page/home_page.dart';
+import 'package:yummap/page/share_page.dart';
 import 'package:yummap/page/splash_screen.dart';
 // Importer le ContextHelper
 import 'package:app_links/app_links.dart';
@@ -18,9 +20,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart'; // Fichier généré
 import 'package:flutter/foundation.dart';
+import 'dart:html' as html;
 import 'package:yummap/services/monitoring_service.dart';
 import 'package:yummap/services/cache_manager.dart';
 import 'package:yummap/services/stream_manager.dart';
+import 'package:yummap/page/deep_profile_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,8 +34,10 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Configuration de Crashlytics
-  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+  // Ne configurer Crashlytics que pour les plateformes mobiles
+  if (!kIsWeb) {
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+  }
 
   // Capture des erreurs Flutter
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -51,9 +57,14 @@ Future<void> main() async {
     } catch (e, stack) {
       FirebaseCrashlytics.instance.recordError(e, stack);
     }
+    setUrlStrategy(PathUrlStrategy()); // Utiliser des URL sans #
     runApp(
       ProviderScope(
-        child: MyApp(),
+        child: Consumer(
+          builder: (context, ref, _) {
+            return MyApp();
+          },
+        ),
       ),
     );
   }, (error, stack) {
@@ -86,19 +97,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return ProviderScope(
-      child: Builder(
-        builder: (context) {
-          ContextHelper.setContext(context);
-          return MaterialApp.router(
-            title: 'Yummap',
-            routerConfig: _router,
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
-            ),
-          );
-        },
-      ),
+    return Builder(
+      builder: (context) {
+        ContextHelper.setContext(context);
+        return MaterialApp.router(
+          title: 'Yummap',
+          routerConfig: _router,
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+        );
+      },
     );
   }
 
@@ -235,7 +244,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 }
 
 final _router = GoRouter(
-  initialLocation: '/', // Ajout de l'emplacement initial
+  initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',
@@ -246,10 +255,39 @@ final _router = GoRouter(
       builder: (context, state) => HomePage(),
     ),
     GoRoute(
+      path: '/share/:id',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        if (kIsWeb) {
+          // Redirection immédiate pour le web
+          html.window.location.href = '/share?id=$id';
+          return const SizedBox(); // Page temporaire pendant la redirection
+        }
+        return SharePage(id: id);
+      },
+    ),
+    GoRoute(
       path: '/map/:id',
       builder: (context, state) => MapScreen(
         id: state.pathParameters['id']!,
       ),
+    ),
+    GoRoute(
+      path: '/share',
+      builder: (context, state) {
+        final id = state.uri.queryParameters['id'];
+        if (id != null) {
+          return SharePage(id: id);
+        }
+        return const SizedBox(); // Page temporaire si aucun ID n'est fourni
+      },
+    ),
+    GoRoute(
+      path: '/deepProfile/:id',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return DeepProfilePage(id: id);
+      },
     ),
   ],
 );

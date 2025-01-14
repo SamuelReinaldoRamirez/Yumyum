@@ -20,6 +20,7 @@ class FilterBar extends StatefulWidget implements PreferredSizeWidget {
   final ValueNotifier<bool> filterFavoritesNotifier;
   final ValueNotifier<bool> filterIsOn;
   final Function(RangeValues, int, List<String>) onFilterChanged;
+  final String? preSelectedWorkspaceId;
 
   const FilterBar({
     super.key,
@@ -29,6 +30,7 @@ class FilterBar extends StatefulWidget implements PreferredSizeWidget {
     required this.filterFavoritesNotifier,
     required this.filterIsOn,
     required this.onFilterChanged,
+    this.preSelectedWorkspaceId,
   });
 
   @override
@@ -77,6 +79,7 @@ class FilterBarState extends State<FilterBar> {
   @override
   void initState() {
     super.initState();
+    print('Init FilterBarState');
     _isRatingFilterActive = widget.ratingFilterNotifier;
     widget.filterFavoritesNotifier.addListener(() {
       generalFilter();
@@ -85,6 +88,32 @@ class FilterBarState extends State<FilterBar> {
       generalFilter();
     });
     _loadInitialState();
+
+    print("Test JJ");
+    print("widget.preSelectedWorkspaceId: ${widget.preSelectedWorkspaceId}");
+    if (widget.preSelectedWorkspaceId != null) {
+      print("PreSelectedWorkspaceId reçu : ${widget.preSelectedWorkspaceId}");
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        print("Début de l'initialisation du filtre");
+
+        // 1. Sélectionner le workspace
+        final workspaceId = int.parse(widget.preSelectedWorkspaceId!);
+        print("WorkspaceId parsé : $workspaceId");
+
+        widget.selectedWorkspacesNotifier.value = [workspaceId];
+        print(
+            "Workspaces sélectionnés : ${widget.selectedWorkspacesNotifier.value}");
+
+        // 2. Appliquer le filtre pour récupérer les restaurants
+        print("Appel de generalFilter");
+        await generalFilter();
+
+        // 3. Mettre à jour l'état pour indiquer que le filtre est actif
+        widget.filterIsOn.value = true;
+        print("Filtre activé");
+      });
+    }
   }
 
   @override
@@ -176,14 +205,18 @@ class FilterBarState extends State<FilterBar> {
   }
 
   Future<void> generalFilter() async {
+    print("Début de generalFilter");
     setState(() {});
     List<Restaurant> filteredRestaurants;
 
     // Step 1: Filter by tags and workspaces
-    List<int> selectedTags = widget.selectedTagIdsNotifier.value;
-    List<int> selectedWorkspaces = widget.selectedWorkspacesNotifier.value;
+    final selectedTags = widget.selectedTagIdsNotifier.value;
+    final selectedWorkspaces = widget.selectedWorkspacesNotifier.value;
+    print("Tags sélectionnés : $selectedTags");
+    print("Workspaces sélectionnés : $selectedWorkspaces");
     filteredRestaurants = await CallEndpointService()
         .getRestaurantsByTagsAndWorkspaces(selectedTags, selectedWorkspaces);
+    print("Restaurants filtrés récupérés : ${filteredRestaurants.length}");
 
     // Step 2: Apply favorites filter if active
     if (widget.filterFavoritesNotifier.value) {
@@ -208,6 +241,12 @@ class FilterBarState extends State<FilterBar> {
     } else {
       MarkerManager.clearMarkers();
     }
+    widget.onFilterChanged(
+      selectedPriceRange,
+      selectedRating,
+      selectedCategories,
+    );
+    print("Filtre appliqué et carte mise à jour");
   }
 
   // Fonction pour filtrer les restaurants favoris
@@ -621,6 +660,175 @@ class FilterBarState extends State<FilterBar> {
                 ],
               ),
       ),
+    );
+  }
+
+  void _showWorkspaceSection() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(20),
+            ),
+            border: Border.all(
+              color: Colors.black,
+              width: 2.0,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                offset: Offset(6, 6),
+                blurRadius: 0,
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: 50,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2.5),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Comptes Suivis',
+                    style: AppTextStyles.titleDarkStyle,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ValueListenableBuilder<List<Workspace>>(
+                  valueListenable: _localDataService.followedWorkspacesNotifier,
+                  builder: (context, followedWorkspaces, child) {
+                    if (followedWorkspaces.isEmpty) {
+                      return Container(
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.all(16),
+                        child: const Text(
+                          'Aucun compte suivi',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      );
+                    }
+
+                    return StatefulBuilder(
+                      builder: (context, setModalState) {
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: followedWorkspaces.length,
+                          itemBuilder: (context, index) {
+                            final workspace = followedWorkspaces[index];
+                            final isSelected = widget
+                                .selectedWorkspacesNotifier.value
+                                .contains(workspace.id);
+
+                            return ListTile(
+                              contentPadding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              title: Text(workspace.name),
+                              trailing: Checkbox(
+                                value: isSelected,
+                                activeColor: AppColors.secondaryColor,
+                                onChanged: (bool? value) {
+                                  setModalState(() {
+                                    if (value ?? false) {
+                                      widget.selectedWorkspacesNotifier.value =
+                                          [
+                                        ...widget
+                                            .selectedWorkspacesNotifier.value,
+                                        workspace.id
+                                      ];
+                                    } else {
+                                      widget.selectedWorkspacesNotifier.value =
+                                          widget.selectedWorkspacesNotifier.value
+                                              .where((id) => id != workspace.id)
+                                              .toList();
+                                    }
+                                  });
+                                },
+                              ),
+                              onTap: () {
+                                setModalState(() {
+                                  if (widget.selectedWorkspacesNotifier.value
+                                      .contains(workspace.id)) {
+                                    widget.selectedWorkspacesNotifier.value =
+                                        widget.selectedWorkspacesNotifier.value
+                                            .where((id) => id != workspace.id)
+                                            .toList();
+                                  } else {
+                                    widget.selectedWorkspacesNotifier.value = [
+                                      ...widget
+                                          .selectedWorkspacesNotifier.value,
+                                      workspace.id
+                                    ];
+                                  }
+                                });
+                              },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.secondaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  minimumSize: Size(double.infinity, 0),
+                ),
+                onPressed: () async {
+                  _scrollToStart();
+                  setState(() {
+                    _isLoadingWorkspaces = true;
+                  });
+
+                  try {
+                    await generalFilter();
+                  } finally {
+                    if (mounted) {
+                      setState(() {
+                        _isLoadingWorkspaces = false;
+                      });
+                    }
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text(
+                  'Appliquer',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

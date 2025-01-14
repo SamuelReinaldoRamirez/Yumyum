@@ -10,7 +10,12 @@ import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/helper/map_helper.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final int? followedWorkspaceId;  
+
+  const HomePage({
+    super.key,
+    this.followedWorkspaceId,  
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -21,10 +26,12 @@ class _HomePageState extends State<HomePage> {
   final ValueNotifier<double> _loadingProgress = ValueNotifier<double>(0.0);
   bool _isLoading = false;
   late Future<Map<String, dynamic>> _preloadedData;
+  int? followedWorkspaceId; 
 
   @override
   void initState() {
     super.initState();
+    followedWorkspaceId = widget.followedWorkspaceId; 
     // Démarrer le préchargement immédiatement
     _preloadedData = _initializeApp();
   }
@@ -45,35 +52,37 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildMainContent(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SvgPicture.asset(
-            'assets/illustrations/Baker-pana.svg',
-            width: 300,
-          ),
-          const SizedBox(height: 32),
-          Text(
-            'Yummap',
-            style: AppTextStyles.titleBlackStyle,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Retrouvez en un instant les meilleurs endroits pour savourer vos moments gourmands avec Yummap.',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.paragraphDarkStyle,
-          ),
-          const SizedBox(height: 82),
-          CustomNeuButton(
-            text: 'Continuer',
-            icon: Icons.arrow_forward,
-            buttonColor: AppColors.appSecondary,
-            textColor: Colors.white,
-            onPressed: _handleContinuePressed,
-          ),
-        ],
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(
+              'assets/illustrations/Baker-pana.svg',
+              width: 300,
+            ),
+            const SizedBox(height: 32),
+            Text(
+              'Yummap',
+              style: AppTextStyles.titleBlackStyle,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Retrouvez en un instant les meilleurs endroits \npour savourer vos moments gourmands avec Yummap.',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.paragraphDarkStyle,
+            ),
+            const SizedBox(height: 82),
+            CustomNeuButton(
+              text: 'Continuer',
+              icon: Icons.arrow_forward,
+              buttonColor: AppColors.appSecondary,
+              textColor: Colors.white,
+              onPressed: _handleContinuePressed,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -83,7 +92,7 @@ class _HomePageState extends State<HomePage> {
       color: Colors.black54,
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             ValueListenableBuilder<double>(
               valueListenable: _loadingProgress,
@@ -92,12 +101,14 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     CircularProgressIndicator(
                       value: progress,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.appSecondary),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(AppColors.appSecondary),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       'Chargement ${(progress * 100).toInt()}%',
-                      style: AppTextStyles.paragraphDarkStyle.copyWith(color: Colors.white),
+                      style: AppTextStyles.paragraphDarkStyle
+                          .copyWith(color: Colors.white),
                     ),
                   ],
                 );
@@ -112,22 +123,19 @@ class _HomePageState extends State<HomePage> {
   Future<Map<String, dynamic>> _initializeApp() async {
     try {
       _loadingProgress.value = 0.1;
-      // 1. Charger les restaurants
       final restaurants = await _getRestaurants();
-      
+
       _loadingProgress.value = 0.4;
-      // 2. Créer les marqueurs pour la carte
       final preloadedData = await _preloadResources(restaurants);
-      
+
       _loadingProgress.value = 0.8;
-      // 3. Initialiser les notifiers pour la gestion des filtres
       final notifiers = _initializeNotifiers();
-      
+
       _loadingProgress.value = 1.0;
-      
+
       return {
-        ...preloadedData,  // Contient 'restaurants', 'markers', 'cuisines'
-        ...notifiers,      // Contient 'selectedTagIdsNotifier', 'selectedWorkspacesNotifier'
+        ...preloadedData,
+        ...notifiers,
       };
     } catch (e) {
       print('Erreur d\'initialisation: $e');
@@ -138,19 +146,27 @@ class _HomePageState extends State<HomePage> {
   Future<void> _handleContinuePressed() async {
     setState(() => _isLoading = true);
     try {
-      final data = await _preloadedData; // Utiliser les données préchargées
+      final data = await _preloadedData;
       if (!mounted) return;
+      
+      // Si nous avons un workspace à pré-sélectionner
+      final workspaceId = followedWorkspaceId;  
+      
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ExplorePage(
-            restaurantList: data['restaurants'],
-            selectedTagIdsNotifier: data['selectedTagIdsNotifier'],
-            selectedWorkspacesNotifier: data['selectedWorkspacesNotifier'],
-            ratingFilterNotifier: ValueNotifier<bool>(false),
-            filterFavoritesNotifier: ValueNotifier<bool>(false),
-            filterIsOn: ValueNotifier<bool>(false),
-          ),
+          builder: (context) {
+            print("Navigation vers ExplorePage avec workspaceId: $workspaceId");
+            return ExplorePage(
+              restaurantList: data['restaurants'],
+              selectedTagIdsNotifier: data['selectedTagIdsNotifier'],
+              selectedWorkspacesNotifier: data['selectedWorkspacesNotifier'],
+              ratingFilterNotifier: ValueNotifier<bool>(false),
+              filterFavoritesNotifier: ValueNotifier<bool>(false),
+              filterIsOn: ValueNotifier<bool>(false),
+              preSelectedWorkspaceId: workspaceId?.toString(),  
+            );
+          },
         ),
       );
     } catch (e) {
@@ -196,18 +212,16 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<Map<String, dynamic>> _preloadResources(List<Restaurant> restaurants) async {
+  Future<Map<String, dynamic>> _preloadResources(
+      List<Restaurant> restaurants) async {
     final markers = await MapHelper.createMarkersFromRestaurants(restaurants);
     MarkerManager.swapMarkersList(markers);
     MarkerManager.allmarkers = List<Marker>.from(markers);
     final cuisines = restaurants.map((r) => r.cuisine).toSet().toList();
-    // Supprimez ou commentez la ligne suivante si workspaces n'est pas nécessaire
-    // final workspaces = restaurants.expand((r) => r.workspaces).toSet().toList();
     return {
       'restaurants': restaurants,
       'markers': markers,
       'cuisines': cuisines,
-      // 'workspaces': workspaces, // Supprimez ou commentez cette ligne
     };
   }
 

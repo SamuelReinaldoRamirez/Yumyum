@@ -204,6 +204,27 @@ class CallEndpointService {
     }
   }
 
+  Future<List<Workspace>?> findWorkspacesByAlias(List<String> aliasList) async {
+    final url = Uri.parse('$rootUrl/workspace/byAlias');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'alias_list': aliasList}),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonResponse = json.decode(response.body);
+      return jsonResponse
+          .map((item) => Workspace.fromJson(item['_workspace']))
+          .toList();
+    } else {
+      // Gérer les erreurs ici
+      print(
+          'Erreur lors de la recherche des workspaces: ${response.statusCode}');
+    }
+    return null;
+  }
+
   Future<List<Restaurant>> getRestaurantsByTagsAndWorkspaces(
       List<int> tagsId, List<int> workspaceIds) async {
     if (baseUrl.isEmpty) {
@@ -417,5 +438,25 @@ class CallEndpointService {
       logger.e('Failed to remove workspace from followed: $e');
       throw Exception('Failed to remove workspace from followed: $e');
     }
+  }
+
+  Future<Workspace?> addWorkspaceByAlias(List<String> aliasList) async {
+    final url = Uri.parse('$rootUrl/workspace/byAlias');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'alias_list': aliasList}),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonResponse = json.decode(response.body);
+      if (jsonResponse.isNotEmpty) {
+        return Workspace.fromJson(jsonResponse[0]['_workspace']);
+      }
+    } else {
+      // Gérer les erreurs ici
+      print('Erreur lors de l\'ajout de l\'espace: ${response.statusCode}');
+    }
+    return null;
   }
 }
