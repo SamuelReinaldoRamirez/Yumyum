@@ -36,10 +36,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="yummap" />
-                <data
-                    android:host="map" />
+                <data android:scheme="yummap" />
             </intent-filter>
         </activity>
 

@@ -6,7 +6,7 @@ class VideoPlayerManager {
   VideoPlayerManager._internal();
 
   final Map<String, VideoPlayerController> _controllers = {};
-  bool _isDisposing = false;
+  final bool _isDisposing = false;
 
   Future<VideoPlayerController> getController(String videoUrl) async {
     if (!_controllers.containsKey(videoUrl)) {
@@ -44,7 +44,7 @@ class VideoPlayerManager {
   Future<void> pauseAllVideos() async {
     // Pause toutes les vidéos actives
     for (var controller in _controllers.values) {
-      if (controller != null && controller.value.isInitialized) {
+      if (controller.value.isInitialized) {
         await controller.pause();
       }
     }
@@ -53,9 +53,7 @@ class VideoPlayerManager {
   Future<void> disposeControllers() async {
     // Nettoyer proprement les contrôleurs
     for (var controller in _controllers.values) {
-      if (controller != null) {
-        await controller.dispose();
-      }
+      await controller.dispose();
     }
     _controllers.clear();
   }
@@ -70,14 +68,15 @@ class VideoPlayerManager {
     for (var controller in _controllers.values) {
       controller.dispose();
     }
-    _controllers.clear(); 
+    _controllers.clear();
   }
 
   void disposeAll() {
     for (var controller in _controllers.values) {
-      controller.dispose(); // Disposez tous les contrôleurs, qu'ils soient initialisés ou non
+      controller
+          .dispose(); // Disposez tous les contrôleurs, qu'ils soient initialisés ou non
     }
-    _controllers.clear(); 
+    _controllers.clear();
   }
 
   void dispose() {

@@ -5,59 +5,65 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yummap/firebase_options.dart';
 import 'package:yummap/helper/context_helper.dart';
 import 'package:yummap/page/home_page.dart';
 import 'package:yummap/page/share_page.dart';
 import 'package:yummap/page/splash_screen.dart';
-// Importer le ContextHelper
 import 'package:app_links/app_links.dart';
 import 'package:yummap/service/mixpanel_service.dart';
 import 'package:yummap/constant/keys_data.dart';
-// Importer StreamManager
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'firebase_options.dart'; // Fichier généré
 import 'package:flutter/foundation.dart';
-import 'dart:html' as html;
 import 'package:yummap/services/monitoring_service.dart';
 import 'package:yummap/services/cache_manager.dart';
-import 'package:yummap/services/stream_manager.dart';
 import 'package:yummap/page/deep_profile_page.dart';
+import 'package:yummap/platform/platform.dart';
+
+PlatformInterface getCurrentPlatform() {
+  if (!kIsWeb) {
+    return MobilePlatform();
+  } else {
+    return WebPlatform();
+  }
+}
+
+void _initializeWeb() {
+  if (kIsWeb) {
+    usePathUrlStrategy();
+  }
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialiser Firebase avec les options générées
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  _initializeWeb();
 
-  // Ne configurer Crashlytics que pour les plateformes mobiles
-  if (!kIsWeb) {
-    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+  } catch (e) {
+    print("Firebase initialization failed: $e");
   }
-
-  // Capture des erreurs Flutter
-  FlutterError.onError = (FlutterErrorDetails details) {
-    FirebaseCrashlytics.instance.recordFlutterError(details);
-  };
 
   // Capture des erreurs de la plateforme
   PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    print("Platform error: $error");
     return true;
   };
 
-  // Exécution de l'application dans une zone protégée
   runZonedGuarded<Future<void>>(() async {
     try {
       await MixpanelService.initialize(mixpanelToken);
     } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack);
+      print("Mixpanel initialization failed: $e");
     }
-    setUrlStrategy(PathUrlStrategy()); // Utiliser des URL sans #
+
     runApp(
       ProviderScope(
         child: Consumer(
@@ -68,7 +74,7 @@ Future<void> main() async {
       ),
     );
   }, (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    print("Unhandled error: $error");
   });
 }
 
@@ -127,37 +133,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.paused:
-        _cleanupResources(partial: true);
-        break;
-      case AppLifecycleState.detached:
-      case AppLifecycleState.hidden:
-        _cleanupResources(partial: false);
-        break;
-      case AppLifecycleState.resumed:
-        _restoreResources();
-        break;
-      default:
-        break;
-    }
-  }
-
-  void _cleanupResources({bool partial = false}) {
-    _streamManager.cancelAll();
-    if (!partial) {
-      CacheManager().clear();
-      imageCache.clear();
-      imageCache.clearLiveImages();
-    }
-  }
-
-  void _restoreResources() {
-    // Implémenter la restauration des ressources
-  }
-
   Future<void> _initializeResources() async {
     if (!mounted) return;
     try {
@@ -166,17 +141,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         _initMixpanel(),
       ]);
       _setupSubscriptions();
-    } catch (e, stack) {
-      await FirebaseCrashlytics.instance.recordError(e, stack);
+    } catch (e) {
+      print("Error initializing resources: $e");
     }
   }
 
   Future<void> _initMixpanel() async {
     try {
       await MonitoringService().logMessage('MixpanelService initialized');
-    } catch (e, stackTrace) {
-      await FirebaseCrashlytics.instance
-          .recordError(e, stackTrace, reason: 'Mixpanel initialization failed');
+    } catch (e) {
+      print("Mixpanel initialization failed: $e");
     }
   }
 
@@ -184,19 +158,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _appLinks = AppLinks();
     try {
       final uri = await _appLinks.getInitialLink();
-      await MonitoringService().logMessage('Initial link processed: $uri');
       if (uri != null) {
         _handleIncomingLink(uri);
       }
-    } catch (e, stackTrace) {
-      await FirebaseCrashlytics.instance.recordError(e, stackTrace,
-          reason: 'Deep linking initialization failed');
+      _appLinks.uriLinkStream.listen(
+        _handleIncomingLink,
+        onError: (e) {
+          print("Error with deep linking: $e");
+        },
+      );
+    } catch (e) {
+      print("Deep linking initialization failed: $e");
     }
   }
 
   void _handleIncomingLink(Uri? uri) {
-    if (!mounted) return;
-    if (uri == null) return;
+    if (!mounted || uri == null) return;
 
     try {
       final String newAccount = _extractAccountFromUri(uri);
@@ -205,9 +182,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           mapAccount = newAccount;
         });
       }
-    } catch (e, stack) {
-      FirebaseCrashlytics.instance.recordError(e, stack);
-      print('Erreur lors du traitement du lien entrant : $e');
+    } catch (e) {
+      print("Error processing incoming link: $e");
     }
   }
 
@@ -225,15 +201,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final Stream<dynamic> exampleStream =
         Stream.periodic(Duration(seconds: 1), (count) => count);
 
-    // Ajouter la subscription
     _streamManager.addSubscription(
         'exampleStream',
         exampleStream.listen((data) {
           // Traiter les données reçues
-          //print('Données reçues : $data');
         }, onError: (error) {
-          // Gérer l'erreur
-          print('Erreur dans le stream : $error');
+          print('Stream error: $error');
         }));
   }
 
@@ -257,76 +230,29 @@ final _router = GoRouter(
     GoRoute(
       path: '/share/:id',
       builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        if (kIsWeb) {
-          // Redirection immédiate pour le web
-          html.window.location.href = '/share?id=$id';
-          return const SizedBox(); // Page temporaire pendant la redirection
-        }
+        final id = state.pathParameters['id'] ?? '';
         return SharePage(id: id);
-      },
-    ),
-    GoRoute(
-      path: '/map/:id',
-      builder: (context, state) => MapScreen(
-        id: state.pathParameters['id']!,
-      ),
-    ),
-    GoRoute(
-      path: '/share',
-      builder: (context, state) {
-        final id = state.uri.queryParameters['id'];
-        if (id != null) {
-          return SharePage(id: id);
-        }
-        return const SizedBox(); // Page temporaire si aucun ID n'est fourni
-      },
-    ),
-    GoRoute(
-      path: '/deepProfile/:id',
-      builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        return DeepProfilePage(id: id);
       },
     ),
   ],
 );
 
-class MapScreen extends ConsumerStatefulWidget {
-  final String id;
-  const MapScreen({required this.id, super.key});
+class StreamManager {
+  final Map<String, StreamSubscription> _subscriptions = {};
 
-  @override
-  ConsumerState<MapScreen> createState() => _MapScreenState();
-}
-
-class _MapScreenState extends ConsumerState<MapScreen> {
-  @override
-  Widget build(BuildContext context) {
-    ref.watch(mapAccountProvider);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Map Screen'),
-      ),
-      body: ListView.builder(
-        itemCount: 10,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text('Item $index'),
-          );
-        },
-      ),
-    );
+  void addSubscription(String key, StreamSubscription subscription) {
+    _subscriptions[key] = subscription;
   }
-}
 
-// Exemple de gestion d'erreurs
-Future<void> fetchData() async {
-  try {
-    // Votre logique de récupération de données
-  } catch (e) {
-    // Gérer l'erreur ici
-    print('Erreur: $e');
+  void cancelSubscription(String key) {
+    _subscriptions[key]?.cancel();
+    _subscriptions.remove(key);
+  }
+
+  void cancelAll() {
+    for (var subscription in _subscriptions.values) {
+      subscription.cancel();
+    }
+    _subscriptions.clear();
   }
 }
