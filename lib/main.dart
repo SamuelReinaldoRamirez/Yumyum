@@ -21,6 +21,7 @@ import 'package:yummap/services/monitoring_service.dart';
 import 'package:yummap/services/cache_manager.dart';
 import 'package:yummap/page/deep_profile_page.dart';
 import 'package:yummap/platform/platform.dart';
+import 'package:yummap/services/stream_manager.dart';
 
 PlatformInterface getCurrentPlatform() {
   if (!kIsWeb) {
@@ -138,19 +139,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     try {
       await Future.wait([
         _initDeepLinking(),
-        _initMixpanel(),
       ]);
       _setupSubscriptions();
     } catch (e) {
       print("Error initializing resources: $e");
-    }
-  }
-
-  Future<void> _initMixpanel() async {
-    try {
-      await MonitoringService().logMessage('MixpanelService initialized');
-    } catch (e) {
-      print("Mixpanel initialization failed: $e");
     }
   }
 
@@ -176,24 +168,33 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     if (!mounted || uri == null) return;
 
     try {
-      final String newAccount = _extractAccountFromUri(uri);
-      if (newAccount.isNotEmpty && newAccount != mapAccount) {
-        setState(() {
-          mapAccount = newAccount;
-        });
+      print("Received URI: $uri"); // Debug print
+
+      if (uri.scheme == 'yummap') {
+        // Nettoyer et normaliser le host/path
+        final path = uri.host + (uri.path.isEmpty ? '' : uri.path);
+        print("Normalized path: $path"); // Debug print
+
+        // Vérifier si c'est un deepProfile
+        if (path.toLowerCase().startsWith('deepprofile')) {
+          // Extraire l'ID en ignorant 'deepprofile/'
+          final id = uri.pathSegments.lastWhere(
+            (segment) => segment != 'deepprofile',
+            orElse: () => '',
+          );
+
+          print("Extracted ID: $id"); // Debug print
+
+          if (id.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _router.go('/deepProfile/$id');
+            });
+          }
+        }
       }
     } catch (e) {
       print("Error processing incoming link: $e");
     }
-  }
-
-  String _extractAccountFromUri(Uri uri) {
-    if (uri.scheme == 'yummap' && uri.host == 'map') {
-      return uri.pathSegments.isNotEmpty ? uri.pathSegments[0] : '';
-    } else if (uri.pathSegments.isNotEmpty && uri.pathSegments[0] == 'map') {
-      return uri.pathSegments.length > 1 ? uri.pathSegments[1] : '';
-    }
-    return '';
   }
 
   void _setupSubscriptions() {
@@ -221,7 +222,7 @@ final _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => SplashScreen(),
+      builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(
       path: '/home',
@@ -234,25 +235,13 @@ final _router = GoRouter(
         return SharePage(id: id);
       },
     ),
+    // Ajoutez cette route pour le deep link
+    GoRoute(
+      path: '/deepProfile/:id',
+      builder: (context, state) {
+        final id = state.pathParameters['id'] ?? '';
+        return DeepProfilePage(id: id);
+      },
+    ),
   ],
 );
-
-class StreamManager {
-  final Map<String, StreamSubscription> _subscriptions = {};
-
-  void addSubscription(String key, StreamSubscription subscription) {
-    _subscriptions[key] = subscription;
-  }
-
-  void cancelSubscription(String key) {
-    _subscriptions[key]?.cancel();
-    _subscriptions.remove(key);
-  }
-
-  void cancelAll() {
-    for (var subscription in _subscriptions.values) {
-      subscription.cancel();
-    }
-    _subscriptions.clear();
-  }
-}

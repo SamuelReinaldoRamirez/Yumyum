@@ -84,7 +84,7 @@ class _FullScreenVideoFeedState extends State<FullScreenVideoFeed> {
                 onPressed: () {
                   _videoManager.pause(_currentVideoUrl!); // Pause la vidéo actuelle
                   VideoPlayerManager().pauseAll(); // Mettre en pause toutes les vidéos
-                  Navigator.of(context).pop(); // Quitter le mode plein écran
+                  widget.onExit?.call(); // Utiliser onExit au lieu de Navigator.pop()
                 },
                 child: const Icon(Icons.close, color: AppColors.white),
               ),
@@ -98,7 +98,9 @@ class _FullScreenVideoFeedState extends State<FullScreenVideoFeed> {
   void _handleDragEnd(DragEndDetails details) {
     if (details.primaryVelocity! > 0) {
       // Swipe vers la droite -> fermer
-      widget.onExit?.call(); // Utiliser onExit pour fermer
+      _videoManager.pause(_currentVideoUrl!); // Pause la vidéo actuelle
+      VideoPlayerManager().pauseAll(); // Mettre en pause toutes les vidéos
+      widget.onExit?.call(); // Utiliser onExit au lieu de Navigator.pop()
     } else if (details.primaryVelocity! < 0) {
       // Swipe vers la gauche -> détails
       widget.onNavigateToDetails.call(); // Ouvre les détails du restaurant

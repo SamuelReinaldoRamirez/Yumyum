@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yummap/constant/keys_data.dart';
 import 'package:yummap/constant/theme.dart';
 import 'package:yummap/widgets/neu_widgets.dart';
 import 'package:go_router/go_router.dart';
@@ -62,6 +63,7 @@ class _SharePageState extends State<SharePage> {
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       const SizedBox(height: 32),
                       Center(
@@ -78,31 +80,52 @@ class _SharePageState extends State<SharePage> {
                       ),
                       const SizedBox(height: 52),
                       CustomNeuButton(
-                        text: 'Download App',
-                        icon: Icons.download,
+                        text: 'Continue in App',
+                        icon: Icons.launch_rounded,
                         buttonColor: AppColors.appSecondary,
                         textColor: Colors.white,
                         onPressed: () async {
                           try {
-                            final deeplink = 'yummap://deepProfile/${widget.id}';
+                            final deeplink =
+                                'yummap://deepProfile/${widget.id}';
                             await platform.launchURL(deeplink);
                           } catch (e) {
                             // Si l'app n'est pas installée, ouvrir le store approprié
                             if (kIsWeb) {
                               if (isIOS()) {
-                                await platform.launchURL('https://apps.apple.com/app/yummap/id123456789');
+                                await platform.launchURL(appStoreUrl);
                               } else if (isAndroid()) {
-                                await platform.launchURL('https://play.google.com/store/apps/details?id=com.yummap.app');
+                                await platform.launchURL(playStoreUrl);
                               } else {
                                 // Sur desktop ou autre, rediriger vers une page qui explique comment télécharger
-                                await platform.launchURL('https://yummap.app/download');
+                                await platform
+                                    .launchURL('https://yummap.app/download');
                               }
                             } else {
                               // Sur mobile natif
                               if (isAndroid()) {
-                                await platform.launchURL('https://play.google.com/store/apps/details?id=com.yummap.app');
+                                await platform.launchURL(playStoreUrl);
                               } else if (isIOS()) {
-                                await platform.launchURL('https://apps.apple.com/app/yummap/id123456789');
+                                await platform.launchURL(appStoreUrl);
+                              }
+                            }
+                          } finally {
+                            if (kIsWeb) {
+                              if (isIOS()) {
+                                await platform.launchURL(appStoreUrl);
+                              } else if (isAndroid()) {
+                                await platform.launchURL(playStoreUrl);
+                              } else {
+                                // Sur desktop ou autre, rediriger vers une page qui explique comment télécharger
+                                await platform
+                                    .launchURL('https://yummap.xyz/download');
+                              }
+                            } else {
+                              // Sur mobile natif
+                              if (isAndroid()) {
+                                await platform.launchURL(playStoreUrl);
+                              } else if (isIOS()) {
+                                await platform.launchURL(appStoreUrl);
                               }
                             }
                           }

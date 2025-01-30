@@ -29,7 +29,8 @@ class ExplorePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    print("ExplorePage build avec preSelectedWorkspaceId: $preSelectedWorkspaceId");
+    print(
+        "ExplorePage build avec preSelectedWorkspaceId: $preSelectedWorkspaceId");
     // Au début du build, si on a un workspace pré-sélectionné
     if (preSelectedWorkspaceId != null) {
       // Mettre à jour selectedWorkspacesNotifier avec le workspace pré-sélectionné
@@ -40,7 +41,7 @@ class ExplorePage extends ConsumerWidget {
 
     double screenHeight = MediaQuery.of(context).size.height;
     // Définit les hauteurs des widgets h1 et h2
-    double h1 = screenHeight * 0.08; // Hauteur de la barre de recherche
+    double h1 = screenHeight * 0.085; // Hauteur de la barre de recherche
     double h2 = screenHeight * 0.08; // Hauteur de la barre de filtre
 
     // Calcule la hauteur restante pour le dernier widget
@@ -79,7 +80,8 @@ class ExplorePage extends ConsumerWidget {
                       preSelectedWorkspaceId: preSelectedWorkspaceId,
                       onFilterChanged: (RangeValues priceRange, int rating,
                           List<String> categories) {
-                        print("onFilterChanged appelé avec ${categories.length} catégories");
+                        print(
+                            "onFilterChanged appelé avec ${categories.length} catégories");
                         // Implémentez la logique pour gérer les changements de filtres
                       },
                     ),

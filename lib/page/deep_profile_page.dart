@@ -86,7 +86,7 @@ class DeepProfilePage extends StatelessWidget {
                           ),
                           const SizedBox(height: 52),
                           CustomNeuButton(
-                            text: 'Follow @$id',
+                            text: 'Follow',
                             icon: Icons.person_add,
                             buttonColor: AppColors.appSecondary,
                             textColor: Colors.white,

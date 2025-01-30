@@ -4,4 +4,4 @@
 flutter build web
 
 # Copier le fichier explore.html dans le répertoire de construction
-cp public/share.html build/web/
+firebase deploy

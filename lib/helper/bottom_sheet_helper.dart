@@ -7,6 +7,7 @@ import 'package:yummap/widget/video_carousel.dart';
 import 'package:yummap/widgets/neu_widgets.dart';
 import '../constant/theme.dart';
 import 'package:yummap/helper/favorite_manager.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class BottomSheetHelper {
   static Future<void> showDraggableBottomSheet(
@@ -32,9 +33,9 @@ class BottomSheetHelper {
             return true;
           },
           child: DraggableScrollableSheet(
-            initialChildSize: 0.55,
-            minChildSize: 0.4,
-            maxChildSize: 0.60,
+            initialChildSize: kIsWeb ? 0.7 : 0.55,
+            minChildSize: kIsWeb ? 0.6 : 0.4,
+            maxChildSize: kIsWeb ? 0.85 : 0.60,
             builder: (context, scrollController) {
               return Container(
                 decoration: BoxDecoration(
@@ -189,10 +190,15 @@ class BottomSheetHelper {
   static void navigateToRestaurantDetails(BuildContext context, Restaurant restaurant) {
     // Navigation vers les détails après avoir pausé la vidéo
     VideoPlayerManager().pauseAllVideos();
-    MixpanelService.instance.track('DetailsResto', properties: {
-      'resto_id': restaurant.id,
-      'resto_name': restaurant.name,
-    });
+    try {
+      MixpanelService.instance.track('DetailsResto', properties: {
+        'resto_id': restaurant.id,
+        'resto_name': restaurant.name,
+      });
+    } catch (e) {
+      // Ignorer l'erreur si Mixpanel n'est pas initialisé
+      print('Mixpanel tracking skipped: $e');
+    }
     Navigator.push(
       context,
       PageRouteBuilder(
