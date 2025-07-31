@@ -490,6 +490,7 @@ class _RestaurantDetailsWidgetState extends State<RestaurantDetailsWidget> {
                     onNext: () => _nextPage(),
                     onClose: () =>
                         Navigator.of(context).pop(), // Fermer le dialog
+                    restaurant: widget.restaurant, // Ajout du restaurant
                   ),
                   BookingStepTwo(
                     bookingData: bookingData,

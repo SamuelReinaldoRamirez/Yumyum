@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Importation de la bibliothèque Intl pour le formatage de la date
 import 'package:yummap/constant/theme.dart';
+import 'package:yummap/model/restaurant.dart';
 import 'package:yummap/widget/neu_brutalism_container.dart';
 import '../../models/booking_data.dart';
 import '../neubrutalist/neubrutalist_button.dart';
@@ -10,12 +11,14 @@ class BookingStepOne extends StatefulWidget {
   final BookingData bookingData;
   final VoidCallback onNext;
   final VoidCallback onClose;
+  final Restaurant restaurant; // Ajout du restaurant
 
   const BookingStepOne({
     Key? key,
     required this.bookingData,
     required this.onNext,
     required this.onClose,
+    required this.restaurant, // Ajout du restaurant dans le constructeur
   }) : super(key: key);
 
   @override
@@ -54,6 +57,109 @@ class _BookingStepOneState extends State<BookingStepOne> {
         _slotsScrollController.jumpTo(_lastScrollPosition);
       }
     });
+  }
+
+  // Ajout des méthodes utilitaires pour gérer les horaires
+  bool isRestaurantOpenOnDate(DateTime date) {
+    String dayName = _getDayOfWeek(date.weekday);
+    final schedule = widget.restaurant.schedule[dayName];
+    return schedule != null &&
+        schedule.isNotEmpty &&
+        !schedule.contains('Closed') &&
+        !schedule.contains('Fermé');
+  }
+
+  String _getDayOfWeek(int index) {
+    if (index < 1 || index > 7) return 'Monday';
+    return [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ][index - 1];
+  }
+
+  List<TimeSlot> getAvailableTimeSlots(DateTime date) {
+    String dayName = _getDayOfWeek(date.weekday);
+    final schedule = widget.restaurant.schedule[dayName];
+    List<TimeSlot> slots = [];
+
+    if (schedule == null || schedule.isEmpty) return slots;
+
+    DateTime now = DateTime.now();
+    bool isToday = date.year == now.year && date.month == now.month && date.day == now.day;
+
+    for (String timeRange in schedule) {
+      if (timeRange.contains('Closed') || timeRange.contains('Fermé')) continue;
+
+      List<String> parts = timeRange.split(' - ');
+      if (parts.length != 2) continue;
+
+      DateTime startTime = _parseTimeString(parts[0].trim(), date);
+      DateTime endTime = _parseTimeString(parts[1].trim(), date);
+
+      // Si l'heure de fin est avant l'heure de début, on considère que c'est le lendemain
+      if (endTime.isBefore(startTime)) {
+        endTime = endTime.add(const Duration(days: 1));
+      }
+
+      // On arrête les réservations 1h avant la fin du service
+      endTime = endTime.subtract(const Duration(hours: 1));
+
+      // Générer des créneaux de 30 minutes
+      DateTime currentSlot = startTime;
+      while (currentSlot.isBefore(endTime)) {
+        // Pour aujourd'hui, ne pas proposer de créneaux déjà passés
+        if (!isToday || currentSlot.isAfter(now)) {
+          slots.add(TimeSlot(
+            startTime: currentSlot,
+            endTime: currentSlot.add(const Duration(minutes: 30)),
+            isAvailable: true,
+          ));
+        }
+        currentSlot = currentSlot.add(const Duration(minutes: 30));
+      }
+    }
+
+    return slots;
+  }
+
+  DateTime _parseTimeString(String timeStr, DateTime date) {
+    // Convertir le format 12h en 24h si nécessaire
+    final RegExp amPmRegex = RegExp(r'(\d{1,2}):(\d{2})\s*(AM|PM)?');
+    final match = amPmRegex.firstMatch(timeStr);
+
+    if (match != null) {
+      int hours = int.parse(match.group(1)!);
+      int minutes = int.parse(match.group(2)!);
+      String? amPm = match.group(3);
+
+      if (amPm != null) {
+        if (amPm.toUpperCase() == 'PM' && hours < 12) hours += 12;
+        if (amPm.toUpperCase() == 'AM' && hours == 12) hours = 0;
+      }
+
+      return DateTime(
+        date.year,
+        date.month,
+        date.day,
+        hours,
+        minutes,
+      );
+    }
+
+    // Format 24h par défaut
+    final parts = timeStr.split(':');
+    return DateTime(
+      date.year,
+      date.month,
+      date.day,
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+    );
   }
 
   @override
@@ -180,15 +286,10 @@ class _BookingStepOneState extends State<BookingStepOne> {
                             Row(
                               children: [
                                 const Icon(Icons.calendar_today,
-                                    size: 30,
-                                    color:
-                                        AppColors.textColor),
-                                const SizedBox(
-                                    width:
-                                        8),
+                                    size: 30, color: AppColors.textColor),
+                                const SizedBox(width: 8),
                                 Text(
-                                  DateFormat('dd/MM/yyyy')
-                                      .format(selectedDate),
+                                  DateFormat('dd/MM/yyyy').format(selectedDate),
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -206,39 +307,28 @@ class _BookingStepOneState extends State<BookingStepOne> {
                           ],
                         ),
                         if (isDateExpanded) ...[
-                          const SizedBox(height: 10),
-                          Theme(
-                            data: Theme.of(context).copyWith(
-                              colorScheme: ColorScheme.light(
-                                primary:
-                                    AppColors.primaryColor,
-                                onPrimary: Colors
-                                    .white,
-                                onSurface: AppColors
-                                    .textColor,
-                              ),
-                              textButtonTheme: TextButtonThemeData(
-                                style: TextButton.styleFrom(
-                                  foregroundColor:
-                                      AppColors.primaryColor,
-                                ),
-                              ),
-                            ),
-                            child: CalendarDatePicker(
-                              initialDate: selectedDate,
-                              firstDate: DateTime.now(),
-                              lastDate:
-                                  DateTime.now().add(const Duration(days: 30)),
-                              onDateChanged: (date) {
+                          const SizedBox(height: 16),
+                          CalendarDatePicker(
+                            initialDate: selectedDate,
+                            firstDate: DateTime.now(),
+                            lastDate:
+                                DateTime.now().add(const Duration(days: 90)), // Augmenté à 90 jours
+                            onDateChanged: (date) {
+                              if (isRestaurantOpenOnDate(date)) {
                                 setState(() {
                                   selectedDate = date;
-                                  widget.bookingData.date = date;
+                                  selectedSlot =
+                                      null; // Réinitialiser le créneau sélectionné
+                                  isDateExpanded =
+                                      false; // Fermer le calendrier
+                                  isSlotExpanded =
+                                      true; // Ouvrir la sélection de créneau
                                 });
-                              },
-                              selectableDayPredicate: (DateTime day) {
-                                return true;
-                              },
-                            ),
+                              }
+                            },
+                            selectableDayPredicate: (date) {
+                              return isRestaurantOpenOnDate(date);
+                            },
                           ),
                         ],
                       ],
@@ -248,7 +338,7 @@ class _BookingStepOneState extends State<BookingStepOne> {
               ),
               const SizedBox(height: 20),
 
-              // Choix du créneau
+              // Sélection du créneau horaire
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -267,30 +357,27 @@ class _BookingStepOneState extends State<BookingStepOne> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Choisir un créneau',
-                              style: const TextStyle(
+                            const Text(
+                              'Créneau horaire',
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textColor,
                               ),
                             ),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  selectedSlot ?? '',
-                                  style: const TextStyle(
-                                      fontSize: 28, fontWeight: FontWeight.bold),
-                                ),
+                                const Icon(Icons.access_time,
+                                    size: 30, color: AppColors.textColor),
                                 const SizedBox(width: 8),
-                                if (selectedSlot != null) ...[
-                                  const Icon(
-                                    Icons.access_time,
-                                    size: 30,
+                                Text(
+                                  selectedSlot ?? 'Choisir un créneau',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                     color: AppColors.textColor,
                                   ),
-                                ],
+                                ),
                               ],
                             ),
                             Icon(
@@ -302,40 +389,75 @@ class _BookingStepOneState extends State<BookingStepOne> {
                           ],
                         ),
                         if (isSlotExpanded) ...[
-                          const SizedBox(height: 10),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            height: isSlotExpanded
-                                ? 300
-                                : 0, // Hauteur maximale fixe quand déplié
-                            child: SingleChildScrollView(
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            height: 200,
+                            child: ListView.builder(
                               controller: _slotsScrollController,
-                              child: Column(
-                                children: [
-                                  const SizedBox(height: 20),
-                                  const Text(
-                                    'Midi',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                              itemCount:
+                                  getAvailableTimeSlots(selectedDate).length,
+                              itemBuilder: (context, index) {
+                                final slot =
+                                    getAvailableTimeSlots(selectedDate)[index];
+                                final isSelected = selectedSlot ==
+                                    DateFormat('HH:mm').format(slot.startTime);
+
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 4),
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedSlot = DateFormat('HH:mm')
+                                            .format(slot.startTime);
+                                        widget.bookingData.timeSlot =
+                                            selectedSlot!;
+                                        isSlotExpanded = false;
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: isSelected
+                                            ? AppColors.primaryColor
+                                            : Colors.transparent,
+                                        border: Border.all(
+                                          color: AppColors.textColor,
+                                          width: 2,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            '${DateFormat('HH:mm').format(slot.startTime)} - ${DateFormat('HH:mm').format(slot.endTime)}',
+                                            style: TextStyle(
+                                              color: isSelected
+                                                  ? Colors.white
+                                                  : AppColors.textColor,
+                                              fontWeight: isSelected
+                                                  ? FontWeight.bold
+                                                  : FontWeight.normal,
+                                            ),
+                                          ),
+                                          if (slot.isAvailable)
+                                            Text(
+                                              'Disponible',
+                                              style: TextStyle(
+                                                color: isSelected
+                                                    ? Colors.white
+                                                    : Colors.green,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                  Column(
-                                    children: generateTimeSlots('midi'),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  const Text(
-                                    'Soir',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Column(
-                                    children: generateTimeSlots('soir'),
-                                  ),
-                                ],
-                              ),
+                                );
+                              },
                             ),
                           ),
                         ],
@@ -564,4 +686,16 @@ class _BookingStepOneState extends State<BookingStepOne> {
 
     return slots;
   }
+}
+
+class TimeSlot {
+  final DateTime startTime;
+  final DateTime endTime;
+  final bool isAvailable;
+
+  TimeSlot({
+    required this.startTime,
+    required this.endTime,
+    required this.isAvailable,
+  });
 }
